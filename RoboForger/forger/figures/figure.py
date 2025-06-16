@@ -75,8 +75,8 @@ class Figure:
         # Append lift point to the end of the points list
         self.points.append(
             (self.points[-1][0], self.points[-1][1], self.points[-1][2] + 50))  # Lift the tool up by 50 units
-        self.points.append(
-            (self.points[-1][0], self.points[-1][1], self.points[-1][2] + 50))  # Lift the tool up by 50 units
+        # self.points.append(
+        #     (self.points[-1][0], self.points[-1][1], self.points[-1][2] + 50))  # Lift the tool up by 50 units
 
         for point in self.get_points():
             target_name = self.__generate_target_name(self.target_count)
