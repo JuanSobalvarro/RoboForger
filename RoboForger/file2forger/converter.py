@@ -5,7 +5,7 @@ from typing import List, Any, Dict
 from RoboForger.types import Point3D
 from RoboForger.forger.figures import PolyLine, Arc, Circle, Figure
 from math import cos, sin, radians, pi, degrees
-from RoboForger.utils import real_coord2robo_coord, normalize_degree
+from RoboForger.utils import real_coord2robo_coord
 
 def convert_lines_to_polylines(lines: List[tuple]) -> List[PolyLine]:
     polylines = []
