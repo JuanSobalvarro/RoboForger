@@ -2,7 +2,7 @@ from .figure import Figure
 from typing import List, Tuple, Union, Optional
 from RoboForger.types import Point3D
 from math import sqrt, atan2, pi, cos, sin, radians
-from RoboForger.utils import round_tuple, normalize_degree
+from RoboForger.utils import round_tuple, normalize_angle, normalize_angle_deg
 
 
 class Arc(Figure):
@@ -34,8 +34,8 @@ class Arc(Figure):
             raise ValueError("End angle cannot be None.")
 
         self.center = center
-        self.start_angle = radians(start_angle)
-        self.end_angle = radians(end_angle)
+        self.start_angle = normalize_angle(radians(start_angle))
+        self.end_angle = normalize_angle(radians(end_angle))
         self.mid_angle = Arc.mid_angle_clock(self.start_angle, self.end_angle, clockwise)
         self.radius = radius
         self.clockwise = clockwise
@@ -90,7 +90,10 @@ class Arc(Figure):
         if clockwise:
             mid_angle += pi
 
-        return mid_angle
+        if start_angle > end_angle:
+            mid_angle += pi
+
+        return mid_angle % (2 * pi)
 
     @staticmethod
     def arc_angle(start_angle: float, end_angle: float, clockwise: bool) -> float:
@@ -133,11 +136,11 @@ class Arc(Figure):
         instructions.append(f"        MoveJ {robtargets[0]}, v{global_velocity}, fine, {tool_name};\n")
         instructions.append(f"        MoveL {robtargets[1]}, v{global_velocity}, fine, {tool_name};\n")
 
-        # If angle is greater or equal than 180 degrees (pi radians), split the arc into 2 segments
-        angle_diff = abs(self.end_angle - self.start_angle)
+        # # If angle is greater or equal than 180 degrees (pi radians), split the arc into 2 segments
+        # angle_diff = abs(self.end_angle - self.start_angle)
 
         # If we dont have a sweep limitation proceed as a single arc
-        if angle_diff < pi:
+        if Arc.arc_angle(self.start_angle, self.end_angle, self.clockwise) < pi:
 
             print(f"Arc is less than 180 degrees, robtargets: {robtargets}")
 
@@ -156,7 +159,7 @@ class Arc(Figure):
         instructions.append(f"        MoveC {robtargets[4]}, {robtargets[5]}, v{self.velocity}, fine, {tool_name};\n")
 
         # MoveL to ensure finishing in end point
-        instructions.append(f"        MoveL {robtargets[6]}, v{global_velocity}, fine, {tool_name};\n")
+        instructions.append(f"        MoveL {robtargets[5]}, v{global_velocity}, fine, {tool_name};\n")
 
         return instructions
 
