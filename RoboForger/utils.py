@@ -1,3 +1,5 @@
+from math import tau, pi
+
 def real_coord2robo_coord(vx: tuple[float, float, float], trans: tuple[float, float, float] = (450, 0, 400)) -> tuple[float, float, float]:
 
     if not isinstance(vx, tuple):
@@ -61,25 +63,28 @@ def round_tuple(t: tuple, precision: int = 2) -> tuple:
     """
     return tuple(round(x, precision) for x in t)
 
-def normalize_degree(angle):
-    """
-    Normalize an angle in degrees to the range [0, 360).
 
-    Parameters:
-        angle (float): The angle in degrees to normalize.
+def normalize_angle(angle_rad: float) -> float:
+    """
+    Normalize any angle in radians to the range [0, 2π).
+
+    Args:
+        angle_rad (float): Angle in radians.
 
     Returns:
-        float: The normalized angle in degrees.
+        float: Normalized angle in radians, in [0, 2π).
     """
-    if not isinstance(angle, (int, float)):
-        raise TypeError("Angle must be an int or float.")
+    return angle_rad % tau
 
-    if 0 <= angle <= 360:
-        return angle
 
-    if angle < 0:
-        angle = angle + 360
+def normalize_angle_deg(angle_deg: float) -> float:
+    """
+    Normalize any angle in degrees to the range [0, 360).
 
-    normalized_angle = angle % 360
+    Args:
+        angle_deg (float): Angle in degrees.
 
-    return normalize_degree(normalized_angle)
+    Returns:
+        float: Normalized angle in degrees, in [0, 360).
+    """
+    return angle_deg % 360
