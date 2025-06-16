@@ -1,0 +1,8 @@
+*.txt
+*.dxf
+*.FCBak
+*.FCStd
+*.FCStd-bak
+.venv
+.idea
+arctest

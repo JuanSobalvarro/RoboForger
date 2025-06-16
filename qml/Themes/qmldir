@@ -1,0 +1,4 @@
+module Themes
+singleton ThemeManager ThemeManager.qml
+singleton Themes Themes.qml
+ThemeSwitch ThemeSwitch.qml
