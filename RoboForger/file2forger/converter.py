@@ -12,14 +12,14 @@ def convert_lines_to_polylines(lines: List[tuple]) -> List[PolyLine]:
     for i, (start, end) in enumerate(lines):
         # Each line is a PolyLine with two points
         robo_coords = [real_coord2robo_coord(start), real_coord2robo_coord(end)]
-        pl = PolyLine(f"Line{i}", robo_coords)
+        pl = PolyLine(f"Line{i}", robo_coords, lifting=100, velocity=1000)
         polylines.append(pl)
     return polylines
 
 def convert_circles(circles: List[tuple]) -> List[Circle]:
     circle_figs = []
     for i, (center, radius) in enumerate(circles):
-        c = Circle(f"Circle{i}", real_coord2robo_coord(center), radius)
+        c = Circle(f"Circle{i}", real_coord2robo_coord(center), radius, lifting=100)
         circle_figs.append(c)
     return circle_figs
 
@@ -37,6 +37,7 @@ def convert_arcs(arcs: List[Dict]) -> List[Arc]:
                                      radius=arc["radius"],
                                      start_angle=start_angle,
                                      end_angle=end_angle,
-                                     clockwise=arc["clockwise"]))
+                                     clockwise=arc["clockwise"],
+                                     lifting=100))
 
     return arc_figs

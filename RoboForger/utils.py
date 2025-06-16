@@ -1,6 +1,6 @@
 from math import tau, pi
 
-def real_coord2robo_coord(vx: tuple[float, float, float], trans: tuple[float, float, float] = (450, 0, 400)) -> tuple[float, float, float]:
+def real_coord2robo_coord(vx: tuple[float, float, float], trans: tuple[float, float, float] = (450, 0, 350)) -> tuple[float, float, float]:
 
     if not isinstance(vx, tuple):
         raise TypeError("Input must be a tuple of (x, y, z) coordinates: ", vx)

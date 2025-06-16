@@ -3,11 +3,12 @@ from RoboForger.types import Point3D
 
 
 class Figure:
-    def __init__(self, name: str, points: List[Point3D], velocity: int = 1000):
+    def __init__(self, name: str, points: List[Point3D], lifting: float = 100,  velocity: int = 1000):
         if not points or len(points) < 2:
             raise ValueError("A figure must have at least two points.")
         self.name = name
         self.target_count = 0
+        self.lifting = lifting
         self.velocity = velocity
         self.points = points.copy()
 
@@ -70,13 +71,11 @@ class Figure:
 
         # Pre down point, this point is used as the pre starting point, the robot needs to move here and then down
         # This is useful for avoiding collisions with the workpiece or other obstacles
-        start_lifted_point = (self.points[0][0], self.points[0][1], self.points[0][2] + 50)
+        start_lifted_point = (self.points[0][0], self.points[0][1], self.points[0][2] + self.lifting)
         self.points.insert(0, start_lifted_point)
         # Append lift point to the end of the points list
         self.points.append(
-            (self.points[-1][0], self.points[-1][1], self.points[-1][2] + 50))  # Lift the tool up by 50 units
-        # self.points.append(
-        #     (self.points[-1][0], self.points[-1][1], self.points[-1][2] + 50))  # Lift the tool up by 50 units
+            (self.points[-1][0], self.points[-1][1], self.points[-1][2] + self.lifting))  # Lift the tool up by 50 units
 
         for point in self.get_points():
             target_name = self.__generate_target_name(self.target_count)
