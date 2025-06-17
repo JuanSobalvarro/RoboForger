@@ -37,6 +37,24 @@ class PolyLine(Figure):
 
         return instructions
 
+    def move_instructions_offset(self, origin_robtarget_name: str, origin: Point3D = (450.0, 0.0, 450.0), tool_name: str = "tool0",  global_velocity: int = 1000) -> List[str]:
+        instructions = []
+
+        points = self.get_points()
+
+        # Pre down point
+        instructions.append(f"        MoveJ Offs {Figure.offset_coord(origin_robtarget_name, origin, points[0])}, v{global_velocity}, fine, {tool_name};\n")
+
+        for point in points[1:-1]:  # Skip the first and last points (lifted points)
+
+            instruction = f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, point)}, v{global_velocity}, fine, {tool_name};\n"
+
+            instructions.append(instruction)
+
+        instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, point)}, v{global_velocity}, fine, {tool_name};\n")
+
+        return instructions
+
     def __str__(self):
         format_str = f"Polyline<name={self.name}>"
 

@@ -3,6 +3,13 @@ from RoboForger.types import Point3D
 
 
 class Figure:
+    """
+    Base class for all figures in RoboForger.
+
+    ** IMPORTANT: **
+    A figure points always should start by the pre down (lifted) point, ... figure points, then the end point is the
+    lifted point.
+    """
     def __init__(self, name: str, points: List[Point3D], lifting: float = 100,  velocity: int = 1000):
         if not points or len(points) < 2:
             raise ValueError("A figure must have at least two points.")
@@ -10,7 +17,7 @@ class Figure:
         self.target_count = 0
         self.lifting = lifting
         self.velocity = velocity
-        self.points = points.copy()
+        self.points: List[Point3D] = points.copy()
 
         self.rob_targets = []
         self.rob_targets_formatted = []
@@ -25,8 +32,20 @@ class Figure:
     def get_points(self) -> List[Point3D]:
         return self.points
 
+    @staticmethod
+    def offset_coord(origin_target_name: str, origin: Point3D, point: Point3D) -> str:
+
+        return f"({origin_target_name}, {point[0] - origin[0]}, {point[1] - origin[1]}, {point[2] - origin[2]})"
+
     # Override this method in subclasses to provide specific move instructions
     def move_instructions(self, tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
+        ...
+
+    def move_instructions_offset(self, origin_robtarget: str, origin: Point3D = (450.0, 0, 450.0), tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
+        """
+        This method is used to generate move instructions with the offset method for the tool.
+        It can be overridden in subclasses if needed.
+        """
         ...
 
     def get_rob_targets(self) -> List[str]:
@@ -60,6 +79,25 @@ class Figure:
                f"[4.14816E-8,6.1133E-9,-1,-2.53589E-16],[0,0,-1,0]," \
                f"[9E+9,9E+9,9E+9,9E+9,9E+9,9E+9]]"
 
+    @staticmethod
+    def rob_target_format(target_name: str, point: Point3D) -> str:
+        """
+        Formats a rob target string for a given point.
+        This is useful for generating individual rob targets without generating the entire list.
+        """
+        return f"CONST robtarget {target_name}:=[[{point[0]},{point[1]},{point[2]}]," \
+               f"[4.14816E-8,6.1133E-9,-1,-2.53589E-16],[0,0,-1,0]," \
+               f"[9E+9,9E+9,9E+9,9E+9,9E+9,9E+9]];\n"
+
+    def add_lifting_points(self):
+        # Pre down point, this point is used as the pre starting point, the robot needs to move here and then down
+        # This is useful for avoiding collisions with the workpiece or other obstacles
+        start_lifted_point = (self.points[0][0], self.points[0][1], self.points[0][2] + self.lifting)
+        self.points.insert(0, start_lifted_point)
+        # Append lift point to the end of the points list
+        self.points.append(
+            (self.points[-1][0], self.points[-1][1], self.points[-1][2] + self.lifting))  # Lift the tool up by 50 units
+
     def __generate_rob_targets(self):
         """
         This function generates the rob targets for the figure based on the points provided. It will generate a point lifted,
@@ -69,13 +107,7 @@ class Figure:
         self.rob_targets_formatted.clear()
         self.target_count = 0
 
-        # Pre down point, this point is used as the pre starting point, the robot needs to move here and then down
-        # This is useful for avoiding collisions with the workpiece or other obstacles
-        start_lifted_point = (self.points[0][0], self.points[0][1], self.points[0][2] + self.lifting)
-        self.points.insert(0, start_lifted_point)
-        # Append lift point to the end of the points list
-        self.points.append(
-            (self.points[-1][0], self.points[-1][1], self.points[-1][2] + self.lifting))  # Lift the tool up by 50 units
+        self.add_lifting_points()
 
         for point in self.get_points():
             target_name = self.__generate_target_name(self.target_count)

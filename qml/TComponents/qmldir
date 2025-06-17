@@ -1,0 +1,4 @@
+module TComponents
+TRectangle TRectangle.qml
+TButton TButton.qml
+TText TText.qml

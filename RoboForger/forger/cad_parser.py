@@ -1,4 +1,5 @@
 import ezdxf
+import os
 from typing import List, Tuple, Dict, Any
 
 Point3D = Tuple[float, float, float]
@@ -7,7 +8,7 @@ Point3D = Tuple[float, float, float]
 class CADParser:
     def __init__(self, filepath: str, scale: float = 1.0):
         self.doc = ezdxf.readfile(filepath)
-        self.msp = self.doc.modelspace()
+        self._msp = self.doc.modelspace()
         self.scale = scale
 
     def _scale_point(self, point: Tuple[float, float, float]) -> Point3D:
@@ -16,9 +17,20 @@ class CADParser:
     def _scale_value(self, value: float) -> float:
         return value * self.scale
 
+    def set_doc(self, file_path: str):
+
+        if os.path.exists(file_path):
+            self.doc = ezdxf.readfile(file_path)
+            self._msp = self.doc.modelspace()
+
+            return f"File: {file_path} loaded correctly"
+
+        return f"File: {file_path} could not be loaded"
+
+
     def get_lines(self) -> List[Tuple[Point3D, Point3D]]:
         lines = []
-        for e in self.msp.query('LINE'):
+        for e in self._msp.query('LINE'):
             start = self._scale_point((e.dxf.start.x, e.dxf.start.y, getattr(e.dxf.start, 'z', 0.0)))
             end = self._scale_point((e.dxf.end.x, e.dxf.end.y, getattr(e.dxf.end, 'z', 0.0)))
             lines.append((start, end))
@@ -26,7 +38,7 @@ class CADParser:
 
     def get_circles(self) -> List[Tuple[Point3D, float]]:
         circles = []
-        for e in self.msp.query('CIRCLE'):
+        for e in self._msp.query('CIRCLE'):
             center = self._scale_point((e.dxf.center.x, e.dxf.center.y, getattr(e.dxf.center, 'z', 0.0)))
             radius = self._scale_value(e.dxf.radius)
             circles.append((center, radius))
@@ -38,7 +50,7 @@ class CADParser:
         (center, radius, start_point, end_point, start_angle, end_angle, clockwise)
         """
         arcs = []
-        for e in self.msp.query('ARC'):
+        for e in self._msp.query('ARC'):
             center = self._scale_point((e.dxf.center.x, e.dxf.center.y, getattr(e.dxf.center, 'z', 0.0)))
             radius = self._scale_value(e.dxf.radius)
 

@@ -8,11 +8,14 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuickControls2 import QQuickStyle
 
+ASSETS_DIR = os.path.join(os.path.dirname(__file__), 'assets')
+
 
 def run_gui_app():
     os.environ["QT_QUICK_CONTROLS_CONF"] = "qtquickcontrols2.conf"
 
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(os.path.join(ASSETS_DIR, 'img', 'icon.png')))
 
     logging.info("Starting RoboForger")
 

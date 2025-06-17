@@ -56,13 +56,13 @@ QtObject {
     }
 
     property var primary: {
-        "light": "#cc77ee",
-        "dark": "#aa55cc"
+        "light": "#728bee",
+        "dark": "#2e3f88"
     }
 
     property var selection_1: {
-        "light": "#CB92CD",
-        "dark": "#917aaf"
+        "light": "#92a7cd",
+        "dark": "#485070"
     }
 
     property var selection_2: {
