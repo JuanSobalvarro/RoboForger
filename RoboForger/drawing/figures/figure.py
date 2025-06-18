@@ -10,14 +10,21 @@ class Figure:
     A figure points always should start by the pre down (lifted) point, ... figure points, then the end point is the
     lifted point.
     """
-    def __init__(self, name: str, points: List[Point3D], lifting: float = 100,  velocity: int = 1000):
+    def __init__(self, name: str, points: List[Point3D], lifting: float = 100,  velocity: int = 1000, float_precision: int = 4):
         if not points or len(points) < 2:
             raise ValueError("A figure must have at least two points.")
         self.name = name
         self.target_count = 0
         self.lifting = lifting
         self.velocity = velocity
-        self.points: List[Point3D] = points.copy()
+        self.float_precision = float_precision
+
+        # Round points to the specified float precision
+        self.points: List[Point3D] = []
+        for point in points:
+            rounded_point = tuple(round(coord, float_precision) for coord in point)
+            self.points.append(rounded_point)
+
 
         self.__skip_pre_down = False  # If True, the first point is not a pre-down point
         self.__skip_end_lifting = False  # If True, the last point is not a lifted point
@@ -25,6 +32,16 @@ class Figure:
         self.rob_targets = []
         self.rob_targets_formatted = []
 
+        # Add lifting points
+        self.add_lifting_points()
+        self.__generate_rob_targets()
+
+    def reverse_points(self):
+        """
+        Reverses the order of points in the figure.
+        This is useful for drawing figures in reverse order.
+        """
+        self.points.reverse()
         self.__generate_rob_targets()
 
     def set_velocity(self, velocity: int):
@@ -135,8 +152,6 @@ class Figure:
         self.rob_targets.clear()
         self.rob_targets_formatted.clear()
         self.target_count = 0
-
-        self.add_lifting_points()
 
         for point in self.get_points():
             target_name = self.__generate_target_name(self.target_count)
