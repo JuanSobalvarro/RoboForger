@@ -1,13 +1,19 @@
+"""
+RoboForger - Draw Module
+This module provides the Draw class that is used to generate Rapid Code for robotic drawing tasks given some figures and
+parameters such as tool name, velocity, workspace limits, origin, and zero point.
+Draw 'draws' the figures one after another, if detector is enabled it will unify figures that are close to each other
+"""
 from typing import Any, List, Tuple
 from RoboForger.types import Point3D
 from .figures.figure import Figure
+from RoboForger.detector.detector import Detector
 
 
 class Draw:
     def __init__(self, tool_name: str = "tool0", velocity: int = 1000,
                  workspace_limits: Tuple[Point3D, Point3D] = ((-810.0, -810.0, 0.0), (810, 810, 0)),
-                 origin: Point3D = (450.0, 0.0, 450.0),
-                 zero: Point3D = (0.0, 0.0, 0.0)):
+                 origin: Point3D = (450.0, 0.0, 450.0), zero: Point3D = (0.0, 0.0, 0.0), use_detector: bool = True):
         self.figures: List[Figure] = []
         self.tool_name = tool_name
         self.velocity = velocity
@@ -16,6 +22,7 @@ class Draw:
         self.workspace_limits = workspace_limits if workspace_limits else None  # (xmin, ymin, zmin), (xmax, ymax, zmax)
         self.origin = origin
         self.zero = zero  # zero point for the robot
+        self.use_detector = use_detector
 
     def _is_within_limits(self, point: Point3D) -> bool:
         if not self.workspace_limits:
@@ -63,29 +70,49 @@ class Draw:
 
     def _generate_targets_and_moves_offset(self) -> List[str]:
 
+        figures = []
+
+        if self.use_detector:
+            detector = Detector(self.figures)
+            figures = detector.detect_and_simplify()
+        else:
+            figures = self.figures
+
         self.instructions.clear()
         self.robtargets.clear()
 
+        if not figures:
+            raise ValueError("No figures to draw. Please add at least one figure.")
+
         # Since we are using offsets the first rob target will be the origin point
-        self.robtargets = [Figure.rob_target_format("origin", self.origin)]
+        self.robtargets = [f"    {Figure.rob_target_format("origin", self.origin)}\n"]
+
+        self.instructions.append(f"        ! Move to origin point\n")
+        self.instructions.append(f"        MoveJ {"origin"}, v{self.velocity}, fine, {self.tool_name};\n")
 
         # First figure will be the origin point, so we need to move to it first with robtarget, so the first instruction of the
         # first figure will be the MoveJ to the origin point (no offset)
-        first_fig_instructions = self.figures[0].move_instructions_offset(origin_robtarget_name=self.robtargets[0][16:22],
+        self.instructions.append(f"        ! Figure: {figures[0].name}\n")
+        first_fig_instructions = figures[0].move_instructions_offset(origin_robtarget_name="origin",
                                                                             origin=self.origin,
                                                                             tool_name=self.tool_name,
                                                                             global_velocity=self.velocity)
-        first_fig_instructions[0] = f"        MoveJ {self.robtargets[0][16:22]}, v{self.velocity}, fine, {self.tool_name};\n"
 
         self.instructions.extend(first_fig_instructions)
 
         # For each figure append its instructions to the instructions list
-        for fig in self.figures[1:]:
+        for fig in figures[1:]:
 
-            self.instructions.extend(fig.move_instructions_offset(origin_robtarget_name=self.robtargets[0][16:22],
+            self.instructions.append(f"\n        ! Figure: {fig.name}\n")
+
+            self.instructions.extend(fig.move_instructions_offset(origin_robtarget_name="origin",
                                                                     origin=self.origin,
                                                                     tool_name=self.tool_name,
                                                                     global_velocity=self.velocity))
+
+        # Move to origin
+        self.instructions.append(f"\n        ! Move to origin point after finishing the drawing\n")
+        self.instructions.append(f"        MoveJ {"origin"}, v{self.velocity}, fine, {self.tool_name};\n")
 
         # Remember to move to the zero position after finishing the drawing
         self.instructions.append(f"        MoveAbsJ ZERO\\NoEOffs, v{self.velocity}, fine, {self.tool_name};")

@@ -11,6 +11,8 @@ class Circle(Figure):
     def __init__(self, name: str, center: Point3D, radius, lifting: float, velocity: int = 100):
         self.center = center
         self.radius = radius
+        # Round the center point to 4 decimal places
+        center = tuple(round(coord, 4) for coord in center)
         super().__init__(name, [
             (center[0] - radius, center[1], center[2]),  # Start point
             (center[0], center[1] + radius, center[2]),  # Midpoint (top)
@@ -48,5 +50,31 @@ class Circle(Figure):
         instructions.append(
             f"        MoveL {robtargets[6]}, v{global_velocity}, fine, {tool_name};\n"
         )
+
+        return instructions
+
+    def move_instructions_offset(self, origin_robtarget_name: str, origin: Point3D = (450.0, 0, 450.0), tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
+        instructions = []
+
+        points = self.get_points()
+
+        # Pre down point
+        if self.skip_pre_down:
+            instructions.append(f"        !init_lifted\n")
+            instructions.append(f"        MoveJ Offs {Figure.offset_coord(origin_robtarget_name, origin, points[0])}, v{global_velocity}, fine, {tool_name};\n")
+
+        # Move to start point (down)
+        instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[1])}, v{global_velocity}, fine, {tool_name};\n")
+
+        # Create the upper half arc movement
+        instructions.append(f"        MoveC Offs {Figure.offset_coord(origin_robtarget_name, origin, points[2])}, Offs {Figure.offset_coord(origin_robtarget_name, origin, points[3])}, v{self.velocity}, fine, {tool_name};\n")
+
+        # Create the lower half arc movement
+        instructions.append(f"        MoveC Offs {Figure.offset_coord(origin_robtarget_name, origin, points[4])}, Offs {Figure.offset_coord(origin_robtarget_name, origin, points[5])}, v{self.velocity}, fine, {tool_name};\n")
+
+        # Move to end point (lifted position)
+        if self.skip_end_lifting:
+            instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[6])}, v{global_velocity}, fine, {tool_name};\n")
+            instructions.append(f"        !end_lifted\n")
 
         return instructions

@@ -6,7 +6,7 @@ Point3D = Tuple[float, float, float]
 
 
 class CADParser:
-    def __init__(self, filepath: str, scale: float = 1.0):
+    def __init__(self, filepath: str, scale: float = 1.0, float_precision: int = 4):
         self.doc = ezdxf.readfile(filepath)
         self._msp = self.doc.modelspace()
         self.scale = scale
@@ -59,3 +59,38 @@ class CADParser:
 
             arcs.append({'center': center, 'radius': radius, 'start_angle': start_angle, 'end_angle': end_angle, 'clockwise': False})
         return arcs
+
+    def convert_lines_to_polylines(lines: List[tuple]) -> List[PolyLine]:
+        polylines = []
+        for i, (start, end) in enumerate(lines):
+            # Each line is a PolyLine with two points
+            robo_coords = [real_coord2robo_coord(start), real_coord2robo_coord(end)]
+            pl = PolyLine(f"Line{i}", robo_coords, lifting=100, velocity=1000)
+            polylines.append(pl)
+        return polylines
+
+    def convert_circles(circles: List[tuple]) -> List[Circle]:
+        circle_figs = []
+        for i, (center, radius) in enumerate(circles):
+            c = Circle(f"Circle{i}", real_coord2robo_coord(center), radius, lifting=100)
+            circle_figs.append(c)
+        return circle_figs
+
+    def convert_arcs(arcs: List[Dict]) -> List[Arc]:
+        arc_figs = []
+        for i, arc in enumerate(arcs):
+            # If angle is too wide (>180) split arc in two
+            center = real_coord2robo_coord(arc["center"])
+            # center = arc["center"]
+            start_angle = arc["start_angle"]
+            end_angle = arc["end_angle"]
+
+            arc_figs.append(Arc(f"Arc{i}",
+                                center=center,
+                                radius=arc["radius"],
+                                start_angle=start_angle,
+                                end_angle=end_angle,
+                                clockwise=arc["clockwise"],
+                                lifting=100))
+
+        return arc_figs

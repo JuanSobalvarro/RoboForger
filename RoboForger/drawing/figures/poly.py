@@ -10,6 +10,10 @@ class PolyLine(Figure):
     """
 
     def __init__(self, name: str, points: List[Point3D], lifting: float, velocity: int = 1000):
+
+        # Round points to 4 decimal places
+        points = [tuple(round(coord, 4) for coord in point) for point in points]
+
         super().__init__(name, points, lifting, velocity)
 
     def move_instructions(self, tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
@@ -43,7 +47,9 @@ class PolyLine(Figure):
         points = self.get_points()
 
         # Pre down point
-        instructions.append(f"        MoveJ Offs {Figure.offset_coord(origin_robtarget_name, origin, points[0])}, v{global_velocity}, fine, {tool_name};\n")
+        if not self.skip_pre_down:
+            instructions.append(f"        !init_lifted\n")
+            instructions.append(f"        MoveJ Offs {Figure.offset_coord(origin_robtarget_name, origin, points[0])}, v{global_velocity}, fine, {tool_name};\n")
 
         for point in points[1:-1]:  # Skip the first and last points (lifted points)
 
@@ -51,7 +57,10 @@ class PolyLine(Figure):
 
             instructions.append(instruction)
 
-        instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, point)}, v{global_velocity}, fine, {tool_name};\n")
+        # Final lifted point
+        if not self.skip_end_lifting:
+            instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[-1])}, v{global_velocity}, fine, {tool_name};\n")
+            instructions.append(f"        !end_lifted\n")
 
         return instructions
 

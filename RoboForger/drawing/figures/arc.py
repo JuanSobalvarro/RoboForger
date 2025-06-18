@@ -50,12 +50,19 @@ class Arc(Figure):
             _, self.mid_1, _ = Arc.arc_points(self.center, radius, self.start_angle, self.mid_angle, clockwise)
             _, self.mid_2, _ = Arc.arc_points(self.center, radius, self.mid_angle, self.end_angle, clockwise)
 
+            # Round the points to 4 decimal places
+            self.start = [round(coord, 4) for coord in self.start]
+            self.mid_1 = [round(coord, 4) for coord in self.mid_1]
+            self.mid = [round(coord, 4) for coord in self.mid]
+            self.mid_2 = [round(coord, 4) for coord in self.mid_2]
+            self.end = [round(coord, 4) for coord in self.end]
+
             super().__init__(name, [self.start, self.mid_1, self.mid, self.mid_2, self.end], lifting, velocity)
 
         else:
-            self.start = round_tuple(self.start, 4)
-            self.mid = round_tuple(self.mid, 4)
-            self.end = round_tuple(self.end, 4)
+            self.start = [round(coord, 4) for coord in self.start]
+            self.mid = [round(coord, 4) for coord in self.mid]
+            self.end = [round(coord, 4) for coord in self.end]
 
             super().__init__(name, [self.start, self.mid, self.end], lifting, velocity)
 
@@ -160,6 +167,37 @@ class Arc(Figure):
 
         # MoveL to ensure finishing in end point
         instructions.append(f"        MoveL {robtargets[5]}, v{global_velocity}, fine, {tool_name};\n")
+
+        return instructions
+
+    def move_instructions_offset(self, origin_robtarget_name: str, origin: Point3D = (450.0, 0, 450.0), tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
+        instructions = []
+
+        robtargets = self.get_rob_targets()
+
+        points = self.get_points()
+
+        # Pre down point
+        if not self.skip_pre_down:
+            instructions.append(f"        !init_lifted\n")
+            instructions.append(f"        MoveJ Offs {Figure.offset_coord(origin_robtarget_name, origin, points[0])}, v{global_velocity}, fine, {tool_name};\n")
+
+        # Move to start point (down)
+        instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[1])}, v{global_velocity}, fine, {tool_name};\n")
+
+        # Move first arc segment
+        instructions.append(f"        MoveC Offs {Figure.offset_coord(origin_robtarget_name, origin, points[2])}, Offs {Figure.offset_coord(origin_robtarget_name, origin, points[3])}, v{self.velocity}, fine, {tool_name};\n")
+
+        # If sweep is greater than 180 (pi radians) we need to draw a second segment
+        if Arc.arc_angle(self.start_angle, self.end_angle, self.clockwise) >= pi:
+            instructions.append(f"        MoveC Offs {Figure.offset_coord(origin_robtarget_name, origin, points[4])}, Offs {Figure.offset_coord(origin_robtarget_name, origin, points[5])}, v{self.velocity}, fine, {tool_name};\n")
+            return instructions
+
+        # Final lifted point
+        if not self.skip_end_lifting:
+            instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[-1])}, v{global_velocity}, fine, {tool_name};\n")
+            instructions.append(f"        !end_lifted\n")
+
 
         return instructions
 

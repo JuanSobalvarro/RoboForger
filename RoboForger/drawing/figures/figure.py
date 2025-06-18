@@ -19,6 +19,9 @@ class Figure:
         self.velocity = velocity
         self.points: List[Point3D] = points.copy()
 
+        self.__skip_pre_down = False  # If True, the first point is not a pre-down point
+        self.__skip_end_lifting = False  # If True, the last point is not a lifted point
+
         self.rob_targets = []
         self.rob_targets_formatted = []
 
@@ -29,19 +32,45 @@ class Figure:
             raise ValueError("Velocity must be a positive integer.")
         self.velocity = velocity
 
+    @property
+    def skip_pre_down(self) -> bool:
+        """
+        Returns True if the first point is not a pre-down (lifted) point.
+        """
+        return self.__skip_pre_down
+
+    @property
+    def skip_end_lifting(self) -> bool:
+        """
+        Returns True if the last point is not a lifted point.
+        """
+        return self.__skip_end_lifting
+
+    def set_skip_pre_down(self, skip: bool = True):
+        """
+        If True, the first point is not a pre-down (lifted) point.
+        """
+        self.__skip_pre_down = skip
+
+    def set_skip_end_lifted(self, skip: bool = True):
+        """
+        If True, the last point is not a lifted point.
+        """
+        self.__skip_end_lifting = skip
+
     def get_points(self) -> List[Point3D]:
         return self.points
 
     @staticmethod
     def offset_coord(origin_target_name: str, origin: Point3D, point: Point3D) -> str:
 
-        return f"({origin_target_name}, {point[0] - origin[0]}, {point[1] - origin[1]}, {point[2] - origin[2]})"
+        return f"({origin_target_name}, {round(point[0] - origin[0], 4)}, {round(point[1] - origin[1], 4)}, {round(point[2] - origin[2], 4)})"
 
     # Override this method in subclasses to provide specific move instructions
     def move_instructions(self, tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
         ...
 
-    def move_instructions_offset(self, origin_robtarget: str, origin: Point3D = (450.0, 0, 450.0), tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
+    def move_instructions_offset(self, origin_robtarget_name: str, origin: Point3D = (450.0, 0, 450.0), tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
         """
         This method is used to generate move instructions with the offset method for the tool.
         It can be overridden in subclasses if needed.
