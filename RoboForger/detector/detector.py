@@ -84,7 +84,7 @@ class Detector:
         last_figure = figures[0]
 
         for next_figure in figures[1:]:
-            if last_figure.points[-1] != next_figure.points[0]:
+            if last_figure._points[-1] != next_figure._points[0]:
                 return False
             last_figure = next_figure
 
