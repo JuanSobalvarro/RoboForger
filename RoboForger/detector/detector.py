@@ -4,17 +4,10 @@ And giving a list of figures in an order that the draw can follow, so when drawi
 continuous is drawn in one go, without lifting the tool.
 """
 from collections import defaultdict
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from RoboForger.drawing.figures import Figure
-from enum import Enum
-
-
-class ConnectionType(Enum):
-    END2START = "end2start"
-    START2END = "start2end"
-    START2START = "start2start"
-    END2END = "end2end"
-    DISCONNECTED = "disconnected"
+from .enums import ConnectionType
+from .dfs import is_figure_connected, print_graph, create_graph_from_figures, find_traces
 
 
 class Detector:
@@ -25,8 +18,11 @@ class Detector:
         :param figures: List of Figure objects to be processed.
         """
         self.figures = figures
-        self.adjacency = self._build_adjacency(figures)
         # self.__print_adj()
+
+        # print_graph(create_graph_from_figures(self.figures))
+
+        self.traces = find_traces(create_graph_from_figures(self.figures))
 
     def __print_adj(self):
 
@@ -36,12 +32,70 @@ class Detector:
 
         print("=============================================")
 
+    def __print_traces(self, traces: List[List[Figure]]):
+        """
+        Prints the detected traces in a readable format.
+        """
+        print("================Detected traces=================")
+        for i, trace in enumerate(traces):
+            print(f"Trace {i + 1}: {[figure.name for figure in trace]}")
+        print("================================================")
+
+    def find_traces(self, graph: Dict[Figure, List[Tuple[Figure, ConnectionType]]]) -> List[List[Tuple[Figure, bool]]]:
+        visited = set()
+        traces = []
+
+        for figure in graph.keys():
+            if figure in visited:
+                continue
+            trace = []
+            stack = [(figure, None, False)]  # (current, parent, reversed_flag)
+            visited.add(figure)
+
+            while stack:
+                current, parent, reversed_flag = stack.pop()
+                trace.append((current, reversed_flag))
+
+                for neighbor, conn_type in graph[current]:
+                    if neighbor in visited:
+                        continue
+
+                    # Determine if reversal is needed
+                    should_reverse = conn_type in {
+                        ConnectionType.START2END,
+                        ConnectionType.END2END,
+                        ConnectionType.START2START
+                    }
+                    stack.append((neighbor, current, should_reverse))
+                    visited.add(neighbor)
+
+            traces.append(trace)
+
+        return traces
+
+    def check_aligned(self, figures: List[Figure]) -> bool:
+        """
+        Checks if all figures are aligned in the same direction.
+        This is useful to ensure that the figures can be drawn in one go without lifting the tool.
+        """
+        if not figures:
+            return True
+
+        last_figure = figures[0]
+
+        for next_figure in figures[1:]:
+            if last_figure.points[-1] != next_figure.points[0]:
+                return False
+            last_figure = next_figure
+
+        return True
+
     def _dfs(self) -> List[List[Figure]]:
         """
         Given the adjacency list of figures, this method will perform a Depth first search to return a list of the longest traces
-        that can be drawn in one go. This method is iterative and will return a list of lists of figures that are connected.
+        that can be drawn in one go. This method is iterative and will return a list of lists of figures that are connected. WORKING FINE DO NOT TOUCH
         """
-        adj_list: Dict[Figure, List[Figure]] = self.adjacency
+        adj_list: Dict[Figure, List[Figure]] = self._build_adjacency(self.figures)
 
         visited: set[Figure] = set()
         traces: List[List[Figure]] = []
@@ -70,63 +124,24 @@ class Detector:
 
         return traces
 
-    def detect(self) -> List[List[Figure]]:
-        """
-        Detects and simplifies figures based on proximity and continuity.
-
-        :return: List of simplified Figure objects.
-        """
-
-        # FIRST: Figures ensure that every single one starts with the pre-down point and ends with the lifted point.
-        # So detect the figures that are root figures (the ones that dont have a start point that is connected to the
-        # end point of another figure)
-
-        root_figures: List[Figure] = self.get_root_figures()
-
-        print("Root figures detected:", root_figures)
-
-        figures_traces: Dict[Figure, List[Figure]] = self.get_connections(root_figures)
-
-        traces_detected: List[List[Figure]] = []
-
-        for root_figure in root_figures:
-            if root_figure not in figures_traces:
-                raise ValueError(f"Figure {root_figure.name} has no traces detected.")
-
-            trace = [root_figure]
-            connected_figures = figures_traces[root_figure]
-
-            while connected_figures:
-                next_figure = connected_figures.pop(0)
-                if next_figure not in trace:
-                    trace.append(next_figure)
-                    connected_figures.extend(figures_traces.get(next_figure, []))
-
-            traces_detected.append(trace)
-
-        return traces_detected
-
-    def __print_traces(self, traces: List[List[Figure]]):
-        """
-        Prints the detected traces in a readable format.
-        """
-        print("================Detected traces=================")
-        for i, trace in enumerate(traces):
-            print(f"Trace {i + 1}: {[figure.name for figure in trace]}")
-        print("================================================")
-
     def detect_and_simplify(self) -> List[Figure]:
         """
         This method detects the traces and then simplifies them into a list of figures that can be drawn in one go.
         Here we use the flags skip_pre_down and skip_end_lifting to determine if the figure should start with a pre-down point
-        and end with a lifted point.
+        and end with a lifted point. *** WORKING FINE DO NOT TOUCH
         """
 
-        detected_traces = self._dfs()
+        # detected_traces = self._dfs()
+        detected_traces: List[List[Figure]] = self.traces
+
+        self.__print_traces(detected_traces)
 
         simplified_figures: List[Figure] = []
 
-        self.__print_traces(detected_traces)
+        for i in range(len(detected_traces)):
+            print("Ensuring continuity for trace", i + 1)
+            trace = self.ensure_continuity(detected_traces[i])
+            detected_traces[i] = trace
 
         for trace in detected_traces:
             if not trace:
@@ -153,6 +168,47 @@ class Detector:
 
         return simplified_figures
 
+    @staticmethod
+    def ensure_continuity(figures: List[Figure]) -> List[Figure]:
+        """
+        This method ensures that given a list of figures (that are connected), it reverse the points of the figures that
+        are not aligned with the previous figure.
+        """
+        if not figures:
+            raise ValueError("The list of figures is empty.")
+
+        print("Pre ensuring continuity of figures:")
+        for fig in figures:
+            print(f"{fig.name}: {fig.get_start_and_end_points()}")
+
+        continuous_figures: List[Figure] = [figures[0]]
+
+        # If the point in common of the first figure with the second is at the start then we should reverse the direction of the first figure
+        first_fig_start, first_fig_end = continuous_figures[0].get_start_and_end_points()
+        second_fig_start, second_fig_end = figures[1].get_start_and_end_points()
+        if first_fig_start == second_fig_start or first_fig_start == second_fig_end:
+            continuous_figures[0].reverse_points()
+
+        for i, figure in enumerate(figures[1:], 1):
+
+            cur_fig_start, cur_fig_end = figure.get_start_and_end_points()
+            prev_fig_start, prev_fig_end = figures[i - 1].get_start_and_end_points()
+
+            # If the start of the current figure is not aligned with the end of the previous figure, reverse it
+            if cur_fig_start != prev_fig_end:
+                figure.reverse_points()
+
+            continuous_figures.append(figure)
+
+
+
+        print("Ensured continuity of figures:")
+        for fig in continuous_figures:
+            print(f"{fig.name}: {fig.get_start_and_end_points()}")
+
+
+        return continuous_figures
+
     def _build_adjacency(self, figures: List[Figure]) -> Dict[Figure, List[Figure]]:
         """
         Builds an adjacency list for the figures based on their connections.
@@ -163,13 +219,20 @@ class Detector:
             adjacency[figure] = []
             for j, other_figure in enumerate(figures):
                 if i != j:
-                    connection_type = self.is_connected(figure, other_figure)
-
-                    # A figure 2 is considered a trace of figure 1 if it is connected to it from figure1 end to figure2 start
-                    if connection_type == ConnectionType.END2START:
+                    if self.__is_trace(figure, other_figure):
                         adjacency[figure].append(other_figure)
 
         return adjacency
+
+    def __is_trace(self, figure1, figure2):
+        """
+        This method defines if figure2 is a trace of figure1. This will define how we interpret the figures when drawing them.
+        """
+        connection_type = is_figure_connected(figure1, figure2)
+
+        is_trace = connection_type == ConnectionType.END2START or connection_type == ConnectionType.END2END
+
+        return is_trace
 
     def _continuous_figures(self, figure: Figure) -> List[Figure]:
         """
@@ -180,26 +243,6 @@ class Detector:
         """
         connected = []
         for fig in self.figures:
-            if fig != figure and Detector.is_connected(figure, fig) == ConnectionType.END2START:
+            if fig != figure and is_figure_connected(figure, fig) == ConnectionType.END2START:
                 connected.append(fig)
         return connected
-
-    @staticmethod
-    def is_connected(start_figure: Figure, end_figure: Figure) -> ConnectionType:
-
-        start_figure_points = start_figure.get_points()
-        end_figure_points = end_figure.get_points()
-
-        if start_figure_points[-1] == end_figure_points[0]:
-            return ConnectionType.END2START
-
-        if start_figure_points[0] == end_figure_points[-1]:
-            return ConnectionType.START2END
-
-        if start_figure_points[0] == end_figure_points[0]:
-            return ConnectionType.START2START
-
-        if start_figure_points[-1] == end_figure_points[-1]:
-            return ConnectionType.END2END
-
-        return ConnectionType.DISCONNECTED

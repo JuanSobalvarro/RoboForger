@@ -59,7 +59,7 @@ class Circle(Figure):
         points = self.get_points()
 
         # Pre down point
-        if self.skip_pre_down:
+        if not self.skip_pre_down:
             instructions.append(f"        !init_lifted\n")
             instructions.append(f"        MoveJ Offs {Figure.offset_coord(origin_robtarget_name, origin, points[0])}, v{global_velocity}, fine, {tool_name};\n")
 
@@ -73,7 +73,7 @@ class Circle(Figure):
         instructions.append(f"        MoveC Offs {Figure.offset_coord(origin_robtarget_name, origin, points[4])}, Offs {Figure.offset_coord(origin_robtarget_name, origin, points[5])}, v{self.velocity}, fine, {tool_name};\n")
 
         # Move to end point (lifted position)
-        if self.skip_end_lifting:
+        if not self.skip_end_lifting:
             instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[6])}, v{global_velocity}, fine, {tool_name};\n")
             instructions.append(f"        !end_lifted\n")
 

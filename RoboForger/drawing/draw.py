@@ -84,11 +84,15 @@ class Draw:
         if not figures:
             raise ValueError("No figures to draw. Please add at least one figure.")
 
+        # First move to zero
+        self.instructions.append(f"        ! Move to ZERO before starting the drawing\n")
+        self.instructions.append(f"        MoveAbsJ ZERO\\NoEOffs, v{self.velocity}, fine, {self.tool_name};\n\n")
+
         # Since we are using offsets the first rob target will be the origin point
         self.robtargets = [f"    {Figure.rob_target_format("origin", self.origin)}\n"]
 
         self.instructions.append(f"        ! Move to origin point\n")
-        self.instructions.append(f"        MoveJ {"origin"}, v{self.velocity}, fine, {self.tool_name};\n")
+        self.instructions.append(f"        MoveJ {"origin"}, v{self.velocity}, fine, {self.tool_name};\n\n")
 
         # First figure will be the origin point, so we need to move to it first with robtarget, so the first instruction of the
         # first figure will be the MoveJ to the origin point (no offset)

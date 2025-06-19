@@ -26,8 +26,8 @@ class Figure:
             self.points.append(rounded_point)
 
 
-        self.__skip_pre_down = False  # If True, the first point is not a pre-down point
-        self.__skip_end_lifting = False  # If True, the last point is not a lifted point
+        self.__skip_pre_down = False
+        self.__skip_end_lifting = False
 
         self.rob_targets = []
         self.rob_targets_formatted = []
@@ -35,6 +35,15 @@ class Figure:
         # Add lifting points
         self.add_lifting_points()
         self.__generate_rob_targets()
+
+    def get_start_and_end_points(self) -> (Point3D, Point3D):
+        """
+        Returns the first and last points of the figure.
+        The first point is the pre-down (lifted) point, and the last point is the end lifted point.
+        """
+        if not self.points:
+            raise ValueError("The figure has no points.")
+        return self.points[0], self.points[-1]
 
     def reverse_points(self):
         """

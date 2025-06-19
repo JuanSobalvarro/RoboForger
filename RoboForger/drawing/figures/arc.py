@@ -177,6 +177,8 @@ class Arc(Figure):
 
         points = self.get_points()
 
+        # print(f"Arc: {self.name} is skipping pre-down: {self.skip_pre_down}, end lifting: {self.skip_end_lifting}")
+
         # Pre down point
         if not self.skip_pre_down:
             instructions.append(f"        !init_lifted\n")
@@ -191,7 +193,6 @@ class Arc(Figure):
         # If sweep is greater than 180 (pi radians) we need to draw a second segment
         if Arc.arc_angle(self.start_angle, self.end_angle, self.clockwise) >= pi:
             instructions.append(f"        MoveC Offs {Figure.offset_coord(origin_robtarget_name, origin, points[4])}, Offs {Figure.offset_coord(origin_robtarget_name, origin, points[5])}, v{self.velocity}, fine, {tool_name};\n")
-            return instructions
 
         # Final lifted point
         if not self.skip_end_lifting:
