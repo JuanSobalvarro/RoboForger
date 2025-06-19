@@ -11,8 +11,10 @@ class Figure:
     lifted point.
     """
     def __init__(self, name: str, points: List[Point3D], lifting: float = 100,  velocity: int = 1000, float_precision: int = 4):
+
         if not points or len(points) < 2:
             raise ValueError("A figure must have at least two points.")
+
         self.name = name
         self.lifting = lifting
         self.velocity = velocity
@@ -139,7 +141,7 @@ class Figure:
         return self.__generate_rob_targets()
 
     @staticmethod
-    def _create_robtarget_coord(point: Point3D) -> str:
+    def _create_rob_target_coord(point: Point3D) -> str:
         """
         Creates a rob target string for a given point.
         This is useful for generating individual rob targets without generating the entire list.
@@ -154,7 +156,7 @@ class Figure:
         Formats a rob target string for a given point and target name.
         This is useful for generating individual rob targets without generating the entire list.
         """
-        return f"CONST robtarget {target_name}:={Figure._create_robtarget_coord(point)};\n"
+        return f"CONST robtarget {target_name}:={Figure._create_rob_target_coord(point)};\n"
 
     def __generate_rob_targets(self):
         """
