@@ -26,12 +26,11 @@ class Figure:
         self.__skip_pre_down = False
         self.__skip_end_lifting = False
 
-        self.rob_targets = []
+        self.rob_target_names: List[str] = [] # Rob targets saves the names of the rob targets
         self.target_count = 0
 
         # Add lifting points
         self._add_lifted_points()
-        self.__generate_rob_targets()
 
     @staticmethod
     def round_point(point: Point3D, precision: int) -> Point3D:
@@ -71,7 +70,7 @@ class Figure:
         This is useful for drawing figures in reverse order.
         """
         self._points.reverse()
-        self.rob_targets.clear()
+        self.rob_target_names.clear()
 
     def set_velocity(self, velocity: int):
         if velocity <= 0:
@@ -128,14 +127,14 @@ class Figure:
         Clears the rob targets list and resets the target count.
         This is useful if you want to regenerate the rob targets.
         """
-        self.rob_targets.clear()
+        self.rob_target_names.clear()
         self.target_count = 0
 
-    def get_rob_targets(self) -> List[str]:
+    def get_rob_target_names(self) -> List[str]:
         """
         Returns the list of all rob targets name in order of use
         """
-        return self.rob_targets
+        return self.rob_target_names
 
     def get_rob_targets_formatted(self) -> List[str]:
         return self.__generate_rob_targets()
@@ -165,7 +164,7 @@ class Figure:
 
         ** The generated rob targets are in ORDER ACCORDING TO THE POINTS at the current state of the figure.
         """
-        self.rob_targets.clear()
+        self.rob_target_names.clear()
         rob_targets_formatted: List[str] = []
         self.target_count = 0
 
@@ -173,6 +172,7 @@ class Figure:
             target_name = self.__generate_target_name(self.target_count)
             self.target_count += 1
 
+            self.rob_target_names.append(target_name)
             rob_targets_formatted.append(Figure.rob_target_format(target_name, point))
 
         return rob_targets_formatted

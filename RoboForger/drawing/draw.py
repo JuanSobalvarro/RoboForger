@@ -17,7 +17,7 @@ class Draw:
         self.figures: List[Figure] = []
         self.tool_name = tool_name
         self.velocity = velocity
-        self.robtargets = []
+        self.rob_targets = []
         self.instructions = []
         self.workspace_limits = workspace_limits if workspace_limits else None  # (xmin, ymin, zmin), (xmax, ymax, zmax)
         self.origin = origin
@@ -32,38 +32,41 @@ class Draw:
         return xmin <= x <= xmax and ymin <= y <= ymax and zmin <= z <= zmax
 
     def _generate_targets_and_moves(self):
+
+        figures = []
+
+        if self.use_detector:
+            detector = Detector(self.figures)
+            figures = detector.detect_and_simplify()
+        else:
+            figures = self.figures
+
+        self.instructions.clear()
+        self.rob_targets.clear()
+
         # Move to ZERO before starting the drawing
         if not self._is_within_limits(self.zero):
             raise ValueError(f"Zero point {self.zero} is outside the robot's workspace limits.")
 
-        self.instructions.clear()
-        self.robtargets.clear()
-        
-        self.instructions.append(f"        MoveAbsJ ZERO\\NoEOffs, v{self.velocity}, fine, {self.tool_name};")
-        
-        if not self.figures:
+        if not figures:
             raise ValueError("No figures to draw. Please add at least one figure.")
         
-        for fig in self.figures:
-            # Comment line for the figure
-            if not isinstance(fig, Figure):
-                raise TypeError(f"Expected Figure instance, got {type(fig).__name__}.")
-            
-            self.instructions.append(f"\n        ! Figure: {fig.name}\n")
+        # First move to zero
+        self.instructions.append(f"        ! Move to ZERO before starting the drawing\n")
+        self.instructions.append(f"        MoveAbsJ ZERO\\NoEOffs, v{self.velocity}, fine, {self.tool_name};\n\n")
 
+        # We are using references to rob targets (abs coordinates) so we need to add the rob target when iterating on each figure
+        self.rob_targets = []
 
-            # Write the instructions for moving through the figure
-            fig_instructions = fig.move_instructions(self.tool_name, self.velocity)
-            if not fig_instructions:
-                raise ValueError(f"Figure {fig.name} has no move instructions defined.")
+        for fig in figures:
 
-            for instruction in fig_instructions:  # Skip the first instruction which is the initial move
-                self.instructions.append(instruction)
+            # Add rob targets formatted
+            self.rob_targets.extend(fig.get_rob_targets_formatted())
 
-            self.instructions.append(f"\n")
+            self.instructions.append(f"        ! Move to {fig.name}\n")
 
-            # Save the figure's robtargets
-            self.robtargets.extend(f"    {rtf}" for rtf in fig.get_rob_targets_formatted())
+            self.instructions.extend(fig.move_instructions(tool_name=self.tool_name,
+                                                           global_velocity=self.velocity))
 
         # Move to zero position after finishing the drawing
         self.instructions.append(f"        MoveAbsJ ZERO\\NoEOffs, v{self.velocity}, fine, {self.tool_name};")
@@ -79,7 +82,7 @@ class Draw:
             figures = self.figures
 
         self.instructions.clear()
-        self.robtargets.clear()
+        self.rob_targets.clear()
 
         if not figures:
             raise ValueError("No figures to draw. Please add at least one figure.")
@@ -89,7 +92,7 @@ class Draw:
         self.instructions.append(f"        MoveAbsJ ZERO\\NoEOffs, v{self.velocity}, fine, {self.tool_name};\n\n")
 
         # Since we are using offsets the first rob target will be the origin point
-        self.robtargets = [f"    {Figure.rob_target_format("origin", self.origin)}\n"]
+        self.rob_targets = [f"    {Figure.rob_target_format("origin", self.origin)}\n"]
 
         self.instructions.append(f"        ! Move to origin point\n")
         self.instructions.append(f"        MoveJ {"origin"}, v{self.velocity}, fine, {self.tool_name};\n\n")
@@ -130,7 +133,7 @@ class Draw:
         self.figures.extend(figures)
 
     def generate_rapid_code(self, use_offset: bool) -> str:
-        self.robtargets.clear()
+        self.rob_targets.clear()
         self.instructions.clear()
 
         if use_offset:
@@ -140,7 +143,7 @@ class Draw:
 
         code = "MODULE MainModule\n"
         code += "    CONST jointtarget ZERO:=[[0,0,0,0,0,0],[9E+9,9E+9,9E+9,9E+9,9E+9,9E+9]];\n"
-        code += "".join(self.robtargets)
+        code += "".join(self.rob_targets)
         code += "\n\n    PROC main()\n"
         code += "".join(self.instructions)
         code += "\n    ENDPROC\nENDMODULE\n"

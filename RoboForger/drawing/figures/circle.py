@@ -24,32 +24,38 @@ class Circle(Figure):
     def move_instructions(self, tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
         instructions = []
 
-        robtargets = self.get_rob_targets()
-        if not robtargets:
+        rob_target_names = self.get_rob_target_names()
+
+        if not rob_target_names:
             raise ValueError("No robot targets generated for the circle.")
 
-        # Move to start point (lifted position)
-        instructions.append(
-            f"        MoveJ {robtargets[0]}, v{global_velocity}, fine, {tool_name};\n"
-        )
+        if not self.skip_pre_down:
+            instructions.append(f"        !init_lifted\n")
+            # Move to the pre-down point
+            instructions.append(
+                f"        MoveJ {rob_target_names[0]}, v{global_velocity}, fine, {tool_name};\n"
+            )
 
         # Move to start point (down)
         instructions.append(
-            f"        MoveL {robtargets[1]}, v{global_velocity}, fine, {tool_name};\n"
+            f"        MoveL {rob_target_names[1]}, v{global_velocity}, fine, {tool_name};\n"
         )
 
         # Create the upper half arc movement
         instructions.append(
-            f"        MoveC {robtargets[2]}, {robtargets[3]}, v{self.velocity}, fine, {tool_name};\n"
+            f"        MoveC {rob_target_names[2]}, {rob_target_names[3]}, v{self.velocity}, fine, {tool_name};\n"
         )
         # Create the lower half arc movement
         instructions.append(
-            f"        MoveC {robtargets[4]}, {robtargets[5]}, v{self.velocity}, fine, {tool_name};\n"
+            f"        MoveC {rob_target_names[4]}, {rob_target_names[5]}, v{self.velocity}, fine, {tool_name};\n"
         )
-        # Move to end point (lifted position)
-        instructions.append(
-            f"        MoveL {robtargets[6]}, v{global_velocity}, fine, {tool_name};\n"
-        )
+
+        if not self.skip_end_lifting:
+            # Move to end point (lifted position)
+            instructions.append(
+                f"        MoveL {rob_target_names[-1]}, v{global_velocity}, fine, {tool_name};\n"
+            )
+            instructions.append(f"        !end_lifted\n")
 
         return instructions
 

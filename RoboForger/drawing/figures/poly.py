@@ -9,35 +9,36 @@ class PolyLine(Figure):
     The points are connected in the order they are provided.
     """
 
-    def __init__(self, name: str, points: List[Point3D], lifting: float, velocity: int = 1000):
+    def __init__(self, name: str, points: List[Point3D], lifting: float, velocity: int = 1000, float_precision: int = 4):
 
-        # Round points to 4 decimal places
-        points = [tuple(round(coord, 4) for coord in point) for point in points]
-
-        super().__init__(name, points, lifting, velocity)
+        super().__init__(name, points, lifting, velocity, float_precision)
 
     def move_instructions(self, tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
         instructions = []
 
-        targets = self.get_rob_targets()
+        targets = self.get_rob_target_names()
 
         if not targets:
             raise ValueError("No robot targets generated for the polyline.")
 
         # Move to the first point
-        instructions.append(
-            f"        MoveJ {targets[0]}, v{global_velocity}, fine, {tool_name};\n"
-        )
+        if not self.skip_pre_down:
+            instructions.append(f"        !init_lifted\n")
+            instructions.append(
+                f"        MoveJ {targets[0]}, v{global_velocity}, fine, {tool_name};\n"
+            )
 
-        for rob_target in targets[:-1]:  # Skip the last target which is the lift point
+        for rob_target in targets[1:-1]:  # Skip the last target which is the lift point
             instructions.append(
                 f"        MoveL {rob_target}, v{self.velocity}, fine, {tool_name};\n"
             )
 
         # Move to the last point (lift point)
-        instructions.append(
-            f"        MoveL {targets[-1]}, v{global_velocity}, fine, {tool_name};\n"
-        )
+        if not self.skip_end_lifting:
+            instructions.append(f"        !end_lifted\n")
+            instructions.append(
+                f"        MoveL {targets[-1]}, v{global_velocity}, fine, {tool_name};\n"
+            )
 
         return instructions
 
@@ -67,7 +68,7 @@ class PolyLine(Figure):
     def __str__(self):
         format_str = f"Polyline<name={self.name}>"
 
-        for point in self.points:
+        for point in self._points:
             format_str += f" -> ({point[0]}, {point[1]}, {point[2]})"
 
         return format_str

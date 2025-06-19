@@ -139,41 +139,36 @@ class Arc(Figure):
         instructions = []
 
         # Move to start position
-        robtargets = self.get_rob_targets()
-        instructions.append(f"        MoveJ {robtargets[0]}, v{global_velocity}, fine, {tool_name};\n")
-        instructions.append(f"        MoveL {robtargets[1]}, v{global_velocity}, fine, {tool_name};\n")
+        rob_target_names = self.get_rob_target_names()
 
-        # # If angle is greater or equal than 180 degrees (pi radians), split the arc into 2 segments
-        # angle_diff = abs(self.end_angle - self.start_angle)
+        if not rob_target_names:
+            raise ValueError("No robot targets generated for the arc.")
 
-        # If we dont have a sweep limitation proceed as a single arc
-        if Arc.arc_angle(self.start_angle, self.end_angle, self.clockwise) < pi:
+        # Pre down point
+        if not self.skip_pre_down:
+            instructions.append(f"        !init_lifted\n")
+            instructions.append(f"        MoveJ {rob_target_names[0]}, v{global_velocity}, fine, {tool_name};\n")
 
-            print(f"Arc is less than 180 degrees, robtargets: {robtargets}")
+        # Move to start point (down)
+        instructions.append(f"        MoveL {rob_target_names[1]}, v{global_velocity}, fine, {tool_name};\n")
+        # Move first arc segment
+        instructions.append(f"        MoveC {rob_target_names[2]}, {rob_target_names[3]}, v{self.velocity}, fine, {tool_name};\n")
 
-            instructions.append(f"        MoveC {robtargets[2]}, {robtargets[3]}, v{self.velocity}, fine, {tool_name};\n")
+        # If sweep is greater than 180 (pi radians) we need to draw a second segment
+        if Arc.arc_angle(self.start_angle, self.end_angle, self.clockwise) >= pi:
+            instructions.append(f"        MoveC {rob_target_names[4]}, {rob_target_names[5]}, v{self.velocity}, fine, {tool_name};\n")
 
-            # MoveL to ensure finishing precisely at the end
-            instructions.append(f"        MoveL {robtargets[4]}, v{global_velocity}, fine, {tool_name};\n")
-
-            return instructions
-
-        print(f"Robtargets for arc greater than 180 {self.name}: {robtargets}")
-
-        # Move to the first mid point
-        instructions.append(f"        MoveC {robtargets[2]}, {robtargets[3]}, v{self.velocity}, fine, {tool_name};\n")
-        # Move to the second mid point
-        instructions.append(f"        MoveC {robtargets[4]}, {robtargets[5]}, v{self.velocity}, fine, {tool_name};\n")
-
-        # MoveL to ensure finishing in end point
-        instructions.append(f"        MoveL {robtargets[5]}, v{global_velocity}, fine, {tool_name};\n")
+        if not self.skip_end_lifting:
+            # Final lifted point
+            instructions.append(f"        MoveL {rob_target_names[-1]}, v{global_velocity}, fine, {tool_name};\n")
+            instructions.append(f"        !end_lifted\n")
 
         return instructions
 
     def move_instructions_offset(self, origin_robtarget_name: str, origin: Point3D = (450.0, 0, 450.0), tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
         instructions = []
 
-        robtargets = self.get_rob_targets()
+        robtargets = self.get_rob_target_names()
 
         points = self.get_points()
 
