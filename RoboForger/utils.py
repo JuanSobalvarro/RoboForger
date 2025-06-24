@@ -88,3 +88,15 @@ def normalize_angle_deg(angle_deg: float) -> float:
         float: Normalized angle in degrees, in [0, 360).
     """
     return angle_deg % 360
+
+def vector_norm(vector: tuple[float, float, float]) -> float:
+    """
+    Calculate the Euclidean norm (magnitude) of a 3D vector.
+
+    Args:
+        vector (tuple[float, float, float]): The 3D vector as a tuple of (x, y, z).
+
+    Returns:
+        float: The magnitude of the vector.
+    """
+    return sum(coord ** 2 for coord in vector) ** 0.5
