@@ -14,7 +14,7 @@ class Arc(Figure):
     """
 
     def __init__(self, name: str, center: Optional[Point3D] = None, radius: float = 1, start_angle: float = 0, end_angle: float = 0,
-                 clockwise: bool = False, lifting: float = 100, velocity: int = 1000):
+                 clockwise: bool = False, lifting: float = 100, velocity: int = 1000, float_precision: int = 6):
         """
         Initialize an Arc object.
         :param name: Name of the arc.
@@ -57,14 +57,14 @@ class Arc(Figure):
             self.mid_2 = [round(coord, 4) for coord in self.mid_2]
             self.end = [round(coord, 4) for coord in self.end]
 
-            super().__init__(name, [self.start, self.mid_1, self.mid, self.mid_2, self.end], lifting, velocity)
+            super().__init__(name, [self.start, self.mid_1, self.mid, self.mid_2, self.end], lifting, velocity, float_precision)
 
         else:
             self.start = [round(coord, 4) for coord in self.start]
             self.mid = [round(coord, 4) for coord in self.mid]
             self.end = [round(coord, 4) for coord in self.end]
 
-            super().__init__(name, [self.start, self.mid, self.end], lifting, velocity)
+            super().__init__(name, [self.start, self.mid, self.end], lifting, velocity, float_precision)
 
     @staticmethod
     def arc_points(center: Point3D, radius: float, start_angle: float, end_angle: float, clockwise: bool) -> Tuple[Point3D, Point3D, Point3D]:

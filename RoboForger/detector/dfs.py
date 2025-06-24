@@ -10,6 +10,7 @@ from typing import List, Dict, Tuple
 from RoboForger.drawing.figures import Figure
 from .enums import ConnectionType
 
+
 def is_figure_connected(start_figure: Figure, end_figure: Figure) -> ConnectionType:
     start_figure_points = start_figure.get_points()
     end_figure_points = end_figure.get_points()
@@ -67,7 +68,7 @@ def print_graph(graph: Dict[Figure, List[Tuple[Figure, ConnectionType]]]):
 
 def find_traces(graph: Dict[Figure, List[Figure]]) -> List[List[Figure]]:
     """
-    Find traces in the graph using depth-first search (DFS).
+    Find traces in the graph using depth-first search (DFS) with priorities.
     """
 
     visited = set()

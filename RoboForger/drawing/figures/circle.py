@@ -8,7 +8,7 @@ class Circle(Figure):
     A circle is a fusion of two arcs, one for the upper half and one for the lower half.
     """
 
-    def __init__(self, name: str, center: Point3D, radius, lifting: float, velocity: int = 100):
+    def __init__(self, name: str, center: Point3D, radius, lifting: float, velocity: int = 100, float_precision: int = 6):
         self.center = center
         self.radius = radius
         # Round the center point to 4 decimal places
@@ -19,7 +19,7 @@ class Circle(Figure):
             (center[0] + radius, center[1], center[2]),  # Right point
             (center[0], center[1] - radius, center[2]),  # Midpoint (bottom)
             (center[0] - radius, center[1], center[2])  # End point (back to start)
-        ], lifting, velocity)
+        ], lifting, velocity, float_precision)
 
     def move_instructions(self, tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
         instructions = []

@@ -32,7 +32,8 @@ class Detector:
 
         print("=============================================")
 
-    def __print_traces(self, traces: List[List[Figure]]):
+    @staticmethod
+    def __print_traces(traces: List[List[Figure]]):
         """
         Prints the detected traces in a readable format.
         """
@@ -73,7 +74,8 @@ class Detector:
 
         return traces
 
-    def check_aligned(self, figures: List[Figure]) -> bool:
+    @staticmethod
+    def check_aligned_end2start(figures: List[Figure]) -> bool:
         """
         Checks if all figures are aligned in the same direction.
         This is useful to ensure that the figures can be drawn in one go without lifting the tool.
@@ -84,9 +86,28 @@ class Detector:
         last_figure = figures[0]
 
         for next_figure in figures[1:]:
-            if last_figure._points[-1] != next_figure._points[0]:
+            if last_figure.end_point != next_figure.start_point:
+                print(f"Figures {last_figure.name} and {next_figure.name} are not aligned end to start.")
                 return False
             last_figure = next_figure
+
+        return True
+
+    @staticmethod
+    def check_aligned_start2end(figures: List[Figure]) -> bool:
+        """
+        Checks if all figures are aligned in the same direction.
+        This is useful to ensure that the figures can be drawn in one go without lifting the tool.
+        """
+        if not figures:
+            return True
+
+        first_figure = figures[0]
+
+        for next_figure in figures[1:]:
+            if first_figure._points[0] != next_figure._points[-1]:
+                return False
+            first_figure = next_figure
 
         return True
 
@@ -134,16 +155,18 @@ class Detector:
         # detected_traces = self._dfs()
         detected_traces: List[List[Figure]] = self.traces
 
-        self.__print_traces(detected_traces)
+        # self.__print_traces(detected_traces)
 
         simplified_figures: List[Figure] = []
 
-        for i in range(len(detected_traces)):
-            print("Ensuring continuity for trace", i + 1)
-            trace = self.ensure_continuity(detected_traces[i])
-            detected_traces[i] = trace
-
+        checked_traces = []
         for trace in detected_traces:
+            # print("Ensuring continuity for trace", i + 1)
+            # print(f"{detected_traces[i]}")
+            continuous_traces = self.ensure_continuity(trace)
+            checked_traces.extend(continuous_traces)
+
+        for trace in checked_traces:
             if not trace:
                 continue
 
@@ -169,45 +192,61 @@ class Detector:
         return simplified_figures
 
     @staticmethod
-    def ensure_continuity(figures: List[Figure]) -> List[Figure]:
+    def ensure_continuity(trace: List[Figure]) -> List[List[Figure]]:
         """
-        This method ensures that given a list of figures (that are connected), it reverse the points of the figures that
-        are not aligned with the previous figure.
+        This method ensures that given a trace, it reverse the points of the figures that
+        are not aligned with the previous figure or SPLITS the trace if the figures are not continuous.
         """
-        if not figures:
+        if not trace:
             raise ValueError("The list of figures is empty.")
 
-        print("Pre ensuring continuity of figures:")
-        for fig in figures:
-            print(f"{fig.name}: {fig.get_start_and_end_points()}")
+        # print("Pre ensuring continuity of figures:")
+        # for fig in figures:
+        #     print(f"{fig.name}: {fig.get_start_and_end_points()}")
 
-        continuous_figures: List[Figure] = [figures[0]]
+        if len(trace) == 1:
+            # If there is only one figure, we can return it directly
+            return [trace]
 
-        # If the point in common of the first figure with the second is at the start then we should reverse the direction of the first figure
-        first_fig_start, first_fig_end = continuous_figures[0].get_start_and_end_points()
-        second_fig_start, second_fig_end = figures[1].get_start_and_end_points()
-        if first_fig_start == second_fig_start or first_fig_start == second_fig_end:
-            continuous_figures[0].reverse_points()
+        continuous_traces: List[List[Figure]] = []
+        current_trace: List[Figure] = [trace[0]]
 
-        for i, figure in enumerate(figures[1:], 1):
+        # Adjust first figure if necessary based on the second
+        first_fig = trace[0]
+        second_fig = trace[1]
+        first_start, first_end = first_fig.get_start_and_end_points()
+        second_start, second_end = second_fig.get_start_and_end_points()
 
-            cur_fig_start, cur_fig_end = figure.get_start_and_end_points()
-            prev_fig_start, prev_fig_end = figures[i - 1].get_start_and_end_points()
+        # If the *end* of the first doesnt connect to the *start* of the second, reverse it
+        if first_end != second_start and first_end != second_end:
+            if first_start == second_start or first_start == second_end:
+                first_fig.reverse_points()
 
-            # If the start of the current figure is not aligned with the end of the previous figure, reverse it
-            if cur_fig_start != prev_fig_end:
-                figure.reverse_points()
+        last_fig = first_fig
 
-            continuous_figures.append(figure)
+        for next_fig in trace[1:]:
+            next_start, next_end = next_fig.get_start_and_end_points()
+            last_end = last_fig.get_start_and_end_points()[1]
 
+            # Reverse next figure if needed
+            if last_end == next_end:
+                next_fig.reverse_points()
+                next_start, next_end = next_fig.get_start_and_end_points()
 
+            # If *still* not continuous start a new trace
+            if last_end != next_start:
+                continuous_traces.append(current_trace)
+                current_trace = [next_fig]
+            else:
+                current_trace.append(next_fig)
 
-        print("Ensured continuity of figures:")
-        for fig in continuous_figures:
-            print(f"{fig.name}: {fig.get_start_and_end_points()}")
+            last_fig = next_fig
 
+            # Append the last trace
+        if current_trace:
+            continuous_traces.append(current_trace)
 
-        return continuous_figures
+        return continuous_traces
 
     def _build_adjacency(self, figures: List[Figure]) -> Dict[Figure, List[Figure]]:
         """

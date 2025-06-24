@@ -9,7 +9,7 @@ class PolyLine(Figure):
     The points are connected in the order they are provided.
     """
 
-    def __init__(self, name: str, points: List[Point3D], lifting: float, velocity: int = 1000, float_precision: int = 4):
+    def __init__(self, name: str, points: List[Point3D], lifting: float, velocity: int = 1000, float_precision: int = 6):
 
         super().__init__(name, points, lifting, velocity, float_precision)
 

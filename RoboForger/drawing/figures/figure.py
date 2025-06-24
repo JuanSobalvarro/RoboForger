@@ -10,7 +10,7 @@ class Figure:
     A figure points always should start by the pre down (lifted) point, ... figure points, then the end point is the
     lifted point.
     """
-    def __init__(self, name: str, points: List[Point3D], lifting: float = 100,  velocity: int = 1000, float_precision: int = 4):
+    def __init__(self, name: str, points: List[Point3D], lifting: float = 100,  velocity: int = 1000, float_precision: int = 6):
 
         if not points or len(points) < 2:
             raise ValueError("A figure must have at least two points.")
@@ -63,6 +63,24 @@ class Figure:
         if not self._points:
             raise ValueError("The figure has no points.")
         return self._points[0], self._points[-1]
+
+    @property
+    def start_point(self) -> Point3D:
+        """
+        Returns the first point of the figure (the pre-down/lifted point).
+        """
+        if not self._points:
+            raise ValueError("The figure has no points.")
+        return self._points[0]
+
+    @property
+    def end_point(self) -> Point3D:
+        """
+        Returns the last point of the figure (the end lifted point).
+        """
+        if not self._points:
+            raise ValueError("The figure has no points.")
+        return self._points[-1]
 
     def reverse_points(self):
         """
