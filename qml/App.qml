@@ -14,6 +14,7 @@ ApplicationWindow {
 
     TRectangle {
         anchors.fill: parent
+        radius: 0
         color: ThemeManager.getColor("background")
 
         ColumnLayout {
