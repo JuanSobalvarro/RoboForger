@@ -2,7 +2,7 @@ from .figure import Figure
 from typing import List, Tuple, Union, Optional
 from RoboForger.types import Point3D
 from math import sqrt, atan2, pi, cos, sin, radians
-from RoboForger.utils import round_tuple, normalize_angle, normalize_angle_deg, vector_norm
+from RoboForger.utils import round_tuple, normalize_angle, normalize_angle_deg, vector_norm, distance_vectors
 
 
 class Arc(Figure):
@@ -14,7 +14,7 @@ class Arc(Figure):
     """
 
     def __init__(self, name: str, center: Optional[Point3D] = None, radius: float = 1, start_angle: float = 0, end_angle: float = 0,
-                 clockwise: bool = False, lifting: float = 100, velocity: int = 1000, float_precision: int = 6, arc_threshold: float = 0.1):
+                 clockwise: bool = False, lifting: float = 100, velocity: int = 1000, float_precision: int = 2):
         """
         Initialize an Arc object.
         :param name: Name of the arc.
@@ -39,7 +39,6 @@ class Arc(Figure):
         self.mid_angle = Arc.mid_angle_clock(self.start_angle, self.end_angle, clockwise)
         self.radius = radius
         self.clockwise = clockwise
-        self.arc_threshold = arc_threshold
 
         self.start, self.mid, self.end = Arc.arc_points(self.center, radius, self.start_angle, self.end_angle, clockwise)
 
@@ -125,19 +124,6 @@ class Arc(Figure):
         z = center[2]  # Assuming z-coordinate remains the same
         return x, y, z
 
-
-    def arc_too_small(self, start: Point3D, mid: Point3D, end: Point3D) -> int:
-        """
-        Returns -1 if the arc is too small start to mid, 1 if too small mid to end, and 0 if both segments are ok.
-        """
-        distance_start_mid = vector_norm((mid[0] - start[0], mid[1] - start[1], mid[2] - start[2]))
-        distance_mid_end = vector_norm((end[0] - mid[0], end[1] - mid[1], end[2] - mid[2]))
-
-        if distance_start_mid < self.arc_threshold:
-            return -1
-        elif distance_mid_end < self.arc_threshold:
-            return 1
-
     def move_instructions(self, tool_name: str = "tool0", global_velocity: int = 1000) -> List[
         str]:
         """
@@ -196,20 +182,24 @@ class Arc(Figure):
         # Move to start point (down)
         instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[1])}, v{global_velocity}, fine, {tool_name};\n")
 
-        # Move first arc segment
-        if self.arc_too_small(points[1], points[2], points[3]) != 0:
-            instructions.append(f"        !arc_too_small\n")
+        # if arcpoints are too close then do a MoveL instead of a MoveC
+        if distance_vectors(points[2], points[3]) < 0.5:
             instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[2])}, v{self.velocity}, fine, {tool_name};\n")
             instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[3])}, v{self.velocity}, fine, {tool_name};\n")
+
         else:
+            # Move first arc segment
             instructions.append(f"        MoveC Offs {Figure.offset_coord(origin_robtarget_name, origin, points[2])}, Offs {Figure.offset_coord(origin_robtarget_name, origin, points[3])}, v{self.velocity}, fine, {tool_name};\n")
 
         # If sweep is greater than 180 (pi radians) we need to draw a second segment
         if Arc.arc_angle(self.start_angle, self.end_angle, self.clockwise) >= pi:
-            if self.arc_too_small(points[3], points[4], points[5]) != 0:
-                instructions.append(f"        !arc_too_small\n")
-                instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[4])}, v{self.velocity}, fine, {tool_name};\n")
-                instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[5])}, v{self.velocity}, fine, {tool_name};\n")
+
+            # if arcpoints are too close then do a MoveL instead of a MoveC
+            if distance_vectors(points[4], points[5]) < 0.5:
+                instructions.append(
+                    f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[4])}, v{self.velocity}, fine, {tool_name};\n")
+                instructions.append(
+                    f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[5])}, v{self.velocity}, fine, {tool_name};\n")
             else:
                 instructions.append(f"        MoveC Offs {Figure.offset_coord(origin_robtarget_name, origin, points[4])}, Offs {Figure.offset_coord(origin_robtarget_name, origin, points[5])}, v{self.velocity}, fine, {tool_name};\n")
 
@@ -222,6 +212,7 @@ class Arc(Figure):
         return instructions
 
     def __str__(self):
-        name = f"Arc<name={self.name}>"
-        mid = f", mid=({self.mid[0]}, {self.mid[1]}, {self.mid[2]})" if self.mid else ""
-        return f"{name}, start={self.start}{mid}, end={self.end}, radius={self.radius}, clockwise={self.clockwise}>"
+        return f"Arc<name={self.name} start_point={self.start_point} end_point={self.end_point}>"
+
+    def __repr__(self):
+        return f"Arc<name={self.name} start_point={self.start_point} end_point={self.end_point}>"

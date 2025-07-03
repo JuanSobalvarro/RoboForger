@@ -42,13 +42,13 @@ def normalize_coordinates(
     return normalized
 
 
-def export_str2txt(s: str, filename: str) -> None:
+def export_str2txt(s: str, filepath: str) -> None:
     # If filename exists, it will be overwritten.
-    if not filename.endswith('.txt'):
-        filename += '.txt'
-    with open(filename, "w") as file:
+    if not filepath.endswith('.txt'):
+        filepath += '.txt'
+    with open(filepath, "w") as file:
         file.write(s)
-    print(f"Exported to {filename} successfully.")
+    print(f"Exported to {filepath} successfully.")
 
 def round_tuple(t: tuple, precision: int = 2) -> tuple:
     """
@@ -100,3 +100,16 @@ def vector_norm(vector: tuple[float, float, float]) -> float:
         float: The magnitude of the vector.
     """
     return sum(coord ** 2 for coord in vector) ** 0.5
+
+def distance_vectors(vector1: tuple[float, float, float], vector2: tuple[float, float, float]) -> float:
+    """
+    Calculate the Euclidean distance between two 3D vectors.
+
+    Args:
+        vector1 (tuple[float, float, float]): The first vector.
+        vector2 (tuple[float, float, float]): The second vector.
+
+    Returns:
+        float: The distance between the two vectors.
+    """
+    return vector_norm(tuple(v1 - v2 for v1, v2 in zip(vector1, vector2)))

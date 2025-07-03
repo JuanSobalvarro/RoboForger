@@ -73,13 +73,13 @@ class Draw:
 
     def _generate_targets_and_moves_offset(self) -> List[str]:
 
-        figures = []
+        figures = self.figures
 
         if self.use_detector:
             detector = Detector(self.figures)
             figures = detector.detect_and_simplify()
-        else:
-            figures = self.figures
+
+        # print(f"Checking type {type(figures)}")
 
         self.instructions.clear()
         self.rob_targets.clear()

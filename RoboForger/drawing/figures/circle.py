@@ -1,7 +1,7 @@
 from .figure import Figure
 from RoboForger.types import Point3D
 from typing import List
-from RoboForger.utils import vector_norm
+from RoboForger.utils import distance_vectors
 
 
 class Circle(Figure):
@@ -9,10 +9,9 @@ class Circle(Figure):
     A circle is a fusion of two arcs, one for the upper half and one for the lower half.
     """
 
-    def __init__(self, name: str, center: Point3D, radius, lifting: float, velocity: int = 100, float_precision: int = 6, arc_threshold: float = 0.1):
+    def __init__(self, name: str, center: Point3D, radius, lifting: float, velocity: int = 100, float_precision: int = 2):
         self.center = center
         self.radius = radius
-        self.arc_threshold = arc_threshold
         # Round the center point to 4 decimal places
         center = tuple(round(coord, 4) for coord in center)
         super().__init__(name, [
@@ -22,18 +21,6 @@ class Circle(Figure):
             (center[0], center[1] - radius, center[2]),  # Midpoint (bottom)
             (center[0] - radius, center[1], center[2])  # End point (back to start)
         ], lifting, velocity, float_precision)
-
-    def arc_too_small(self, start: Point3D, mid: Point3D, end: Point3D) -> int:
-        """
-        Returns -1 if the arc is too small start to mid, 1 if too small mid to end, and 0 if both segments are ok.
-        """
-        distance_start_mid = vector_norm((mid[0] - start[0], mid[1] - start[1], mid[2] - start[2]))
-        distance_mid_end = vector_norm((end[0] - mid[0], end[1] - mid[1], end[2] - mid[2]))
-
-        if distance_start_mid < self.arc_threshold:
-            return -1
-        elif distance_mid_end < self.arc_threshold:
-            return 1
 
     def move_instructions(self, tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
         instructions = []
@@ -86,21 +73,20 @@ class Circle(Figure):
         # Move to start point (down)
         instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[1])}, v{global_velocity}, fine, {tool_name};\n")
 
-
-        # Create the upper half arc movement
-        if self.arc_too_small(points[0], points[1], points[2]) != 0:
-            instructions.append(f"        !arc_too_small\n")
+        if distance_vectors(points[2], points[3]) < 0.5:
+            # If the upper and lower points are too close, we can skip the arc movement
             instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[2])}, v{self.velocity}, fine, {tool_name};\n")
-            instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[3])}, v{self.velocity}, fine, {tool_name};\n")
+            instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[4])}, v{self.velocity}, fine, {tool_name};\n")
         else:
+            # Create the upper half arc movement
             instructions.append(f"        MoveC Offs {Figure.offset_coord(origin_robtarget_name, origin, points[2])}, Offs {Figure.offset_coord(origin_robtarget_name, origin, points[3])}, v{self.velocity}, fine, {tool_name};\n")
 
-        # Create the lower half arc movement
-        if self.arc_too_small(points[2], points[3], points[4]) != 0:
-            instructions.append(f"        !arc_too_small\n")
+        if distance_vectors(points[4], points[5]) < 0.5:
+            # If the lower points are too close, we can skip the arc movement
             instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[4])}, v{self.velocity}, fine, {tool_name};\n")
             instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[5])}, v{self.velocity}, fine, {tool_name};\n")
         else:
+            # Create the lower half arc movement
             instructions.append(f"        MoveC Offs {Figure.offset_coord(origin_robtarget_name, origin, points[4])}, Offs {Figure.offset_coord(origin_robtarget_name, origin, points[5])}, v{self.velocity}, fine, {tool_name};\n")
 
         # Move to end point (lifted position)
