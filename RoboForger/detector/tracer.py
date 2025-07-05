@@ -2,6 +2,8 @@ from RoboForger.drawing.figures import Figure
 from typing import Dict, List, Tuple, Any, Set
 from RoboForger.types import Point3D
 
+import time
+
 
 class Tracer:
     """
@@ -15,7 +17,12 @@ class Tracer:
         self.graph = self.create_graph_from_figures(figures)
         # print(f"Graph adjacency list: {self.graph}")
 
+        # Benchmark printing
+        print(f"Initial time saved:")
+        init_time = time.time()
         self.vtx_traces = self.find_traces(self.graph)
+        end_time = time.time()
+        print(f"Found {len(self.vtx_traces)} traces for {len(figures)} figures in {(end_time - init_time) * 1000} milliseconds")
 
         amount_figures = 0
         for vtx_trace in self.vtx_traces:
@@ -51,7 +58,9 @@ class Tracer:
         """
         longest_trace: List[Point3D] = [vtx]
 
-        path: List[Tuple[Point3D, List[Point3D]]] = [(vtx, [n for n in graph[vtx] if n not in globally_visited])]
+        first_adj = [adj for adj in graph[vtx] if adj not in globally_visited]
+        first_adj = sorted(first_adj , key=lambda x: len(graph[x]))
+        path: List[Tuple[Point3D, List[Point3D]]] = [(vtx, first_adj)]
 
         while path:
             if len(path) > len(longest_trace):
@@ -61,8 +70,11 @@ class Tracer:
                 path.pop()
                 continue
 
+            # Pop the first node since it is sorted to be the one with the least connections heuristic approach?
             next_node = path[-1][1].pop()
-            next_adj = [adj for adj in graph[next_node] if adj not in globally_visited and adj not in [x[0] for x in path]]
+            nodes_in_path = [x[0] for x in path]
+            next_adj = [adj for adj in graph[next_node] if adj not in globally_visited and adj not in nodes_in_path]
+            next_adj = sorted(next_adj, key=lambda x: len(graph[x]))
 
             next_step = (next_node, next_adj)
 
@@ -142,5 +154,6 @@ class Tracer:
 
             if not in_trace:
                 figure_traces.append([fig])
+                print(f"Figure {fig.name} not in traces, appending it as a single figure trace.")
 
         return figure_traces

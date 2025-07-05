@@ -40,7 +40,7 @@ class Figure:
         if len(point) != 3:
             raise ValueError("Point must be a tuple of three float values (x, y, z).")
 
-        if not isinstance(precision, int) or precision <= 0:
+        if not isinstance(precision, int) or precision < 0:
             raise ValueError("Precision must be a positive integer.")
 
         return tuple(round(coord, precision) for coord in point)

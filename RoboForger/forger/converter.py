@@ -21,14 +21,14 @@ class Converter:
         for i, (start, end) in enumerate(lines):
             # Each line is a PolyLine with two points
             robo_coords = [real_coord2robo_coord(start), real_coord2robo_coord(end)]
-            pl = PolyLine(f"Line{i}", robo_coords, lifting=100, velocity=1000)
+            pl = PolyLine(f"Line{i}", robo_coords, lifting=100, velocity=1000, float_precision=self.float_precision)
             polylines.append(pl)
         return polylines
 
     def convert_circles(self, circles: List[tuple]) -> List[Circle]:
         circle_figs = []
         for i, (center, radius) in enumerate(circles):
-            c = Circle(f"Circle{i}", real_coord2robo_coord(center), radius, lifting=100)
+            c = Circle(f"Circle{i}", real_coord2robo_coord(center), radius, lifting=100, float_precision=self.float_precision)
             circle_figs.append(c)
         return circle_figs
 
@@ -47,6 +47,7 @@ class Converter:
                                          start_angle=start_angle,
                                          end_angle=end_angle,
                                          clockwise=arc["clockwise"],
-                                         lifting=100))
+                                         lifting=100,
+                                         float_precision=self.float_precision))
 
         return arc_figs
