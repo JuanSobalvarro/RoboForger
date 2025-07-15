@@ -1,8 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
-import QtQuick.Controls.Material
 import QtQuick.Effects
+import TElements
 import Utils
 
 Item {
@@ -10,7 +9,7 @@ Item {
     height: 48
 
     // This rectangle will be the visual main component with border and color
-    Rectangle {
+    TRectangle {
         id: themeSwitch
         width: parent.width
         height: parent.height
@@ -25,48 +24,44 @@ Item {
             spacing: 4
 
             // Light theme button
-            Button {
+            TButton {
                 id: lightButton
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                background: Rectangle {
-                    radius: themeSwitch.radius
-                    color: ThemeManager.isLight() ? ThemeManager.getColor("primary") : "transparent"
-                    Behavior on color { ColorAnimation { duration: 200 } }
-                }
+                background.color: ThemeManager.isLight() ? ThemeManager.getColor("primary") : "transparent"
+                background.radius: themeSwitch.radius
+                // background: Rectangle {
+                //     radius: themeSwitch.radius
+                //     color: ThemeManager.isLight() ? ThemeManager.getColor("primary") : "transparent"
+                //     Behavior on color { ColorAnimation { duration: 200 } }
+                // }
 
-                icon.source: Assets.asset("icons/sun.svg")
-                icon.width: 24
-                icon.height: 24
-                icon.color: ThemeManager.isLight() ? "#ffffff" : ThemeManager.getColor("text")
+                iconSource: "qrc:/assets/icons/sun.svg"
+                // icon.width: 24
+                // icon.height: 24
+                iconColor: ThemeManager.isLight() ? "#ffffff" : ThemeManager.getColor("text")
                 onClicked: ThemeManager.setLight()
             }
 
             // Dark theme button
-            Button {
+            TButton {
                 id: darkButton
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                background: Rectangle {
-                    radius: themeSwitch.radius
-                    color: !ThemeManager.isLight() ? ThemeManager.getColor("primary") : "transparent"
-                    Behavior on color { ColorAnimation { duration: 200 } }
-                }
+                background.color: !ThemeManager.isLight() ? ThemeManager.getColor("primary") : "transparent"
+                background.radius: themeSwitch.radius
+                // background: Rectangle {
+                //     radius: themeSwitch.radius
+                //     color: !ThemeManager.isLight() ? ThemeManager.getColor("primary") : "transparent"
+                //     Behavior on color { ColorAnimation { duration: 200 } }
+                // }
 
-                icon.source: Assets.asset("icons/moon.svg")
-                icon.width: 24
-                icon.height: 24
-                icon.color: !ThemeManager.isLight() ? "#ffffff" : ThemeManager.getColor("text")
+                iconSource: "qrc:/assets/icons/moon.svg"
+                // icon.width: 24
+                // icon.height: 24
+                iconColor: !ThemeManager.isLight() ? "#ffffff" : ThemeManager.getColor("text")
                 onClicked: ThemeManager.setDark()
             }
-        }
-
-        Behavior on color {
-            ColorAnimation { duration: 300 }
-        }
-
-        Behavior on border.color {
-            ColorAnimation { duration: 300 }
         }
     }
 

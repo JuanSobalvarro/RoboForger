@@ -3,11 +3,8 @@ Detector is a module that given some figures, it simplifies the points of those 
 And giving a list of figures in an order that the draw can follow, so when drawing the design we ensure that any figure that is
 continuous is drawn in one go, without lifting the tool.
 """
-from collections import defaultdict
 from typing import List, Dict, Any, Tuple
 from RoboForger.drawing.figures import Figure
-from .enums import ConnectionType
-from .traces import is_figure_connected, print_graph, create_graph_from_figures, find_traces
 from RoboForger.detector.tracer import Tracer
 
 

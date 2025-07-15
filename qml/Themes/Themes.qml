@@ -20,14 +20,39 @@ QtObject {
         "dark": "#1e1e1e"
     })
 
+    property var background1: ({
+        "light": "#f0f0f0",
+        "dark": "#2d2d30"
+    })
+
     property var input_background: ({
         "light": "#f0f0f0",
         "dark": "#2d2d30"
     })
 
+    property var input_background_sel: ({
+        "light": "#e0e0e0",
+        "dark": "#333333"
+    })
+
+    property var input_placeholder: ({
+        "light": "#888888",
+        "dark": "#aaaaaa"
+    })
+
     property var input_border: ({
         "light": "#cccccc",
         "dark": "#555555"
+    })
+
+    property var input_disabled: ({
+        "light": "#e0e0e0",
+        "dark": "#2d2d30"
+    })
+
+    property var input_border_disabled: ({
+        "light": "#aaaaaa",
+        "dark": "#444444"
     })
 
     property var background_sel: ({
@@ -89,4 +114,11 @@ QtObject {
         "light": "#333333",
         "dark": "#aaaaaa"
     }
+
+    property var checkbox_fill: {
+        "light": primary.light,
+        "dark": primary.dark
+    }
+
+    property var checkbox_border: text
 }

@@ -1,2 +1,2 @@
 module Utils
-singleton Assets Assets.qml
+singleton Scaler Scaler.qml

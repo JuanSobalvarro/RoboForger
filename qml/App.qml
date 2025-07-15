@@ -3,7 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Themes
 import Utils
-import TComponents
+import TElements
+import Sections
 
 ApplicationWindow {
     id: appWindow
@@ -16,98 +17,75 @@ ApplicationWindow {
         anchors.fill: parent
         radius: 0
         color: ThemeManager.getColor("background")
+        // color: "red"
 
-        ColumnLayout {
+        GridLayout {
+            id: grid
             anchors.fill: parent
-            spacing: 8
+            anchors.leftMargin: 20
+            anchors.rightMargin: 20
+            columns: 3
+            rows: 3
 
-            // App Header
-            RowLayout {
+
+            Description {
+                Layout.columnSpan: 1
+                Layout.rowSpan: 1
+                Layout.column: 0
+                Layout.row: 0
                 Layout.fillWidth: true
-                spacing: 8
-
-                Text {
-                    text: "RoboForger"
-                    font.pixelSize: 24
-                    color: ThemeManager.getColor("primary")
-                    font.bold: true
-                }
-
-                Item { Layout.fillWidth: true }
+                Layout.fillHeight: true
+                width: parent.width / 4
             }
 
-            // File Buttons + Animation Row
-            RowLayout {
+            Parameters {
+                Layout.columnSpan: 1
+                Layout.rowSpan: 2
+                Layout.column: 0
+                Layout.row: 1
                 Layout.fillWidth: true
-                Layout.preferredHeight: 80
-                spacing: 24
-                anchors.margins: 8
-
-                TButton {
-                    text: "➕  Add DXF File"
-                    Layout.preferredWidth: 180
-                    onClicked: {} // connect later
-                }
-
-                Item { Layout.fillWidth: true }
-
-                // TLoader {
-                //     running: true // bind this to processing property later
-                //     size: 48
-                // }
-
-                Item { Layout.fillWidth: true }
-
-                TButton {
-                    bg_color: ThemeManager.getColor("selection_1")
-                    border_color: ThemeManager.getColor("error")
-                    button_text: "Save Rapid Code"
-                    text_color: ThemeManager.getColor("text")
-                    radius: 10
-                    Layout.preferredWidth: 180
-                    onClicked: {} // connect later
-                }
+                Layout.fillHeight: true
+                Layout.bottomMargin: 20
             }
 
-            // Feedback Section
-            TRectangle {
+            Process {
+                height: parent.height / 2
+                width: parent.width / 3
+                Layout.column: 1
+                Layout.row: 0
+                Layout.columnSpan: 2
+                Layout.rowSpan: 1
                 Layout.fillWidth: true
-                Layout.preferredHeight: 80
-                color: ThemeManager.getColor("sidebar_background")
-                radius: 8
-                border.color: ThemeManager.getColor("sidebar_border")
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: 8
-                    spacing: 16
-
-                    Text {
-                        text: `Figures found: ${feedback.figuresFound}`
-                        color: ThemeManager.getColor("text")
-                    }
-                    Text {
-                        text: `Lines: ${feedback.linesFound}`
-                        color: ThemeManager.getColor("text")
-                    }
-                    Text {
-                        text: `Arcs: ${feedback.arcsFound}`
-                        color: ThemeManager.getColor("text")
-                    }
-                }
+                Layout.fillHeight: true
             }
 
-            // Console Area
-            // ConsoleOutput {
-            //     Layout.fillWidth: true
-            //     Layout.fillHeight: true
-            //     border.color: ThemeManager.getColor("popup_border")
-            // }
+            Preview {
+                id: preview
+                Layout.column: 1
+                Layout.row: 1
+                Layout.columnSpan: 1
+                Layout.rowSpan: 2
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                width: parent.width / 3
+                height: parent.height / 2
+            }
+
+            Feedback {
+                Layout.columnSpan: 1
+                Layout.rowSpan: 1
+                Layout.column: 2
+                Layout.row: 1
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                width: parent.width / 3
+                height: parent.height / 2
+            }
         }
+
         ThemeSwitch {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
         }
     }
 }
-

@@ -8,11 +8,14 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuickControls2 import QQuickStyle
 
+# Importa tu ViewModel
+from viewmodels.app_vm import AppViewModel # Ajusta la ruta si tu viewmodel está en otra carpeta
+
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
+import resources_rc
 
 def run_gui_app():
-    os.environ["QT_QUICK_CONTROLS_CONF"] = "qtquickcontrols2.conf"
 
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(os.path.join(ASSETS_DIR, 'img', 'icon.png')))
@@ -21,6 +24,11 @@ def run_gui_app():
 
     engine = QQmlApplicationEngine()
     engine.addImportPath('qml')
+    engine.addImportPath('qml/viewmodels') # Asegúrate de que QML pueda encontrar tu ViewModel
+
+    # Crea una instancia de tu ViewModel y la expone a QML
+    app_view_model = AppViewModel()
+    engine.rootContext().setContextProperty("appViewModel", app_view_model)
 
     logging.info("ViewModels Loaded Successfully")
 

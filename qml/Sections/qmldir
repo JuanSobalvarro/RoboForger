@@ -1,0 +1,6 @@
+module Sections
+Description Description.qml
+Feedback Feedback.qml
+Parameters Parameters.qml
+Preview Preview.qml
+Process Process.qml

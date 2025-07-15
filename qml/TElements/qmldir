@@ -1,0 +1,8 @@
+module TElements
+TRectangle TRectangle.qml
+TButton TButton.qml
+TText TText.qml
+TLoader TLoader.qml
+TSeparator TSeparator.qml
+TInputField TInputField.qml
+TCheckBox TCheckBox.qml
