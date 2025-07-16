@@ -56,7 +56,7 @@ Item {
 
             TText {
                 text: descriptionItem.description
-                font.pixelSize: Scaler.font5
+                font.pixelSize: Scaler.font6
                 color: ThemeManager.getColor("text")
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true

@@ -166,7 +166,7 @@ Item {
                     TCheckBox {
                         text: "Use AI trace detection"
                         checked: false
-                        font.pixelSize: Scaler.fontCheckbox
+                        font.pixelSize: Scaler.font6
                         Layout.leftMargin: Scaler.margin2
                         Layout.rightMargin: Scaler.margin2
                         indicatorSize: Scaler.checkboxIndicatorSize2
@@ -176,7 +176,7 @@ Item {
                     TCheckBox {
                         text: "Use Offset programming"
                         checked: false
-                        font.pixelSize: Scaler.fontCheckbox
+                        font.pixelSize: Scaler.font6
                         Layout.leftMargin: Scaler.margin2
                         Layout.rightMargin: Scaler.margin2
                         indicatorSize: Scaler.checkboxIndicatorSize2
