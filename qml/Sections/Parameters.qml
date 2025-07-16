@@ -1,8 +1,6 @@
 // Components/Parameters.qml
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Controls.FluentWinUI3
-// import QtQuick.Controls.Material
 import QtQuick.Layouts
 
 import Themes
@@ -13,11 +11,8 @@ import Components
 Item {
     id: parametersItem
 
-    Component.onCompleted: {
-        Scaler.baseUnit = parametersItem.width / 500
-    }
-
     TRectangle {
+        id: backgroundRect
         anchors.fill: parent
         color: ThemeManager.getColor("background")
 
@@ -25,25 +20,18 @@ Item {
             id: lcol
             anchors.fill: parent
 
-            // TRectangle {
-            //     anchors.fill: parent
-            //     color: "red"
-            //     radius: 0
-            // }
-
             // --- Title ---
             TRectangle {
                 color: ThemeManager.getColor("background1")
-                radius: 8
+                // radius: 8
 
                 Layout.fillWidth: true
-                Layout.preferredHeight: Scaler.fontMainTitle * 1.5 + Scaler.gridSpacing * 2
-                Layout.alignment: Qt.AlignTop
+                Layout.preferredHeight: Scaler.font3 * 2
 
                 TText {
                     anchors.centerIn: parent
                     text: "Parameters Configuration"
-                    font.pixelSize: Scaler.fontMainTitle
+                    font.pixelSize: Scaler.font3
                     font.bold: true
                     color: ThemeManager.getColor("text")
                     horizontalAlignment: Text.AlignHCenter
@@ -55,10 +43,11 @@ Item {
             // --- Parser Section ---
             TRectangle {
                 Layout.fillWidth: true
+                Layout.leftMargin: Scaler.margin2
+                Layout.rightMargin: Scaler.margin2
                 Layout.preferredHeight: parserGrid.implicitHeight
-                Layout.alignment: Qt.AlignTop
+                // Layout.alignment: Qt.AlignTop
                 color: ThemeManager.getColor("background")
-                radius: 8
 
                 ColumnLayout {
                     id: parserGrid
@@ -66,9 +55,9 @@ Item {
 
                     TText {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: Scaler.fontSubTitle * 1
+                        Layout.preferredHeight: Scaler.font4 * 1
                         text: "Parser"
-                        font.pixelSize: Scaler.fontSubTitle
+                        font.pixelSize: Scaler.font4
                         font.bold: true
                         color: ThemeManager.getColor("text")
                     }
@@ -77,15 +66,16 @@ Item {
                         Layout.fillWidth: true
                         label: "Scale Factor"
                         placeholder: "Scale (1.0)"
+                        Layout.leftMargin: Scaler.margin1
+                        Layout.rightMargin: Scaler.margin1
                     }
                 }
             }
 
             TSeparator {
-                Layout.alignment: Qt.AlignTop
                 Layout.fillWidth: true
-                Layout.leftMargin: Scaler.gridSpacing
-                Layout.rightMargin: Scaler.gridSpacing
+                Layout.leftMargin: Scaler.margin2
+                Layout.rightMargin: Scaler.margin2
                 thickness: 1
                 color: ThemeManager.getColor("background_sel")
             }
@@ -93,9 +83,10 @@ Item {
             // --- Converter Section ---
             TRectangle {
                 Layout.fillWidth: true
+                Layout.leftMargin: Scaler.margin2
+                Layout.rightMargin: Scaler.margin2
                 Layout.preferredHeight: converterGrid.implicitHeight
                 color: ThemeManager.getColor("background")
-                radius: 8
 
                 ColumnLayout {
                     id: converterGrid
@@ -104,33 +95,40 @@ Item {
                     TText {
                         Layout.fillWidth: true
                         text: "Converter"
-                        font.pixelSize: Scaler.fontSubTitle
+                        font.pixelSize: Scaler.font4
                         font.bold: true
                         color: ThemeManager.getColor("text")
-                        // Layout.bottomMargin: Scaler.gridSpacing
                     }
                     LabeledInput {
                         Layout.fillWidth: true
                         label: "Float Precision"
                         placeholder: "Precision (2)"
+                        Layout.leftMargin: Scaler.margin1
+                        Layout.rightMargin: Scaler.margin1
                     }
 
                     LabeledInput {
                         Layout.fillWidth: true
                         label: "Polyline Velocity"
                         placeholder: "Velocity (1000)"
+                        Layout.leftMargin: Scaler.margin1
+                        Layout.rightMargin: Scaler.margin1
                     }
 
                     LabeledInput {
                         Layout.fillWidth: true
                         label: "Arc Velocity"
                         placeholder: "Velocity (1000)"
+                        Layout.leftMargin: Scaler.margin1
+                        Layout.rightMargin: Scaler.margin1
                     }
 
                     LabeledInput {
                         Layout.fillWidth: true
                         label: "Circle Velocity"
                         placeholder: "Velocity (1000)"
+                        Layout.leftMargin: Scaler.margin1
+                        Layout.rightMargin: Scaler.margin1
                     }
                 }
             }
@@ -138,26 +136,28 @@ Item {
             TSeparator {
                 Layout.fillWidth: true
                 thickness: 1
-                Layout.leftMargin: Scaler.gridSpacing
-                Layout.rightMargin: Scaler.gridSpacing
+                Layout.leftMargin: Scaler.margin2
+                Layout.rightMargin: Scaler.margin2
                 color: ThemeManager.getColor("background_sel")
             }
 
-            // Drawing y rapid
+            // Drawing and rapid section
             TRectangle {
                 Layout.fillWidth: true
+                Layout.leftMargin: Scaler.margin2
+                Layout.rightMargin: Scaler.margin2
                 Layout.preferredHeight: checkboxGrid.implicitHeight
                 color: ThemeManager.getColor("background")
-                radius: 8
 
                 ColumnLayout {
                     id: checkboxGrid
                     anchors.fill: parent
+                    spacing: 5
 
                     TText {
                         Layout.fillWidth: true
                         text: "Drawing and Rapid"
-                        font.pixelSize: Scaler.fontSubTitle
+                        font.pixelSize: Scaler.font4
                         font.bold: true
                         color: ThemeManager.getColor("text")
                         Layout.bottomMargin: Scaler.gridSpacing
@@ -167,12 +167,20 @@ Item {
                         text: "Use AI trace detection"
                         checked: false
                         font.pixelSize: Scaler.fontCheckbox
+                        Layout.leftMargin: Scaler.margin2
+                        Layout.rightMargin: Scaler.margin2
+                        indicatorSize: Scaler.checkboxIndicatorSize2
+                        spacing: Scaler.spacing2
                     }
 
                     TCheckBox {
                         text: "Use Offset programming"
                         checked: false
                         font.pixelSize: Scaler.fontCheckbox
+                        Layout.leftMargin: Scaler.margin2
+                        Layout.rightMargin: Scaler.margin2
+                        indicatorSize: Scaler.checkboxIndicatorSize2
+                        spacing: Scaler.spacing2
                     }
                 }
             }

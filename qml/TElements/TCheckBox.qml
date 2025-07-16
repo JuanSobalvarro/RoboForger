@@ -13,15 +13,19 @@ T.CheckBox {
                              implicitContentHeight + topPadding + bottomPadding,
                              implicitIndicatorHeight + topPadding + bottomPadding)
 
-    spacing: 8
-    padding: 8
-    verticalPadding: padding + 7
+    spacing: 10
+
+    property alias radius: indicator.radius
+    property int indicatorSize: 24
 
     indicator: TCheckIndicator {
+        id: indicator
         x: control.text ? (control.mirrored ? control.width - width - control.rightPadding : control.leftPadding) : control.leftPadding + (control.availableWidth - width) / 2
         y: control.topPadding + (control.availableHeight - height) / 2
         control: control
-
+        radius: 5
+        implicitWidth: control.indicatorSize
+        implicitHeight: control.indicatorSize
         // Can add ripple (wave) here
     }
 

@@ -1,8 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
-// import QtQuick.Controls.Material
-import QtQuick.Controls.FluentWinUI3
 import Themes
 import Utils
 import TElements
@@ -13,26 +10,34 @@ Item {
     property alias text: input.text
     property alias inputField: input
 
-    implicitHeight: Scaler.inputHeight + Scaler.gridSpacing
+    property int spacing: Scaler.spacing3
+
+    implicitHeight: rootLayout.implicitHeight
+    implicitWidth: rootLayout.implicitWidth
 
     RowLayout {
+        id: rootLayout
         anchors.fill: parent
-        spacing: Scaler.gridSpacing
+        spacing: spacing
 
         TText {
-            Layout.fillWidth: true
+            // Layout.fillWidth: true
             text: label
-            font.pixelSize: Scaler.fontLabel
+            font.pixelSize: Scaler.font6
             color: ThemeManager.getColor("text")
             verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignLeft
         }
 
         TInputField {
             id: input
-            Layout.preferredWidth: parent.width * 0.7
-            Layout.preferredHeight: Scaler.inputHeight
+            // Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.minimumHeight: Scaler.scale(30)
+            Layout.minimumWidth: Scaler.minInputWidth
+            Layout.alignment: Qt.AlignRight
             placeholderText: placeholder
-            font.pixelSize: Scaler.fontInput
+            font.pixelSize: Scaler.font8
             color: ThemeManager.getColor("text")
         }
     }

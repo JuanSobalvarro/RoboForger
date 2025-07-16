@@ -32,7 +32,6 @@ Rectangle {
         }
     }
 
-    // TODO: This needs to be transparent
     MonoColorSVG {
         anchors.fill: parent
         anchors.margins: 2
