@@ -115,6 +115,11 @@ QtObject {
         "dark": "#ff0000"
     }
 
+    property var error_2: {
+        "light": "#ffcccc",
+        "dark": "#330000"
+    }
+
     property var popup: {
         "light": "#ffffff",
         "dark": "#1e1e1e"

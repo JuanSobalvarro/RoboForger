@@ -18,6 +18,7 @@ QtObject {
     readonly property real font6: scale(14) // Smaller texts
     readonly property real font7: scale(12) // Tiny texts
     readonly property real font8: scale(10) // Extra small texts
+    readonly property real font9: scale(8)  // Micro texts
 
     // Grid Spacing
     readonly property real spacing1: scale(16) // Main spacing
@@ -55,6 +56,8 @@ QtObject {
     readonly property real iconSize3: scale(24)
     readonly property real iconSize4: scale(20) // Standard icon size
     readonly property real iconSize5: scale(16)
+    readonly property real iconSize6: scale(12) // Small icon size
+    readonly property real iconSize7: scale(8)  // Extra small icon size
     readonly property real buttonHeight: scale(40) // Standard button height
     readonly property real buttonBorderWidth: scale(1) // Standard button width
 
