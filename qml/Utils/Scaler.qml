@@ -48,4 +48,17 @@ QtObject {
     readonly property real checkboxIndicatorSize1: scale(24)
     readonly property real checkboxIndicatorSize2: scale(20)
     readonly property real checkboxIndicatorSize3: scale(16)
+
+    // Button sizes
+    readonly property real iconSize1: scale(48)
+    readonly property real iconSize2: scale(36)
+    readonly property real iconSize3: scale(24)
+    readonly property real iconSize4: scale(20) // Standard icon size
+    readonly property real iconSize5: scale(16)
+    readonly property real buttonHeight: scale(40) // Standard button height
+    readonly property real buttonBorderWidth: scale(1) // Standard button width
+
+    // Loader Size
+    readonly property real loaderSize: scale(48) // Standard loader size
+    readonly property real loaderIconSize: scale(36) // Standard loader icon size
 }

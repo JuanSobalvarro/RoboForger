@@ -3,21 +3,21 @@ import Qt5Compat.GraphicalEffects
 
 Item {
     id: svgItem
-    anchors.fill: parent
 
     property string color: "#00000000"
+    property bool mipmap: true
+    property bool smooth: true
+
     property alias source: svgImage.source
 
     Image {
         id: svgImage
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        source: "qrc:/assets/utils/monkey.svg"
+        anchors.fill: parent
         fillMode: Image.PreserveAspectFit
-        mipmap: true
-        smooth: true
+        source: "qrc:/assets/utils/monkey.svg"
+        mipmap: svgItem.mipmap
+        smooth: svgItem.smooth
         visible: false
-
     }
 
     ColorOverlay {

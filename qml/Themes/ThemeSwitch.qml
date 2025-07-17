@@ -28,18 +28,16 @@ Item {
                 id: lightButton
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                background.color: ThemeManager.isLight() ? ThemeManager.getColor("primary") : "transparent"
-                background.radius: themeSwitch.radius
-                // background: Rectangle {
-                //     radius: themeSwitch.radius
-                //     color: ThemeManager.isLight() ? ThemeManager.getColor("primary") : "transparent"
-                //     Behavior on color { ColorAnimation { duration: 200 } }
-                // }
+                backgroundColor: ThemeManager.isLight() ? ThemeManager.getColor("primary") : "transparent"
+                cornerRadius: themeSwitch.radius
+                borderWidth: 0
+                hoverColor: ThemeManager.getColor("selection_1")
+                pressedColor: ThemeManager.getColor("selection_2")
 
                 iconSource: "qrc:/assets/icons/sun.svg"
-                // icon.width: 24
-                // icon.height: 24
                 iconColor: ThemeManager.isLight() ? "#ffffff" : ThemeManager.getColor("text")
+                iconWidth: Scaler.iconSize3
+                iconHeight: Scaler.iconSize3
                 onClicked: ThemeManager.setLight()
             }
 
@@ -48,18 +46,16 @@ Item {
                 id: darkButton
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                background.color: !ThemeManager.isLight() ? ThemeManager.getColor("primary") : "transparent"
-                background.radius: themeSwitch.radius
-                // background: Rectangle {
-                //     radius: themeSwitch.radius
-                //     color: !ThemeManager.isLight() ? ThemeManager.getColor("primary") : "transparent"
-                //     Behavior on color { ColorAnimation { duration: 200 } }
-                // }
+                backgroundColor: !ThemeManager.isLight() ? ThemeManager.getColor("primary") : "transparent"
+                cornerRadius: themeSwitch.radius
+                borderWidth: 0
+                hoverColor: ThemeManager.getColor("selection_1")
+                pressedColor: ThemeManager.getColor("selection_2")
 
                 iconSource: "qrc:/assets/icons/moon.svg"
-                // icon.width: 24
-                // icon.height: 24
                 iconColor: !ThemeManager.isLight() ? "#ffffff" : ThemeManager.getColor("text")
+                iconWidth: Scaler.iconSize3
+                iconHeight: Scaler.iconSize3
                 onClicked: ThemeManager.setDark()
             }
         }

@@ -25,6 +25,11 @@ QtObject {
         "dark": "#2d2d30"
     })
 
+    property var background2: ({
+        "light": "#e0e0e0",
+        "dark": "#333333"
+    })
+
     property var input_background: ({
         "light": "#f0f0f0",
         "dark": "#2d2d30"
@@ -73,6 +78,11 @@ QtObject {
     property var text: {
         "light": "#1e1e1e",
         "dark": "#f2f2f2"
+    }
+
+    property var text_disabled: {
+        "light": "#888888",
+        "dark": "#aaaaaa"
     }
 
     property var text_placeholder: {
