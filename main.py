@@ -3,7 +3,7 @@ import os
 import sys
 import argparse
 
-from PySide6.QtGui import QIcon, QPalette
+from PySide6.QtGui import QIcon, QPalette, QColor
 from PySide6.QtWidgets import QApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
@@ -16,7 +16,10 @@ import resources_rc
 def run_gui_app():
 
     app = QApplication(sys.argv)
-    # app.setPalette(QPalette())
+    darkPalette = QPalette()
+    darkPalette.setColor(QPalette.Window, QColor(53, 53, 53))  # Main window background
+    app.setPalette(darkPalette)
+
     app.setWindowIcon(QIcon(os.path.join(ASSETS_DIR, 'img', 'icon.png')))
 
     logging.info("Starting RoboForger")

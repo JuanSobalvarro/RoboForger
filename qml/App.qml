@@ -23,15 +23,15 @@ AppWindow {
             rows: 4
 
             // === Header Bar ===
-            TTitleBar {
-                Layout.columnSpan: 3
-                Layout.rowSpan: 1
-                Layout.column: 0
-                Layout.row: 0
-                Layout.fillWidth: true
-                Layout.preferredHeight: Scaler.font1
-                window: appWindow
-            }
+            // TTitleBar {
+            //     Layout.columnSpan: 3
+            //     Layout.rowSpan: 1
+            //     Layout.column: 0
+            //     Layout.row: 0
+            //     Layout.fillWidth: true
+            //     Layout.preferredHeight: Scaler.font1
+            //     window: appWindow
+            // }
 
             Description {
                 Layout.columnSpan: 1
