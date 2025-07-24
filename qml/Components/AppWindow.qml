@@ -17,7 +17,7 @@ ApplicationWindow {
     minimumHeight: 720
     maximumWidth: 1080
     maximumHeight: 720
-    // flags: Qt.Window | Qt.FramelessWindowHint
+    flags: Qt.Window | Qt.FramelessWindowHint
     title: "RoboForger"
     color: "#01000000"
     opacity: 1
@@ -42,8 +42,8 @@ ApplicationWindow {
     ParallelAnimation {
         id: minimizeAnim
         // PropertyAnimation { target: contentContainer; property: "opacity"; from: 1; to: 0.0; duration: 1000 }
-        PropertyAnimation { target: contentContainer; property: "scale"; to: 0.0; duration: 2000; easing.type: Easing.InOutQuad }
-        PropertyAnimation { target: appWindow; property: "y"; to: appWindow.screen.height - taskbarHeight; duration: 2000; easing.type: Easing.InOutQuad }
+        PropertyAnimation { target: contentContainer; property: "scale"; to: 0.0; duration: 200; easing.type: Easing.InOutQuad }
+        PropertyAnimation { target: appWindow; property: "y"; to: appWindow.screen.height - taskbarHeight; duration: 200; easing.type: Easing.InOutQuad }
         onStopped: {
             appWindow.showMinimized()
             contentContainer.opacity = 1
