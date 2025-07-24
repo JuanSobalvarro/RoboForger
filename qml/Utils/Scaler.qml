@@ -64,4 +64,7 @@ QtObject {
     // Loader Size
     readonly property real loaderSize: scale(48) // Standard loader size
     readonly property real loaderIconSize: scale(36) // Standard loader icon size
+
+    // Header height
+    readonly property real headerHeight: scale(16) // Standard header height
 }

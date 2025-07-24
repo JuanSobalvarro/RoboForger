@@ -3,13 +3,11 @@ import os
 import sys
 import argparse
 
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QPalette
 from PySide6.QtWidgets import QApplication
 from PySide6.QtQml import QQmlApplicationEngine
-from PySide6.QtQuickControls2 import QQuickStyle
 
-# Importa tu ViewModel
-from viewmodels.app_vm import AppViewModel # Ajusta la ruta si tu viewmodel está en otra carpeta
+from viewmodels.app_vm import AppViewModel
 
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -18,6 +16,7 @@ import resources_rc
 def run_gui_app():
 
     app = QApplication(sys.argv)
+    # app.setPalette(QPalette())
     app.setWindowIcon(QIcon(os.path.join(ASSETS_DIR, 'img', 'icon.png')))
 
     logging.info("Starting RoboForger")

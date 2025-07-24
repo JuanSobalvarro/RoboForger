@@ -58,6 +58,17 @@ T.TextField {
         anchors.fill: parent
         radius: 6
 
+        transformOrigin: Item.Center
+
+        scale: control.activeFocus ? 1.05 : 1
+
+        Behavior on scale {
+            NumberAnimation {
+                duration: 200
+                easing.type: Easing.OutCubic
+            }
+        }
+
         border.color: {
             switch (control.__currentState) {
                 case "focused": return ThemeManager.getColor("primary");

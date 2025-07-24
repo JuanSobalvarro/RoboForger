@@ -1,39 +1,43 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Components
 import Themes
 import Utils
 import TElements
 import Sections
 
-ApplicationWindow {
+
+AppWindow {
     id: appWindow
-    width: 1080
-    height: 720
-    visible: true
-    title: "RoboForger by JuSo"
-    minimumWidth: 1080
-    minimumHeight: 720
-    // maximumWidth: 1080
-    // maximumHeight: 720
 
     TRectangle {
         anchors.fill: parent
         radius: 0
         color: ThemeManager.getColor("background")
-        // color: "red"
 
         GridLayout {
             id: mainGrid
             anchors.fill: parent
             columns: 3
-            rows: 3
+            rows: 4
+
+            // === Header Bar ===
+            TTitleBar {
+                Layout.columnSpan: 3
+                Layout.rowSpan: 1
+                Layout.column: 0
+                Layout.row: 0
+                Layout.fillWidth: true
+                Layout.preferredHeight: Scaler.font1
+                window: appWindow
+            }
 
             Description {
                 Layout.columnSpan: 1
                 Layout.rowSpan: 1
                 Layout.column: 0
-                Layout.row: 0
+                Layout.row: 1
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.maximumWidth: mainGrid.width / 4
@@ -43,7 +47,7 @@ ApplicationWindow {
                 Layout.columnSpan: 1
                 Layout.rowSpan: 2
                 Layout.column: 0
-                Layout.row: 1
+                Layout.row: 2
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.topMargin: Scaler.margin1
@@ -57,14 +61,14 @@ ApplicationWindow {
                 Layout.columnSpan: 1
                 Layout.rowSpan: 1
                 Layout.column: 1
-                Layout.row: 0
+                Layout.row: 1
                 Layout.fillWidth: true
                 Layout.fillHeight: true
             }
 
             Process {
                 Layout.column: 2
-                Layout.row: 0
+                Layout.row: 1
                 Layout.columnSpan: 1
                 Layout.rowSpan: 1
                 Layout.fillWidth: true
@@ -74,7 +78,7 @@ ApplicationWindow {
             Preview {
                 id: preview
                 Layout.column: 1
-                Layout.row: 1
+                Layout.row: 2
                 Layout.columnSpan: 1
                 Layout.rowSpan: 2
                 Layout.fillWidth: true
@@ -85,7 +89,7 @@ ApplicationWindow {
                 Layout.columnSpan: 1
                 Layout.rowSpan: 1
                 Layout.column: 2
-                Layout.row: 1
+                Layout.row: 2
                 Layout.fillWidth: true
                 Layout.fillHeight: true
             }
@@ -95,14 +99,5 @@ ApplicationWindow {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
         }
-    }
-
-    onWidthChanged: {
-        // Set scaler base unit
-        Scaler.baseUnit = appWindow.width / 1080;
-    }
-
-    Component.onCompleted: {
-        Scaler.baseUnit = 1;
     }
 }

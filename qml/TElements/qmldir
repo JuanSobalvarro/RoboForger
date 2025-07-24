@@ -6,3 +6,4 @@ TLoader TLoader.qml
 TSeparator TSeparator.qml
 TInputField TInputField.qml
 TCheckBox TCheckBox.qml
+TTitleBar TTitleBar.qml
