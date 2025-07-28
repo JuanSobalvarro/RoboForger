@@ -10,15 +10,15 @@ QtObject {
     }
 
     // Font sizes
-    readonly property real font1: scale(28) // Main title
-    readonly property real font2: scale(24) // Sub title
-    readonly property real font3: scale(20) // Section title
-    readonly property real font4: scale(18) // Normal texts
-    readonly property real font5: scale(16) // Small texts
-    readonly property real font6: scale(14) // Smaller texts
-    readonly property real font7: scale(12) // Tiny texts
-    readonly property real font8: scale(10) // Extra small texts
-    readonly property real font9: scale(8)  // Micro texts
+    readonly property real font1: 28 // Main title
+    readonly property real font2: 24 // Sub title
+    readonly property real font3: 20 // Section title
+    readonly property real font4: 18 // Normal texts
+    readonly property real font5: 16 // Small texts
+    readonly property real font6: 14 // Smaller texts
+    readonly property real font7: 12 // Tiny texts
+    readonly property real font8: 10 // Extra small texts
+    readonly property real font9: 8 // Micro texts
 
     // Grid Spacing
     readonly property real spacing1: scale(16) // Main spacing

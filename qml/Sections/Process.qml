@@ -99,7 +99,7 @@ Item {
                     borderWidth: 0
                     onClicked: {
                         if (appViewModel) {
-                            appViewModel.processSelectedDxfFile();
+                            appViewModel.startProcessing();
                         }
                     }
                     visible: !appViewModel.isProcessing

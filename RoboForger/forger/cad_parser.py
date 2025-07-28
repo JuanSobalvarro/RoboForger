@@ -31,7 +31,7 @@ class CADParser:
         for e in self._msp.query('LINE'):
             start = self._scale_point((e.dxf.start.x, e.dxf.start.y, getattr(e.dxf.start, 'z', 0.0)))
             end = self._scale_point((e.dxf.end.x, e.dxf.end.y, getattr(e.dxf.end, 'z', 0.0)))
-            lines.append((start, end))
+            lines.append({'start': start, 'end': end})
         return lines
 
     def get_circles(self) -> List[Tuple[Point3D, float]]:
@@ -39,7 +39,7 @@ class CADParser:
         for e in self._msp.query('CIRCLE'):
             center = self._scale_point((e.dxf.center.x, e.dxf.center.y, getattr(e.dxf.center, 'z', 0.0)))
             radius = self._scale_value(e.dxf.radius)
-            circles.append((center, radius))
+            circles.append({'center': center, 'radius': radius})
         return circles
 
     def get_arcs(self) -> List[Dict[str, Any]]:
@@ -57,3 +57,13 @@ class CADParser:
 
             arcs.append({'center': center, 'radius': radius, 'start_angle': start_angle, 'end_angle': end_angle, 'clockwise': False})
         return arcs
+
+    def get_figures_parsed(self) -> Dict[str, Any]:
+        """
+        Returns a dictionary with all figures parsed from the DXF file.
+        """
+        return {
+            'lines': self.get_lines(),
+            'arcs': self.get_arcs(),
+            'circles': self.get_circles()
+        }

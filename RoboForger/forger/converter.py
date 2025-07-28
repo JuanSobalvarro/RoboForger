@@ -18,17 +18,17 @@ class Converter:
 
     def convert_lines_to_polylines(self, lines: List[tuple]) -> List[PolyLine]:
         polylines = []
-        for i, (start, end) in enumerate(lines):
+        for i, line in enumerate(lines):
             # Each line is a PolyLine with two points
-            robo_coords = [real_coord2robo_coord(start), real_coord2robo_coord(end)]
+            robo_coords = [real_coord2robo_coord(line['start']), real_coord2robo_coord(line['end'])]
             pl = PolyLine(f"Line{i}", robo_coords, lifting=100, velocity=1000, float_precision=self.float_precision)
             polylines.append(pl)
         return polylines
 
     def convert_circles(self, circles: List[tuple]) -> List[Circle]:
         circle_figs = []
-        for i, (center, radius) in enumerate(circles):
-            c = Circle(f"Circle{i}", real_coord2robo_coord(center), radius, lifting=100, float_precision=self.float_precision)
+        for i, circle in enumerate(circles):
+            c = Circle(f"Circle{i}", real_coord2robo_coord(circle['center']), circle['radius'], lifting=100, float_precision=self.float_precision)
             circle_figs.append(c)
         return circle_figs
 

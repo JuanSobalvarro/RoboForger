@@ -73,6 +73,7 @@ AppWindow {
                 Layout.rowSpan: 1
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.bottomMargin: Scaler.margin1
             }
 
             Preview {
@@ -83,6 +84,7 @@ AppWindow {
                 Layout.rowSpan: 2
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.bottomMargin: Scaler.margin1
             }
 
             Feedback {

@@ -4,7 +4,7 @@ from RoboForger.drawing.draw import Draw
 from RoboForger.utils import export_str2txt
 
 
-FILE_NAME = "./test_files/fachada gotica"
+FILE_NAME = "./test_files/formula"
 
 def test_rapid():
     parser = CADParser(filepath=f'{FILE_NAME}.dxf', scale=1.0)
@@ -16,7 +16,6 @@ def test_rapid():
     polylines = converter.convert_lines_to_polylines(lines)
     arcs = converter.convert_arcs(raw_arcs)
     circles = converter.convert_circles(raw_circles)
-
 
     print("Detected Polylines:", len(polylines))
     print("Detected Arcs:", len(arcs))

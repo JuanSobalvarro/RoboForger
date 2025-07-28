@@ -99,7 +99,7 @@ class Arc(Figure):
 
         if start_angle > end_angle:
             mid_angle += pi
-
+ 
         return mid_angle % (2 * pi)
 
     @staticmethod

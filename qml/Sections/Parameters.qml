@@ -68,6 +68,19 @@ Item {
                         placeholder: "Scale (1.0)"
                         Layout.leftMargin: Scaler.margin1
                         Layout.rightMargin: Scaler.margin1
+
+                        text: isNaN(appViewModel.dxfWorker.scale) ? "" : appViewModel.dxfWorker.scale.toString()
+                        onTextChanged: {
+                            console.log("Scale Factor Changed: ", text);
+                            if (text === "") {
+                                appViewModel.dxfWorker.scale = NaN;
+                            } else {
+                                // Ensure the text is a valid number
+                                if (!isNaN(parseFloat(text))) {
+                                    appViewModel.dxfWorker.scale = parseFloat(text);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -105,6 +118,18 @@ Item {
                         placeholder: "Precision (2)"
                         Layout.leftMargin: Scaler.margin1
                         Layout.rightMargin: Scaler.margin1
+
+                        text: appViewModel.dxfWorker.floatPrecision === 0 ? "" : appViewModel.dxfWorker.floatPrecision.toString()
+                        onTextChanged: {
+                            if (text === "") {
+                                appViewModel.dxfWorker.floatPrecision = NaN;
+                            } else {
+                                // Ensure the text is a valid number
+                                if (parseFloat(text) >= 0) {
+                                    appViewModel.dxfWorker.floatPrecision = parseFloat(text);
+                                }
+                            }
+                        }
                     }
 
                     LabeledInput {
@@ -113,6 +138,18 @@ Item {
                         placeholder: "Velocity (1000)"
                         Layout.leftMargin: Scaler.margin1
                         Layout.rightMargin: Scaler.margin1
+
+                        text: appViewModel.dxfWorker.linesVelocity === 0 ? "" : appViewModel.dxfWorker.linesVelocity.toString()
+                        onTextChanged: {
+                            if (text === "") {
+                                appViewModel.dxfWorker.linesVelocity = NaN;
+                            } else {
+                                // Ensure the text is a valid number
+                                if (parseFloat(text) >= 0) {
+                                    appViewModel.dxfWorker.linesVelocity = parseFloat(text);
+                                }
+                            }
+                        }
                     }
 
                     LabeledInput {
@@ -121,6 +158,18 @@ Item {
                         placeholder: "Velocity (1000)"
                         Layout.leftMargin: Scaler.margin1
                         Layout.rightMargin: Scaler.margin1
+
+                        text: appViewModel.dxfWorker.arcsVelocity === 0 ? "" : appViewModel.dxfWorker.arcsVelocity.toString()
+                        onTextChanged: {
+                            if (text === "") {
+                                appViewModel.dxfWorker.arcsVelocity = NaN;
+                            } else {
+                                // Ensure the text is a valid number
+                                if (parseFloat(text) >= 0) {
+                                    appViewModel.dxfWorker.arcsVelocity = parseFloat(text);
+                                }
+                            }
+                        }
                     }
 
                     LabeledInput {
@@ -129,6 +178,18 @@ Item {
                         placeholder: "Velocity (1000)"
                         Layout.leftMargin: Scaler.margin1
                         Layout.rightMargin: Scaler.margin1
+
+                        text: appViewModel.dxfWorker.circlesVelocity === 0 ? "" : appViewModel.dxfWorker.circlesVelocity.toString()
+                        onTextChanged: {
+                            if (text === "") {
+                                appViewModel.dxfWorker.circlesVelocity = NaN;
+                            } else {
+                                // Ensure the text is a valid number
+                                if (parseFloat(text) >= 0) {
+                                    appViewModel.dxfWorker.circlesVelocity = parseFloat(text);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -165,22 +226,26 @@ Item {
 
                     TCheckBox {
                         text: "Use AI trace detection"
-                        checked: false
                         font.pixelSize: Scaler.font6
                         Layout.leftMargin: Scaler.margin2
                         Layout.rightMargin: Scaler.margin2
                         indicatorSize: Scaler.checkboxIndicatorSize2
                         spacing: Scaler.spacing2
+                        checked: appViewModel.dxfWorker.useDetector
+
+                        onCheckedChanged: appViewModel.dxfWorker.useDetector = checked
                     }
 
                     TCheckBox {
                         text: "Use Offset programming"
-                        checked: false
                         font.pixelSize: Scaler.font6
                         Layout.leftMargin: Scaler.margin2
                         Layout.rightMargin: Scaler.margin2
                         indicatorSize: Scaler.checkboxIndicatorSize2
                         spacing: Scaler.spacing2
+                        checked: appViewModel.dxfWorker.useOffset
+
+                        onCheckedChanged: appViewModel.dxfWorker.useOffset = checked
                     }
                 }
             }

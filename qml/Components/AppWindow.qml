@@ -16,8 +16,6 @@ Window {
     visible: true
     minimumWidth: 1080
     minimumHeight: 720
-    maximumWidth: 1080
-    maximumHeight: 720
     // flags: Qt.Window | Qt.FramelessWindowHint
     title: "RoboForger"
 

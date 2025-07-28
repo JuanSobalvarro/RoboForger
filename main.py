@@ -2,12 +2,15 @@ import logging
 import os
 import sys
 import argparse
+import multiprocessing
 
 from PySide6.QtGui import QIcon, QPalette, QColor
 from PySide6.QtWidgets import QApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
 from viewmodels.app_vm import AppViewModel
+
+from ui import line_geometry, arc_geometry, circle_geometry
 
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -49,6 +52,7 @@ def run_gui_app():
 
 
 def main():
+    multiprocessing.freeze_support()
     run_gui_app()
 
 
