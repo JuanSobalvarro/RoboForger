@@ -57,12 +57,13 @@ class LineGeometry(QQuick3DGeometry):
             raise TypeError("Invalid point format, must be QVector3D or [x, y, z] list")
 
     def _generate_geometry(self):
+        print("Generating geometry for line with scale:", self._scale)
         self.clear()
 
         positions = []
         for line in self._lines_data:
-            print('Processing line:', line)
-            print('Start:', line['start'], 'End:', line['end'])
+            # print('Processing line:', line)
+            # print('Start:', line['start'], 'End:', line['end'])
             start = self._to_vec3(line['start']) * self._scale
             end = self._to_vec3(line['end']) * self._scale
             positions.append(start)

@@ -56,6 +56,11 @@ class ArcGeometry(QQuick3DGeometry):
         else:
             raise TypeError("Invalid point format, must be QVector3D or [x, y, z] list")
 
+    @Slot()
+    def updateGeometry(self):
+        # print("Generating geometry for arcs with scale:", self._scale)
+        self._generate_geometry()
+
     def _generate_geometry(self):
         self.clear()
 
@@ -80,7 +85,7 @@ class ArcGeometry(QQuick3DGeometry):
 
             # the number of segments should be propotional to the radius and the sweep angle( sweep max at 360)
             sweep_angle = abs(end_angle - start_angle)
-            num_segments = int(radius * sweep_angle / np.pi * 10)
+            num_segments = int(radius * sweep_angle / np.pi * 2)
             if clockwise:
                 if start_angle < end_angle:
                     start_angle += 2 * np.pi

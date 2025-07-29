@@ -65,7 +65,7 @@ class CircleGeometry(QQuick3DGeometry):
             center = QVector3D(center.x() * self._scale, center.y() * self._scale, center.z() * self._scale)
             radius = circle['radius']
 
-            num_segments = int(radius * 10)
+            num_segments = int(radius * 2)
             angles = np.linspace(0, 2 * np.pi, num_segments)
 
             for angle in angles:

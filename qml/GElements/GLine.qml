@@ -19,7 +19,7 @@ Model {
     geometry: LineGeometry {
         id: lineGeometry
         thickness: lineModel.thickness
-        scale: lineModel.scaling
+        scale: isNaN(lineModel.scaling) ? 1.0 : lineModel.scaling
         Component.onCompleted: {
             set_lines([{start: [lineModel.startPoint.x, lineModel.startPoint.y, lineModel.startPoint.z],
                 end: [lineModel.endPoint.x, lineModel.endPoint.y, lineModel.endPoint.z]}]);
@@ -34,5 +34,14 @@ Model {
     // Component.onCompleted: {
     //     console.log("Line Model initialized with", lines.length, "lines")
     // }
+
+    Connections {
+        target: appViewModel.dxfWorker
+        function onScaleChanged() {
+            console.log("QML: appViewModel.dxfWorker.scale changed to", appViewModel.dxfWorker.scale);
+            // Update scaling for all lines
+            line.scaling = appViewModel.dxfWorker.scale;
+        }
+    }
 }
 

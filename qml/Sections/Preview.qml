@@ -47,29 +47,19 @@ Item {
 
         // Repeater of lines to be drawn
         Repeater3D {
+            id: lineRepeater
             model: appViewModel.dxfWorker.lineModel
             delegate: GLine {
                 startPoint: Qt.vector3d(model.start_x, model.start_y, model.start_z)
                 endPoint: Qt.vector3d(model.end_x, model.end_y, model.end_z)
                 thickness: 10
-                scaling: 10
+                scaling: appViewModel.dxfWorker.scale
                 lineColor: "yellow" // Use model color or default to white
 
                 Component.onCompleted: {
                     console.log("Model: ", model.start_x);
                 }
             }
-            // Model {
-            //     source: "#Sphere"
-            //     position: Qt.vector3d(model.start_x, model.start_y, model.start_z)
-            //     scale: Qt.vector3d(0.5, 0.5, 0.5)
-            //
-            //     materials: [
-            //         DefaultMaterial {
-            //             diffuseColor: "blue"
-            //         }
-            //     ]
-            // }
         }
 
         // Repeater of arcs to be drawn
@@ -82,7 +72,7 @@ Item {
                 endAngle: model.end_angle
                 clockwise: model.clockwise
                 thickness: 10
-                scaling: 10
+                scaling: appViewModel.dxfWorker.scale
                 arcColor: "blue" // Use model color or default to blue
 
                 Component.onCompleted: {
@@ -98,7 +88,7 @@ Item {
                 center: Qt.vector3d(model.center_x, model.center_y, model.center_z)
                 radius: model.radius
                 thickness: 10
-                scaling: 10
+                scaling: appViewModel.dxfWorker.scale
                 circleColor: "green" // Use model color or default to green
 
                 Component.onCompleted: {

@@ -19,21 +19,35 @@ Model {
     geometry: ArcGeometry {
         id: arcGeometry
         thickness: arcModel.thickness
-        scale: arcModel.scaling
-        Component.onCompleted: {
-            set_arcs([{
-                center: [arcModel.center.x, arcModel.center.y, arcModel.center.z],
-                radius: arcModel.radius,
-                startAngle: arcModel.startAngle,
-                endAngle: arcModel.endAngle,
-                clockwise: arcModel.clockwise,
-                thickness: arcModel.thickness
-            }]);
-        }
+        scale: isNaN(arcModel.scaling) ? 1.0 : arcModel.scaling
     }
 
     materials: PrincipledMaterial {
         baseColor: arcColor
         lighting: PrincipledMaterial.NoLighting
     }
+
+    function updateGeometry() {
+        arcGeometry.set_arcs([{
+            center: [arcModel.center.x, arcModel.center.y, arcModel.center.z],
+            radius: arcModel.radius,
+            startAngle: arcModel.startAngle,
+            endAngle: arcModel.endAngle,
+            clockwise: arcModel.clockwise,
+            thickness: arcModel.thickness
+        }]);
+    }
+
+    Component.onCompleted: updateGeometry()
+
+    // onCenterChanged: updateGeometry()
+    // onRadiusChanged: updateGeometry()
+    // onStartAngleChanged: updateGeometry()
+    // onEndAngleChanged: updateGeometry()
+    // onClockwiseChanged: updateGeometry()
+    // onThicknessChanged: updateGeometry()
+    // onScalingChanged: {
+    //     arcGeometry.scale = isNaN(arcModel.scaling) ? 1.0 : arcModel.scaling;
+    //     updateGeometry()
+    // }
 }

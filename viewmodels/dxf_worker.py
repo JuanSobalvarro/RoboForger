@@ -7,6 +7,9 @@ import threading
 from PySide6.QtCore import QObject, Signal, Property
 
 from RoboForger.forger.cad_parser import CADParser
+from RoboForger.forger.converter import Converter
+from RoboForger.drawing.draw import Draw
+from RoboForger.utils import export_str2txt
 
 from models.line_model import LineModel
 from models.arc_model import ArcModel
@@ -15,7 +18,7 @@ from models.circle_model import CircleModel
 
 # from RoboForger.drawing.draw import Draw
 
-def processing_function(file_path, *args, **kwargs):
+def processing_function(file_path, result_queue, *args, **kwargs):
     """
     Simulates a long-running processing function.
     This function is intended to be run in a separate thread.
@@ -24,8 +27,39 @@ def processing_function(file_path, *args, **kwargs):
     print(f"File path: {file_path}")
     print(f"Arguments: {args}")
     print(f"Keyword Arguments: {kwargs}")
-    time.sleep(10)  # Simulate a delay
+
+    raw_lines = kwargs["lines"]
+    raw_arcs = kwargs["arcs"]
+    raw_circles = kwargs["circles"]
+
+    converter = Converter(float_precision=kwargs["float_precision"])
+    polylines = converter.convert_lines_to_polylines(raw_lines)
+    arcs = converter.convert_arcs(raw_arcs)
+    circles = converter.convert_circles(raw_circles)
+
+    print("Detected Polylines:", len(polylines))
+    print("Detected Arcs:", len(arcs))
+    print("Detected Circles:", len(circles))
+
+    for line in polylines:
+        line.set_velocity(kwargs["lines_velocity"])
+    for arc in arcs:
+        arc.set_velocity(kwargs["arcs_velocity"])
+    for circle in circles:
+        circle.set_velocity(kwargs["circles_velocity"])
+
+    draw = Draw(use_detector=kwargs["use_detector"])
+    draw.add_figures(polylines)
+    draw.add_figures(arcs)
+    draw.add_figures(circles)
+
+    rapid_code = draw.generate_rapid_code(use_offset=kwargs["use_offset"])
+
+    result_queue.put(rapid_code)
+
     print("Processing completed.")
+    # print(rapid_code)
+    # print("Done.")
 
 class DxfWorker(QObject):
     """
@@ -33,7 +67,7 @@ class DxfWorker(QObject):
     """
     processingStarted = Signal()
     processingFinished = Signal()
-    processingError = Signal()
+    processingError = Signal(str)
     fileLoaded = Signal()
     linesChanged = Signal()
     arcsChanged = Signal()
@@ -52,6 +86,7 @@ class DxfWorker(QObject):
         super().__init__(parent)
 
         self._process: multiprocessing.Process = None
+        self._result_queue: multiprocessing.Queue = None
 
         self._selected_file_path = ""
         self._save_path = ""
@@ -109,6 +144,7 @@ class DxfWorker(QObject):
             # raise ValueError("Scale must be a positive number.")
             # return
         self._scale = value
+        # self.scaleChanged.emit(self._scale)
 
     @Property(int, notify=floatPrecisionChanged)
     def floatPrecision(self):
@@ -193,7 +229,7 @@ class DxfWorker(QObject):
 
         self._selected_file_path = file_path
 
-        parser = CADParser(filepath=self._selected_file_path, scale=self._scale)
+        parser = CADParser(filepath=self._selected_file_path, scale=self._scale if self._scale else 1.0,)
         self._raw_lines = parser.get_lines()
         self._raw_arcs = parser.get_arcs()
         self._raw_circles = parser.get_circles()
@@ -242,23 +278,28 @@ class DxfWorker(QObject):
                 # raise ValueError("Invalid parameters. Please check scale, velocities, and other settings.")
                 return
 
+            if not self._selected_file_path:
+                return
 
             self._is_running = True
             self.processingStarted.emit()
 
+            kwargs = {**self._parameters_as_kwargs(), **self._get_raw_figures()}
+
+            self._result_queue = multiprocessing.Queue()
             self._process = multiprocessing.Process(
                 target=processing_function,
                 name="DxfProcessingWorker",
-                args=("example.dxf", "arg1", "arg2"),
-                kwargs={"key1": "value1", "key2": "value2"}
+                args=(self._selected_file_path, self._result_queue),
+                kwargs=kwargs
             )
             self._process.start()
 
             threading.Thread(target=self._monitor_process, daemon=True).start()
         except Exception as e:
             self._is_running = False
-            self.processingError.emit(str(e))
             print(f"Error starting processing: {e}")
+            self.processingError.emit(str(e))
 
     def _validate_parameters(self):
 
@@ -292,12 +333,43 @@ class DxfWorker(QObject):
 
         return True
 
+    def _parameters_as_kwargs(self):
+        """
+        Returns the parameters as a dictionary for passing to the processing function.
+        """
+        return {
+            "scale": self._scale,
+            "float_precision": self._float_precision,
+            "lines_velocity": self._lines_velocity,
+            "arcs_velocity": self._arcs_velocity,
+            "circles_velocity": self._circles_velocity,
+            "use_detector": self._use_detector,
+            "use_offset": self._use_offset
+        }
+
+    def _get_raw_figures(self):
+        """
+        Returns the raw figures (lines, arcs, circles) as a dictionary.
+        """
+        return {
+            "lines": self._raw_lines,
+            "arcs": self._raw_arcs,
+            "circles": self._raw_circles
+        }
+
     def _monitor_process(self):
-        """
-        Monitor the process and emit signals when it finishes.
-        """
+        try:
+            # Get the result FIRST, with a timeout to avoid hanging
+            result = self._result_queue.get()
+            print("Got result from worker")
+            self._rapid_code = result
+        except Exception as e:
+            print(f"Error reading result from queue: {e}")
+            self._rapid_code = None
+
         self._process.join()
         self._is_running = False
+
         self.processingFinished.emit()
 
     def cancel(self):

@@ -16,7 +16,7 @@ Model {
     geometry: CircleGeometry {
         id: circleGeometry
         thickness: circleModel.thickness
-        scale: circleModel.scaling
+        scale: isNaN(circleModel.scaling) ? 1.0 : circleModel.scaling
         Component.onCompleted: {
             set_circles([{
                 center: [circleModel.center.x, circleModel.center.y, circleModel.center.z],
