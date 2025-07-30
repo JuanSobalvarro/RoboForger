@@ -2,3 +2,5 @@ module Components
 LabeledInput LabeledInput.qml
 MonoColorSVG MonoColorSVG.qml
 AppWindow AppWindow.qml
+Scrollable Scrollable.qml
+Scrollbar Scrollbar.qml

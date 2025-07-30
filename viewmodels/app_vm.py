@@ -14,6 +14,7 @@ from RoboForger.forger.cad_parser import CADParser
 from RoboForger.forger.converter import Converter
 from RoboForger.drawing.draw import Draw
 from RoboForger.utils import export_str2txt
+from viewmodels.console_logger import ConsoleLogger
 
 from viewmodels.dxf_worker import DxfWorker
 from viewmodels.file_dialog import FileDialogManager
@@ -32,6 +33,9 @@ class AppViewModel(QObject):
         super().__init__(parent)
         self._isProcessing = False
 
+        self._console_logger = ConsoleLogger()
+        self._console_logger.start()
+
         self._dxf_worker = DxfWorker()
         self._dxf_worker.processingStarted.connect(self._on_processing_started)
         self._dxf_worker.processingFinished.connect(self._on_processing_finished)
@@ -41,7 +45,15 @@ class AppViewModel(QObject):
         self._file_dialog_manager.fileSaved.connect(self._on_dxf_file_saved_from_dialog)
         self._file_dialog_manager.fileDialogCancelled.connect(self._on_dxf_file_dialog_cancelled)
 
+
     # -- PROPERTIES -- #
+    @Property(QObject, constant=True)
+    def consoleLogger(self):
+        """
+        Exposes the console logger to QML for real-time logging.
+        """
+        return self._console_logger
+
     @Property(QObject, notify=fileDialogManagerChanged)
     def fileDialogManager(self):
         return self._file_dialog_manager
