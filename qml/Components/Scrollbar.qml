@@ -2,221 +2,147 @@ import QtQuick
 
 Item {
     id: scrollbar
+    property Flickable target
+    property bool autoHide: true
+    property real visibleOpacity: 0.8
+    property real fadedOpacity: 0.2
+    property int orientation: Qt.Vertical
+    property real breadth: 8
+    property int handleMargin: breadth / 3
 
-    property QtObject target                //< The flickable to control
-    property bool autoHide: true            //< If true, the bar will be hidden unless mouseover or moving
-    property real visibleOpacity: 0.9       //< When visible (not hidden), how "opaque" are we?
-    property int orientation: Qt.Vertical   //< Either Qt.Vertical or Qt.Horizontal
-
-    function decPos(amount) {
-        if( !amount ) amount = 0.10;
-        let newPos = position - amount;
-        if( newPos < 0 )
-            newPos = 0;
-
-        scrollbar.position = newPos;
-        recalculateHandle();
-    }
-
-    function incPos(amount) {
-        if( !amount ) amount = 0.10;
-        const max = 1-scrollbar.size;
-        let newPos = position + amount;
-        if( newPos >= max )
-            newPos = max;
-
-        scrollbar.position = newPos;
-        recalculateHandle();
-    }
-
-    // These don't normally need to be set:
-    property real minimumSize: 0.1      //< The minimum size of the handle
-    property real position: 0           //< The position of the scroller (between 0.0 and 1.0)
-
-    // The rest, as they say, is logic.
-    implicitHeight: orientation == Qt.Horizontal ? 24 : parent.height
-    implicitWidth: orientation == Qt.Horizontal ? parent.width : 24
-
+    // Size and position
+    property real position: 0.0
     property real size: 0.5
-    onSizeChanged: recalculateHandle();
-    onPositionChanged: {
-        updatePosition();
-        recalculateHandle();
-    }
+    property real minimumSize: 10
 
-    MouseArea {
-        id: hoverTester
-        anchors.fill: scrollbar
-        hoverEnabled: true
-    }
+    property color backgroundColor: "#222"
+    property color handleColor: "#888"
 
-    Item {
-        id: scrollerHint
+    anchors {
+        right: parent.right
+        top: parent.top
+        bottom: orientation === Qt.Vertical ? parent.bottom : undefined
+        left: orientation === Qt.Horizontal ? parent.left : undefined
+    }
+    width: orientation === Qt.Vertical ? breadth : parent.width
+    height: orientation === Qt.Horizontal ? breadth : parent.height
+
+    // Show only when target exists and content is scrollable
+    visible: target && size < 1.0
+
+    // Background
+    Rectangle {
+        id: track
         anchors.fill: parent
-        opacity: (scrollbar.size < 1) ? (autoHide ? (hoverTester.containsMouse || scrollbar.target.dragging ? scrollbar.visibleOpacity : 0) : scrollbar.visibleOpacity) : 0
-        Behavior on opacity {
-            NumberAnimation {
-                target: scrollerHint
-                property: 'opacity'
-                duration: 200
+        color: backgroundColor
+        radius: 4
+        opacity: autoHide ? fadedOpacity : visibleOpacity
+        Behavior on opacity { NumberAnimation { duration: 200 } }
+
+        // Track click -> jump
+        // MouseArea {
+        //     anchors.fill: parent
+        //     onClicked: {
+        //         if (!target) return
+        //         let totalSize = orientation === Qt.Vertical
+        //             ? target.contentHeight - target.height
+        //             : target.contentWidth - target.width
+        //         if (totalSize <= 0) return
+        //
+        //         if (orientation === Qt.Vertical) {
+        //             let ratio = (mouse.y - handle.height / 2) / (track.height - handle.height)
+        //             target.contentY = Math.max(0, Math.min(1, ratio)) * totalSize
+        //         } else {
+        //             let ratio = (mouse.x - handle.width / 2) / (track.width - handle.width)
+        //             target.contentX = Math.max(0, Math.min(1, ratio)) * totalSize
+        //         }
+        //     }
+        // }
+    }
+
+    // Handle
+    Rectangle {
+        id: handle
+        radius: 4
+        color: handleColor
+        opacity: autoHide ? visibleOpacity : visibleOpacity
+        Behavior on opacity { NumberAnimation { duration: 200 } }
+
+        width: orientation === Qt.Vertical
+            ? parent.width - (handleMargin * 2)
+            : Math.max(size * (parent.width - (handleMargin * 2)), minimumSize)
+        height: orientation === Qt.Vertical
+            ? Math.max(size * (parent.height - (handleMargin * 2)), minimumSize)
+            : parent.height - (handleMargin * 2)
+
+        x: orientation === Qt.Vertical
+            ? handleMargin
+            : handleMargin + position * ((parent.width - (handleMargin * 2)) - width)
+        y: orientation === Qt.Vertical
+            ? handleMargin + position * ((parent.height - (handleMargin * 2)) - height)
+            : handleMargin
+
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: orientation === Qt.Vertical ? Qt.SizeVerCursor : Qt.SizeHorCursor
+            drag.target: handle
+            drag.axis: orientation === Qt.Vertical ? Drag.YAxis : Drag.XAxis
+            drag.minimumX: handleMargin
+            drag.minimumY: handleMargin
+            drag.maximumX: orientation === Qt.Vertical
+                ? parent.width - handle.width - handleMargin
+                : parent.width - handle.width - handleMargin
+            drag.maximumY: orientation === Qt.Vertical
+                ? scrollbar.height - handle.height - handleMargin
+                : scrollbar.height - handle.height - handleMargin
+
+            onPositionChanged: {
+                let maxPos = orientation === Qt.Vertical
+                    ? (track.height - (handleMargin * 2)) - handle.height
+                    : (track.width - (handleMargin * 2)) - handle.width
+                let ratio = orientation === Qt.Vertical
+                    ? (handle.y - handleMargin) / maxPos
+                    : (handle.x - handleMargin) / maxPos
+                if (target) {
+                    if (orientation === Qt.Vertical)
+                        target.contentY = ratio * (target.contentHeight - target.height)
+                    else
+                        target.contentX = ratio * (target.contentWidth - target.width)
+                }
             }
         }
-
-        Rectangle {
-            id: scrollerHintBG
-            y: scrollbar.orientation === Qt.Horizontal ? parent.height * 0.5 - (height * 0.5) : 24
-            x: scrollbar.orientation === Qt.Horizontal ? 24 : parent.width * 0.5 - (width * 0.5)
-            width: scrollbar.orientation === Qt.Horizontal ? parent.width - 48 : 6
-            height: scrollbar.orientation === Qt.Horizontal ? 6 : parent.height - 48
-            radius: 3
-            color: '#FF0000'
-
-            Rectangle {
-                id: handle
-                y: scrollbar.orientation === Qt.Horizontal ? parent.height * 0.5 - (height * 0.5) : handle.y
-                x: scrollbar.orientation === Qt.Horizontal ? handle.x : parent.width * 0.5 - (width * 0.5)
-                width: scrollbar.orientation === Qt.Horizontal ? handle.width : 6
-                height: scrollbar.orientation === Qt.Horizontal ? 6 : handle.height
-                color: '#00ff00'
-                radius: 3
-
-                MouseArea {
-                    id: handleDragger
-                    anchors.fill: parent
-                    cursorShape: scrollbar.orientation == Qt.Horizontal ? Qt.SizeHorCursor : Qt.SizeVerCursor
-                    drag {
-                        target: parent
-                        axis: scrollbar.orientation == Qt.Horizontal ? Drag.XAxis : Drag.YAxis
-                        minimumX: 0
-                        maximumX: scrollerHintBG.width - handle.width
-                        minimumY: 0
-                        maximumY: scrollerHintBG.height - handle.height
-                        smoothed: true
-                        threshold: 0
-                    }
-
-                    onMouseXChanged: function(ev) { if( scrollbar.orientation == Qt.Horizontal ) dragged(ev) }
-                    onMouseYChanged: function(ev) { if( scrollbar.orientation != Qt.Horizontal ) dragged(ev) }
-
-                    function dragged(ev) {
-                        if( !drag.active )
-                            return;
-
-                        const myPos = ( scrollbar.orientation == Qt.Horizontal ? handle.x : handle.y );
-                        const maxPos = ( scrollbar.orientation == Qt.Horizontal ? (scrollerHintBG.width-handle.width) : (scrollerHintBG.height-handle.height) );
-
-                        const newratio = myPos / maxPos;
-                        const newpos = (1-scrollbar.size) * newratio;
-                        scrollbar.position = newpos;
-                    }
-                } // handleDragger
-            } // handle
-        } // scrollerHintBG
     }
 
-    function recalculateHandlePosition()
-    {
-        let newHandlePos = scrollbar.position * (scrollbar.orientation == Qt.Horizontal ? scrollbar.width : scrollbar.height);
-        if( scrollbar.orientation == Qt.Horizontal )
-            handle.x = newHandlePos;
-        else
-            handle.y = newHandlePos;
-    }
-
-    function recalculateHandleSize()
-    {
-        const maxSize = (scrollbar.orientation == Qt.Horizontal ? scrollbar.width : scrollbar.height);
-
-        let newHandleSize = maxSize * scrollbar.size;
-        if( newHandleSize > maxSize )
-            newHandleSize = maxSize;
-        else if( newHandleSize < 10 )
-            newHandleSize = 10;
-
-        if( scrollbar.orientation == Qt.Horizontal )
-            handle.width = newHandleSize;
-        else
-            handle.height = newHandleSize;
-    }
-
-    function recalculateHandle() {
-        if( handleDragger.drag.active )
-            return;
-
-        recalculateHandlePosition();
-        recalculateHandleSize();
-    }
-
+    // Updates
     Connections {
         target: scrollbar.target
-        function onContentWidthChanged() { scrollbar.updateSize(); }
-        function onContentHeightChanged() { scrollbar.updateSize(); }
-        function onWidthChanged() { scrollbar.updateSize(); }
-        function onHeightChanged() { scrollbar.updateSize(); }
-        function onContentXChanged() { recentre(); }
-        function onContentYChanged() { recentre(); }
-    }
-
-    function recentre() {
-        // Called to move the handle position to match wherever contentX is:
-        if( scrollbar.orientation == Qt.Horizontal )
-        {
-            if( scrollbar.target.width >= scrollbar.target.contentWidth )
-            {
-                scrollbar.position = 0;
-                scrollbar.target.contentX = 0;
-            }
-            else if( scrollbar.target.contentX > scrollbar.target.contentWidth - scrollbar.target.width )
-                scrollbar.position = (1-scrollbar.size);
-            else {
-                const diff = scrollbar.target.contentWidth - scrollbar.target.width;
-                const cquotient = scrollbar.target.contentX / diff;
-                const hquotient = (1-scrollbar.size);
-
-                const newpos = hquotient * cquotient;
-                if( newpos >= 0 )
-                    scrollbar.position = newpos;
-            }
-        } else {
-            if( scrollbar.target.height >= scrollbar.target.contentHeight )
-            {
-                scrollbar.position = 0;
-                scrollbar.target.contentY = 0;
-            }
-            else if( scrollbar.target.contentY > scrollbar.target.contentHeight - scrollbar.target.height )
-                scrollbar.position = (1-scrollbar.size);
-            else {
-                const diff = scrollbar.target.contentHeight - scrollbar.target.height;
-                const cquotient = scrollbar.target.contentY / diff;
-                const hquotient = (1-scrollbar.size);
-
-                const newpos = hquotient * cquotient;
-                if( newpos >= 0 )
-                    scrollbar.position = newpos;
-            }
-        }
+        function onContentHeightChanged() { updateSize() }
+        function onContentWidthChanged() { updateSize() }
+        function onHeightChanged() { updateSize() }
+        function onWidthChanged() { updateSize() }
+        function onContentYChanged() { updatePosition() }
+        function onContentXChanged() { updatePosition() }
     }
 
     function updateSize() {
-        // Find the ratio to calculate our handle size:
-        const ratio = (scrollbar.orientation == Qt.Horizontal ? (scrollbar.target.width / scrollbar.target.contentWidth) : (scrollbar.target.height / scrollbar.target.contentHeight));
-        scrollbar.size = ratio <= 1 ? ratio : 1
+        if (!target) return
+        size = orientation === Qt.Vertical
+            ? Math.min(1.0, target.height / target.contentHeight)
+            : Math.min(1.0, target.width / target.contentWidth)
     }
 
     function updatePosition() {
-        const quotient = (1-scrollbar.size);
-        if( quotient <= 0 )
-            return;
-
-        const handlepos = scrollbar.position / quotient;
-        const viewportDiff = (scrollbar.orientation == Qt.Horizontal ? (scrollbar.target.contentWidth - scrollbar.target.width) : (scrollbar.target.contentHeight - scrollbar.target.height))
-        const diff = viewportDiff * handlepos;
-
-        if( scrollbar.orientation == Qt.Horizontal )
-            scrollbar.target.contentX = diff;
-        else
-            scrollbar.target.contentY = diff;
+        if (!target) return
+        let maxScroll = orientation === Qt.Vertical
+            ? target.contentHeight - target.height
+            : target.contentWidth - target.width
+        position = maxScroll > 0
+            ? (orientation === Qt.Vertical ? target.contentY : target.contentX) / maxScroll
+            : 0
     }
 
-    Component.onCompleted: recalculateHandle();
+    Component.onCompleted: {
+        updateSize()
+
+    }
 }

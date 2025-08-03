@@ -12,10 +12,10 @@ import Sections
 Window {
     id: appWindow
     width: 1080
-    height: 720
+    height: 650
     visible: true
     minimumWidth: 1080
-    minimumHeight: 720
+    minimumHeight: 650
     // flags: Qt.Window | Qt.FramelessWindowHint
     title: "RoboForger"
 

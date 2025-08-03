@@ -9,6 +9,9 @@ import Components
 Item {
     id: processItem
 
+    property real buttonWidth: parent.width / 3 - Scaler.margin2 * 2
+    property real buttonHeight: parent.height / 4 - Scaler.margin2 * 2
+
     TRectangle {
         anchors.fill: parent
         color: "transparent"
@@ -44,7 +47,8 @@ Item {
                 borderWidth: 0
                 Layout.fillWidth: true
                 Layout.preferredHeight: parent.height / 4
-                Layout.margins: Scaler.margin2
+                // Layout.margins: Scaler.margin2
+                Layout.rightMargin: Scaler.margin2
                 Layout.row: 1
                 Layout.column: 0
                 onClicked: {
@@ -66,7 +70,8 @@ Item {
                 borderWidth: 0
                 Layout.fillWidth: true
                 Layout.preferredHeight: parent.height / 4
-                Layout.margins: Scaler.margin2
+                // Layout.margins: Scaler.margin2
+                Layout.leftMargin: Scaler.margin2
                 Layout.row: 1
                 Layout.column: 1
                 onClicked: {
@@ -78,8 +83,8 @@ Item {
             }
 
             Item {
-                Layout.fillHeight: true
-                Layout.fillWidth: true // Important to allow content to fill
+                Layout.preferredWidth: buttonWidth
+                Layout.preferredHeight: parent.height / 4
                 Layout.margins: Scaler.margin2
                 Layout.row: 2
                 Layout.column: 0

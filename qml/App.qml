@@ -19,7 +19,7 @@ AppWindow {
         GridLayout {
             id: mainGrid
             anchors.fill: parent
-            columns: 3
+            columns: 4
             rows: 4
 
             // === Header Bar ===
@@ -34,13 +34,15 @@ AppWindow {
             // }
 
             Description {
+                id: descriptionSections
                 Layout.columnSpan: 1
-                Layout.rowSpan: 1
+                Layout.rowSpan: 2
                 Layout.column: 0
-                Layout.row: 1
+                Layout.row: 0
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.maximumWidth: mainGrid.width / 4
+                Layout.maximumWidth: 290
+                Layout.minimumWidth: mainGrid.width / 4
             }
 
             Parameters {
@@ -51,55 +53,62 @@ AppWindow {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.topMargin: Scaler.margin1
-                Layout.bottomMargin: Scaler.margin1
+                Layout.bottomMargin: 30
                 Layout.maximumHeight: mainGrid.height * 2 / 3 - 20
-                Layout.maximumWidth: mainGrid.width / 4
+                Layout.maximumWidth: 290
             }
 
             // robo config
             Robo {
                 Layout.columnSpan: 1
-                Layout.rowSpan: 1
+                Layout.rowSpan: 3
                 Layout.column: 1
-                Layout.row: 1
-                Layout.fillWidth: true
+                Layout.row: 0
                 Layout.fillHeight: true
+                Layout.maximumWidth: mainGrid.width * 3 / 8
+                Layout.minimumWidth: mainGrid.width * 2 / 6
+                // 360 width
             }
 
             Process {
-                Layout.column: 2
-                Layout.row: 1
+                Layout.column: 1
+                Layout.row: 3
                 Layout.columnSpan: 1
                 Layout.rowSpan: 1
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+                Layout.maximumWidth: mainGrid.width * 3 / 8
+                Layout.minimumWidth: mainGrid.width * 2 / 6
+                Layout.preferredHeight: mainGrid.height / 3
                 Layout.bottomMargin: Scaler.margin1
             }
 
             Preview {
                 id: preview
-                Layout.column: 1
-                Layout.row: 2
+                Layout.column: 2
+                Layout.row: 0
                 Layout.columnSpan: 1
-                Layout.rowSpan: 2
+                Layout.rowSpan: 3
+                Layout.preferredHeight: mainGrid.height * 2 / 3
+                // Layout.preferredWidth: mainGrid.height * 2 / 3
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.bottomMargin: Scaler.margin1
+                // Layout.bottomMargin: Scaler.margin1
             }
 
             Feedback {
                 Layout.columnSpan: 1
                 Layout.rowSpan: 1
                 Layout.column: 2
-                Layout.row: 2
-                Layout.fillWidth: true
+                Layout.row: 3
+                Layout.preferredWidth: mainGrid.height * 2 / 3
                 Layout.fillHeight: true
+                Layout.fillWidth: true
+                Layout.bottomMargin: 30
+                Layout.rightMargin: 5
             }
         }
 
-        ThemeSwitch {
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-        }
+        // ThemeSwitch {
+        //     anchors.bottom: parent.bottom
+        //     anchors.right: parent.right
+        // }
     }
 }

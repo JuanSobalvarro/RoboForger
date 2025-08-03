@@ -5,8 +5,8 @@ import TElements
 import Utils
 
 Item {
-    width: 160
-    height: 48
+    width: 120
+    height: 36
 
     // This rectangle will be the visual main component with border and color
     TRectangle {

@@ -1,5 +1,6 @@
 module Components
 LabeledInput LabeledInput.qml
+NumberLabeledInput NumberLabeledInput.qml
 MonoColorSVG MonoColorSVG.qml
 AppWindow AppWindow.qml
 Scrollable Scrollable.qml

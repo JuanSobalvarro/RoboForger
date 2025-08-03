@@ -82,6 +82,25 @@ class DxfWorker(QObject):
     useDetectorChanged = Signal(bool)
     useOffsetChanged = Signal(bool)
 
+    # robo parameters
+    toolNameChanged = Signal(str)
+
+    inferiorLimitXChanged = Signal(float)
+    inferiorLimitYChanged = Signal(float)
+    inferiorLimitZChanged = Signal(float)
+
+    superiorLimitXChanged = Signal(float)
+    superiorLimitYChanged = Signal(float)
+    superiorLimitZChanged = Signal(float)
+
+    originXChanged = Signal(float)
+    originYChanged = Signal(float)
+    originZChanged = Signal(float)
+
+    zeroXChanged = Signal(float)
+    zeroYChanged = Signal(float)
+    zeroZChanged = Signal(float)
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -104,6 +123,14 @@ class DxfWorker(QObject):
         self._circles_velocity: int = None
         self._use_detector: bool = False
         self._use_offset: bool = False
+
+        # Robot parameters
+        self._tool_name: str = "tool0"
+
+        self._inferior_limit: tuple[float, float, float] = (-810.0, -810.0, 0.0)  # (xmin, ymin, zmin)
+        self._superior_limit: tuple[float, float, float] = (810.0, 810.0, 0.0)  # (xmax, ymax, zmax)
+        self._origin: tuple[float, float, float] = (450.0, 0.0, 450.0)  # (x, y, z)
+        self._zero: tuple[float, float, float] = (0.0, 0.0, 0.0)  # (x, y, z)
 
         # figures
         self._raw_lines = []
@@ -206,6 +233,163 @@ class DxfWorker(QObject):
             # raise ValueError("useOffset must be a boolean value.")
         self._use_offset = value
 
+    # -- ROBOT PARAMETERS -- #
+    @Property(str, notify=toolNameChanged)
+    def toolName(self):
+        return self._tool_name
+
+    @toolName.setter
+    def toolName(self, value):
+        if not value:
+            raise ValueError("Tool name cannot be empty.")
+        self._tool_name = value
+        self.toolNameChanged.emit(value)
+
+    @Property(float, notify=inferiorLimitXChanged)
+    def inferiorLimitX(self):
+        return self._inferior_limit[0]
+
+    @inferiorLimitX.setter
+    def inferiorLimitX(self, value):
+        logging.info(f"Setting inferior limit X to {value}")
+        self._inferior_limit = (value, self._inferior_limit[1], self._inferior_limit[2])
+        self.inferiorLimitXChanged.emit(value)
+
+    @Property(float, notify=inferiorLimitYChanged)
+    def inferiorLimitY(self):
+        return self._inferior_limit[1]
+
+    @inferiorLimitY.setter
+    def inferiorLimitY(self, value):
+        self._inferior_limit = (self._inferior_limit[0], value, self._inferior_limit[2])
+        self.inferiorLimitYChanged.emit(value)
+
+    @Property(float, notify=inferiorLimitZChanged)
+    def inferiorLimitZ(self):
+        return self._inferior_limit[2]
+
+    @inferiorLimitZ.setter
+    def inferiorLimitZ(self, value):
+        self._inferior_limit = (self._inferior_limit[0], self._inferior_limit[1], value)
+        self.inferiorLimitZChanged.emit(value)
+
+    @Property(float, notify=superiorLimitXChanged)
+    def superiorLimitX(self):
+        return self._superior_limit[0]
+
+    @superiorLimitX.setter
+    def superiorLimitX(self, value):
+        self._superior_limit = (value, self._superior_limit[1], self._superior_limit[2])
+        self.superiorLimitXChanged.emit(value)
+
+    @Property(float, notify=superiorLimitYChanged)
+    def superiorLimitY(self):
+        return self._superior_limit[1]
+
+    @superiorLimitY.setter
+    def superiorLimitY(self, value):
+        self._superior_limit = (self._superior_limit[0], value, self._superior_limit[2])
+        self.superiorLimitYChanged.emit(value)
+
+    @Property(float, notify=superiorLimitZChanged)
+    def superiorLimitZ(self):
+        return self._superior_limit[2]
+
+    @superiorLimitZ.setter
+    def superiorLimitZ(self, value):
+        self._superior_limit = (self._superior_limit[0], self._superior_limit[1], value)
+        self.superiorLimitZChanged.emit(value)
+
+    @Property(float, notify=originXChanged)
+    def originX(self):
+        return self._origin[0]
+
+    @originX.setter
+    def originX(self, value):
+        if self._inferior_limit and value < self._inferior_limit[0]:
+            raise ValueError(f"Origin X cannot be less than inferior limit X: {self._inferior_limit[0]}")
+
+        if self._superior_limit and value > self._superior_limit[0]:
+            raise ValueError(f"Origin X cannot be greater than superior limit X: {self._superior_limit[0]}")
+
+        self._origin = (value, self._origin[1], self._origin[2])
+        self.originXChanged.emit(value)
+
+    @Property(float, notify=originYChanged)
+    def originY(self):
+        return self._origin[1]
+
+    @originY.setter
+    def originY(self, value):
+        if self._inferior_limit and value < self._inferior_limit[1]:
+            raise ValueError(f"Origin Y cannot be less than inferior limit Y: {self._inferior_limit[1]}")
+
+        if self._superior_limit and value > self._superior_limit[1]:
+            raise ValueError(f"Origin Y cannot be greater than superior limit Y: {self._superior_limit[1]}")
+
+        self._origin = (self._origin[0], value, self._origin[2])
+        self.originYChanged.emit(value)
+
+    @Property(float, notify=originZChanged)
+    def originZ(self):
+        return self._origin[2]
+
+    @originZ.setter
+    def originZ(self, value):
+        if self._inferior_limit and value < self._inferior_limit[2]:
+            raise ValueError(f"Origin Z cannot be less than inferior limit Z: {self._inferior_limit[2]}")
+
+        if self._superior_limit and value > self._superior_limit[2]:
+            raise ValueError(f"Origin Z cannot be greater than superior limit Z: {self._superior_limit[2]}")
+
+        self._origin = (self._origin[0], self._origin[1], value)
+        self.originZChanged.emit(value)
+
+    @Property(float, notify=zeroXChanged)
+    def zeroX(self):
+        return self._zero[0]
+
+    @zeroX.setter
+    def zeroX(self, value):
+        if self._inferior_limit and value < self._inferior_limit[0]:
+            raise ValueError(f"Zero X cannot be less than inferior limit X: {self._inferior_limit[0]}")
+
+        if self._superior_limit and value > self._superior_limit[0]:
+            raise ValueError(f"Zero X cannot be greater than superior limit X: {self._superior_limit[0]}")
+
+        self._zero = (value, self._zero[1], self._zero[2])
+        self.zeroXChanged.emit(value)
+
+    @Property(float, notify=zeroYChanged)
+    def zeroY(self):
+        return self._zero[1]
+
+    @zeroY.setter
+    def zeroY(self, value):
+        if self._inferior_limit and value < self._inferior_limit[1]:
+            raise ValueError(f"Zero Y cannot be less than inferior limit Y: {self._inferior_limit[1]}")
+
+        if self._superior_limit and value > self._superior_limit[1]:
+            raise ValueError(f"Zero Y cannot be greater than superior limit Y: {self._superior_limit[1]}")
+
+        self._zero = (self._zero[0], value, self._zero[2])
+        self.zeroYChanged.emit(value)
+
+    @Property(float, notify=zeroZChanged)
+    def zeroZ(self):
+        return self._zero[2]
+
+    @zeroZ.setter
+    def zeroZ(self, value):
+        if self._inferior_limit and value < self._inferior_limit[2]:
+            raise ValueError(f"Zero Z cannot be less than inferior limit Z: {self._inferior_limit[2]}")
+
+        if self._superior_limit and value > self._superior_limit[2]:
+            raise ValueError(f"Zero Z cannot be greater than superior limit Z: {self._superior_limit[2]}")
+
+        self._zero = (self._zero[0], self._zero[1], value)
+        self.zeroZChanged.emit(value)
+
     def is_running(self):
         """
         Check if the worker process is currently running.
@@ -279,6 +463,7 @@ class DxfWorker(QObject):
                 return
 
             if not self._selected_file_path:
+                raise ValueError("No file selected. Please load a DXF file before starting processing.")
                 return
 
             self._is_running = True
@@ -331,6 +516,22 @@ class DxfWorker(QObject):
             print("Invalid useOffset value. It must be a boolean.")
             return False
 
+        if not isinstance(self._inferior_limit, tuple) or len(self._inferior_limit) != 3:
+            print("Invalid inferior limit. It must be a tuple of three floats.")
+            return False
+
+        if not isinstance(self._superior_limit, tuple) or len(self._superior_limit) != 3:
+            print("Invalid superior limit. It must be a tuple of three floats.")
+            return False
+
+        if not isinstance(self._origin, tuple) or len(self._origin) != 3:
+            print("Invalid origin. It must be a tuple of three floats.")
+            return False
+
+        if not isinstance(self._zero, tuple) or len(self._zero) != 3:
+            print("Invalid zero. It must be a tuple of three floats.")
+            return False
+
         return True
 
     def _parameters_as_kwargs(self):
@@ -344,7 +545,11 @@ class DxfWorker(QObject):
             "arcs_velocity": self._arcs_velocity,
             "circles_velocity": self._circles_velocity,
             "use_detector": self._use_detector,
-            "use_offset": self._use_offset
+            "use_offset": self._use_offset,
+            "inferior_limit": self._inferior_limit,
+            "superior_limit": self._superior_limit,
+            "origin": self._origin,
+            "zero": self._zero,
         }
 
     def _get_raw_figures(self):

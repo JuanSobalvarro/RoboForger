@@ -56,9 +56,9 @@ Item {
                 scaling: appViewModel.dxfWorker.scale
                 lineColor: "yellow" // Use model color or default to white
 
-                Component.onCompleted: {
-                    console.log("Model: ", model.start_x);
-                }
+                // Component.onCompleted: {
+                //     console.log("Model: ", model.start_x);
+                // }
             }
         }
 
@@ -75,9 +75,9 @@ Item {
                 scaling: appViewModel.dxfWorker.scale
                 arcColor: "blue" // Use model color or default to blue
 
-                Component.onCompleted: {
-                    console.log("Arc Model: ", model.center_x);
-                }
+                // Component.onCompleted: {
+                //     console.log("Arc Model: ", model.center_x);
+                // }
             }
         }
 
@@ -91,9 +91,9 @@ Item {
                 scaling: appViewModel.dxfWorker.scale
                 circleColor: "green" // Use model color or default to green
 
-                Component.onCompleted: {
-                    console.log("Circle Model: ", model.center_x);
-                }
+                // Component.onCompleted: {
+                //     console.log("Circle Model: ", model.center_x);
+                // }
             }
         }
 
@@ -136,56 +136,56 @@ Item {
         onClicked: {
             camera.position = Qt.vector3d(0, 0, 500);
             camera.eulerRotation = Qt.vector3d(0, 0, 0);
-            console.log("Camera view reset to default position and rotation.");
+            // console.log("Camera view reset to default position and rotation.");
         }
     }
 
-    Connections {
-        target: appViewModel.dxfWorker
-
-        function onFileLoaded() {
-            if (!target) {
-                console.error("DXF Worker target is not set.");
-                return;
-            }
-
-            console.log("DXF file loaded successfully.");
-
-            // Check if lines is actually a model (list)
-            if (target.lines && target.lines.length > 0) {
-                console.log("Number of lines:", target.lines.length);
-
-                // Iterate through the first few items to see their properties
-                var max_items_to_log = Math.min(target.lines.length, 5); // Log up to 5 lines
-                for (var i = 0; i < max_items_to_log; i++) {
-                    var line_item = target.lines[i]; // Access item by index
-                    // Now access individual properties of the dictionary/object
-                    console.log("Line", i + ":");
-                    console.log("  start_x:", line_item.start_x);
-                    console.log("  start_y:", line_item.start_y);
-                    console.log("  start_z:", line_item.start_z);
-                    console.log("  end_x:", line_item.end_x);
-                    console.log("  end_y:", line_item.end_y);
-                    console.log("  end_z:", line_item.end_z);
-                    // If you have other properties like 'color', log them too
-                    // console.log("  color:", line_item.color);
-                }
-                if (target.lines.length > max_items_to_log) {
-                    console.log("...(and", target.lines.length - max_items_to_log, "more lines)");
-                }
-            } else {
-                console.log("No lines found or target.lines is not a valid list.");
-            }
-
-            // You can do similar checks for arcs and circles
-            if (target.arcs && target.arcs.length > 0) {
-                console.log("Number of arcs:", target.arcs.length);
-                // ... log arc details
-            }
-            if (target.circles && target.circles.length > 0) {
-                console.log("Number of circles:", target.circles.length);
-                // ... log circle details
-            }
-        }
-    }
+    // Connections {
+    //     target: appViewModel.dxfWorker
+    //
+    //     function onFileLoaded() {
+    //         if (!target) {
+    //             console.error("DXF Worker target is not set.");
+    //             return;
+    //         }
+    //
+    //         console.log("DXF file loaded successfully.");
+    //
+    //         // Check if lines is actually a model (list)
+    //         if (target.lines && target.lines.length > 0) {
+    //             console.log("Number of lines:", target.lines.length);
+    //
+    //             // Iterate through the first few items to see their properties
+    //             var max_items_to_log = Math.min(target.lines.length, 5); // Log up to 5 lines
+    //             for (var i = 0; i < max_items_to_log; i++) {
+    //                 var line_item = target.lines[i]; // Access item by index
+    //                 // Now access individual properties of the dictionary/object
+    //                 console.log("Line", i + ":");
+    //                 console.log("  start_x:", line_item.start_x);
+    //                 console.log("  start_y:", line_item.start_y);
+    //                 console.log("  start_z:", line_item.start_z);
+    //                 console.log("  end_x:", line_item.end_x);
+    //                 console.log("  end_y:", line_item.end_y);
+    //                 console.log("  end_z:", line_item.end_z);
+    //                 // If you have other properties like 'color', log them too
+    //                 // console.log("  color:", line_item.color);
+    //             }
+    //             if (target.lines.length > max_items_to_log) {
+    //                 console.log("...(and", target.lines.length - max_items_to_log, "more lines)");
+    //             }
+    //         } else {
+    //             console.log("No lines found or target.lines is not a valid list.");
+    //         }
+    //
+    //         // You can do similar checks for arcs and circles
+    //         if (target.arcs && target.arcs.length > 0) {
+    //             console.log("Number of arcs:", target.arcs.length);
+    //             // ... log arc details
+    //         }
+    //         if (target.circles && target.circles.length > 0) {
+    //             console.log("Number of circles:", target.circles.length);
+    //             // ... log circle details
+    //         }
+    //     }
+    // }
 }
