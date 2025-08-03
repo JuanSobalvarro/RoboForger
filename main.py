@@ -16,6 +16,22 @@ ASSETS_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
 import resources_rc
 
+def get_resource_path(relative_path):
+    """
+    Get the absolute path to a resource, handling both development and
+    PyInstaller-frozen environments.
+    """
+    if getattr(sys, 'frozen', False):
+        # We are running as a PyInstaller-frozen executable.
+        # The base path is the temporary directory where files are extracted.
+        base_path = sys._MEIPASS
+    else:
+        # We are running in a regular Python environment.
+        # The base path is the directory of the current script.
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    return os.path.join(base_path, relative_path)
+
 def run_gui_app():
 
     app = QApplication(sys.argv)
@@ -23,13 +39,14 @@ def run_gui_app():
     darkPalette.setColor(QPalette.Window, QColor(53, 53, 53))  # Main window background
     app.setPalette(darkPalette)
 
-    app.setWindowIcon(QIcon(os.path.join(ASSETS_DIR, 'img', 'icon.png')))
+    icon_path = get_resource_path(os.path.join('assets', 'img', 'icon.png'))
+    app.setWindowIcon(QIcon(icon_path))
 
     logging.info("Starting RoboForger")
 
     engine = QQmlApplicationEngine()
-    engine.addImportPath('qml')
-    engine.addImportPath('qml/viewmodels') # Asegúrate de que QML pueda encontrar tu ViewModel
+    qml_dir = get_resource_path('qml')
+    engine.addImportPath(qml_dir)
 
     # Crea una instancia de tu ViewModel y la expone a QML
     app_view_model = AppViewModel()
@@ -37,7 +54,8 @@ def run_gui_app():
 
     logging.info("ViewModels Loaded Successfully")
 
-    engine.load('qml/App.qml')
+    main_qml_path = get_resource_path(os.path.join('qml', 'App.qml'))
+    engine.load(main_qml_path)
 
     if not engine.importPathList():
         logging.error("No import paths found")
