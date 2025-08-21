@@ -5,6 +5,7 @@ import Utils
 import TElements
 
 Item {
+    id: root
     property string label: ""
     property string placeholder: ""
     property alias text: input.text
@@ -14,6 +15,8 @@ Item {
 
     implicitHeight: rootLayout.implicitHeight
     implicitWidth: rootLayout.implicitWidth
+
+    signal editingFinished()
 
     RowLayout {
         id: rootLayout
@@ -39,6 +42,10 @@ Item {
             placeholderText: placeholder
             font.pixelSize: Scaler.font8
             color: ThemeManager.getColor("text")
+
+            onEditingFinished: {
+                root.editingFinished()
+            }
         }
     }
 }

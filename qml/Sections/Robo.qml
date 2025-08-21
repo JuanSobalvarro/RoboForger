@@ -1,10 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
 
-import TElements
-import Themes
-import Components
-import Utils
+import "../TElements"
+import "../Themes"
+import "../Components"
+import "../Utils"
+
+import ApplicationObjects
 
 Item {
     id: roboItem
@@ -44,10 +46,9 @@ Item {
                 Layout.leftMargin: Scaler.margin1
                 Layout.rightMargin: Scaler.margin1
 
-                text: appViewModel.dxfWorker.toolName
-                onTextChanged: {
-                    if (focus && appViewModel.dxfWorker.toolName !== text)
-                        appViewModel.dxfWorker.toolName = text
+                text: Orchestrator.dxfWorker.toolName
+                onEditingFinished: {
+                    Orchestrator.dxfWorker.toolName = text
                 }
             }
 
@@ -91,17 +92,20 @@ Item {
                     NumberLabeledInput {
                         label: "X";
                         placeholder: "0.0";
-                        targetProperty: appViewModel.dxfWorker.inferiorLimitX
+                        targetObject: Orchestrator.dxfWorker
+                        targetProperty: "inferiorLimitX"
                     }
                     NumberLabeledInput {
                         label: "Y";
                         placeholder: "0.0";
-                        targetProperty: appViewModel.dxfWorker.inferiorLimitY
+                        targetObject: Orchestrator.dxfWorker
+                        targetProperty: "inferiorLimitY"
                     }
                     NumberLabeledInput {
                         label: "Z";
                         placeholder: "0.0";
-                        targetProperty: appViewModel.dxfWorker.inferiorLimitZ
+                        targetObject: Orchestrator.dxfWorker
+                        targetProperty: "inferiorLimitZ"
                     }
                 }
 
@@ -133,17 +137,20 @@ Item {
                     NumberLabeledInput {
                         label: "X";
                         placeholder: "0.0";
-                        targetProperty: appViewModel.dxfWorker.superiorLimitX
+                        targetObject: Orchestrator.dxfWorker
+                        targetProperty: "superiorLimitX"
                     }
                     NumberLabeledInput {
                         label: "Y";
                         placeholder: "0.0";
-                        targetProperty: appViewModel.dxfWorker.superiorLimitY
+                        targetObject: Orchestrator.dxfWorker
+                        targetProperty: "superiorLimitY"
                     }
                     NumberLabeledInput {
                         label: "Z";
                         placeholder: "0.0";
-                        targetProperty: appViewModel.dxfWorker.superiorLimitZ
+                        targetObject: Orchestrator.dxfWorker
+                        targetProperty: "superiorLimitZ"
                     }
 
                 }
@@ -162,18 +169,21 @@ Item {
                     // Origin
                     NumberLabeledInput {
                         label: "Origin X";
-                        placeholder: "0.0";
-                        targetProperty: appViewModel.dxfWorker.originX
+                        targetObject: Orchestrator.dxfWorker
+                        targetProperty: "originX"
+                        placeholder: "0.0"
                     }
                     NumberLabeledInput {
                         label: "Origin Y";
-                        placeholder: "0.0";
-                        targetProperty: appViewModel.dxfWorker.originY
+                        targetObject: Orchestrator.dxfWorker
+                        targetProperty: "originY"
+                        placeholder: "0.0"
                     }
                     NumberLabeledInput {
                         label: "Origin Z";
-                        placeholder: "0.0";
-                        targetProperty: appViewModel.dxfWorker.originZ
+                        targetObject: Orchestrator.dxfWorker
+                        targetProperty: "originZ"
+                        placeholder: "0.0"
                     }
 
                 }
@@ -182,17 +192,20 @@ Item {
                     NumberLabeledInput {
                         label: "Zero X";
                         placeholder: "0.0";
-                        targetProperty: appViewModel.dxfWorker.zeroX
+                        targetObject: Orchestrator.dxfWorker
+                        targetProperty: "zeroX"
                     }
                     NumberLabeledInput {
                         label: "Zero Y";
                         placeholder: "0.0";
-                        targetProperty: appViewModel.dxfWorker.zeroY
+                        targetObject: Orchestrator.dxfWorker
+                        targetProperty: "zeroY"
                     }
                     NumberLabeledInput {
                         label: "Zero Z";
                         placeholder: "0.0";
-                        targetProperty: appViewModel.dxfWorker.zeroZ
+                        targetObject: Orchestrator.dxfWorker
+                        targetProperty: "zeroZ"
                     }
 
                 }

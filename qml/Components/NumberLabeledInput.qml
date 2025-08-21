@@ -1,23 +1,27 @@
 import QtQuick
 
 LabeledInput {
-    property real defaultValue: NaN
-    property var targetProperty
+    property var targetObject
+    property string targetProperty: ""
 
-    text: targetProperty === defaultValue ? "" : targetProperty.toString()
+    // Show empty string if Python property is NaN, otherwise show its value
+    text: {
+        var v = targetObject ? targetObject[targetProperty] : NaN
+        return isNaN(v) ? "" : v.toString()
+    }
 
-    Component.onCompleted: updateTextFromTarget()
-    onTargetPropertyChanged: updateTextFromTarget()
+    placeholder: targetObject && !isNaN(targetObject[targetProperty])
+                 ? targetObject[targetProperty].toString()
+                 : ""
 
-    function updateTextFromTarget() {
-        // Avoid infinite loops
-        if (targetProperty === defaultValue) {
-            text = "";
+    onEditingFinished: {
+        var trimmed = text.trim()
+        var value = parseFloat(trimmed)
+
+        if (trimmed === "" || isNaN(value)) {
+            targetObject[targetProperty] = NaN
         } else {
-            let parsed = parseFloat(text);
-            if (isNaN(parsed) || parsed !== targetProperty) {
-                text = targetProperty.toString();
-            }
+            targetObject[targetProperty] = value
         }
     }
 }

@@ -1,6 +1,8 @@
 import QtQuick
 import Components
 
+import ApplicationObjects
+
 Item {
     id: feedbackItem
     property int maxLines: 200
@@ -49,7 +51,7 @@ Item {
     }
 
     Connections {
-        target: appViewModel.consoleLogger
+        target: Orchestrator.consoleLogger
         function onMessageReceived(message) {
             const formatted = "> " + message
             logModel.append({ text: formatted })

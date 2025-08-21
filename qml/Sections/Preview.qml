@@ -7,6 +7,8 @@ import GElements
 
 import Utils
 
+import ApplicationObjects
+
 Item {
     id: previewItem
 
@@ -48,12 +50,12 @@ Item {
         // Repeater of lines to be drawn
         Repeater3D {
             id: lineRepeater
-            model: appViewModel.dxfWorker.lineModel
+            model: Orchestrator.dxfWorker.lineModel
             delegate: GLine {
                 startPoint: Qt.vector3d(model.start_x, model.start_y, model.start_z)
                 endPoint: Qt.vector3d(model.end_x, model.end_y, model.end_z)
                 thickness: 10
-                scaling: appViewModel.dxfWorker.scale
+                scaling: Orchestrator.dxfWorker.scale
                 lineColor: "yellow" // Use model color or default to white
 
                 // Component.onCompleted: {
@@ -64,7 +66,7 @@ Item {
 
         // Repeater of arcs to be drawn
         Repeater3D {
-            model: appViewModel.dxfWorker.arcModel
+            model: Orchestrator.dxfWorker.arcModel
             delegate: GArc {
                 center: Qt.vector3d(model.center_x, model.center_y, model.center_z)
                 radius: model.radius
@@ -72,7 +74,7 @@ Item {
                 endAngle: model.end_angle
                 clockwise: model.clockwise
                 thickness: 10
-                scaling: appViewModel.dxfWorker.scale
+                scaling: Orchestrator.dxfWorker.scale
                 arcColor: "blue" // Use model color or default to blue
 
                 // Component.onCompleted: {
@@ -83,17 +85,29 @@ Item {
 
         // Repeater of circles to be drawn
         Repeater3D {
-            model: appViewModel.dxfWorker.circleModel
+            model: Orchestrator.dxfWorker.circleModel
             delegate: GCircle {
                 center: Qt.vector3d(model.center_x, model.center_y, model.center_z)
                 radius: model.radius
                 thickness: 10
-                scaling: appViewModel.dxfWorker.scale
+                scaling: Orchestrator.dxfWorker.scale
                 circleColor: "green" // Use model color or default to green
 
                 // Component.onCompleted: {
                 //     console.log("Circle Model: ", model.center_x);
                 // }
+            }
+        }
+
+        // Repeater for splines
+        Repeater3D {
+            model: Orchestrator.dxfWorker.splineModel
+            delegate: GSpline {
+                startPoints: model.startPoints
+                endPoints: model.endPoints
+                thickness: model.thickness
+                lineColor: model.lineColor
+                scaling: model.scaling
             }
         }
 
@@ -141,7 +155,7 @@ Item {
     }
 
     // Connections {
-    //     target: appViewModel.dxfWorker
+    //     target: Orchestrator.dxfWorker
     //
     //     function onFileLoaded() {
     //         if (!target) {

@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick3D
 import QtQuick3D.Helpers
 
-import CircleGeometry
+import GeometryObjects
 
 Model {
     id: circleModel

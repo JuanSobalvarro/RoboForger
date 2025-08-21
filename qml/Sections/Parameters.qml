@@ -1,12 +1,13 @@
 // Components/Parameters.qml
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 
-import Themes
-import Utils
-import TElements
-import Components
+import "../Themes"
+import "../Utils"
+import "../TElements"
+import "../Components"
+
+import ApplicationObjects
 
 Item {
     id: parametersItem
@@ -23,8 +24,6 @@ Item {
             // --- Title ---
             TRectangle {
                 color: ThemeManager.getColor("background1")
-                // radius: 8
-
                 Layout.fillWidth: true
                 Layout.preferredHeight: Scaler.font3 * 2
 
@@ -46,7 +45,6 @@ Item {
                 Layout.leftMargin: Scaler.margin2
                 Layout.rightMargin: Scaler.margin2
                 Layout.preferredHeight: parserGrid.implicitHeight
-                // Layout.alignment: Qt.AlignTop
                 color: ThemeManager.getColor("background")
 
                 ColumnLayout {
@@ -69,17 +67,10 @@ Item {
                         Layout.leftMargin: Scaler.margin1
                         Layout.rightMargin: Scaler.margin1
 
-                        text: isNaN(appViewModel.dxfWorker.scale) ? "" : appViewModel.dxfWorker.scale.toString()
-                        onTextChanged: {
-                            console.log("Scale Factor Changed: ", text);
-                            if (text === "") {
-                                appViewModel.dxfWorker.scale = NaN;
-                            } else {
-                                // Ensure the text is a valid number
-                                if (!isNaN(parseFloat(text))) {
-                                    appViewModel.dxfWorker.scale = parseFloat(text);
-                                }
-                            }
+                        text: isNaN(Orchestrator.dxfWorker.scale) ? "" : Orchestrator.dxfWorker.scale.toString()
+                        onEditingFinished: {
+                            var value = parseFloat(text)
+                            Orchestrator.dxfWorker.scale = !isNaN(value) ? value : 1.0
                         }
                     }
                 }
@@ -112,6 +103,7 @@ Item {
                         font.bold: true
                         color: ThemeManager.getColor("text")
                     }
+
                     LabeledInput {
                         Layout.fillWidth: true
                         label: "Float Precision"
@@ -119,16 +111,10 @@ Item {
                         Layout.leftMargin: Scaler.margin1
                         Layout.rightMargin: Scaler.margin1
 
-                        text: appViewModel.dxfWorker.floatPrecision === 0 ? "" : appViewModel.dxfWorker.floatPrecision.toString()
-                        onTextChanged: {
-                            if (text === "") {
-                                appViewModel.dxfWorker.floatPrecision = NaN;
-                            } else {
-                                // Ensure the text is a valid number
-                                if (parseFloat(text) >= 0) {
-                                    appViewModel.dxfWorker.floatPrecision = parseFloat(text);
-                                }
-                            }
+                        text: Orchestrator.dxfWorker.floatPrecision === 0 ? "" : Orchestrator.dxfWorker.floatPrecision.toString()
+                        onEditingFinished: {
+                            var value = parseFloat(text)
+                            Orchestrator.dxfWorker.floatPrecision = !isNaN(value) && value >= 0 ? value : NaN
                         }
                     }
 
@@ -139,16 +125,10 @@ Item {
                         Layout.leftMargin: Scaler.margin1
                         Layout.rightMargin: Scaler.margin1
 
-                        text: appViewModel.dxfWorker.linesVelocity === 0 ? "" : appViewModel.dxfWorker.linesVelocity.toString()
-                        onTextChanged: {
-                            if (text === "") {
-                                appViewModel.dxfWorker.linesVelocity = NaN;
-                            } else {
-                                // Ensure the text is a valid number
-                                if (parseFloat(text) >= 0) {
-                                    appViewModel.dxfWorker.linesVelocity = parseFloat(text);
-                                }
-                            }
+                        text: Orchestrator.dxfWorker.linesVelocity === 0 ? "" : Orchestrator.dxfWorker.linesVelocity.toString()
+                        onEditingFinished: {
+                            var value = parseFloat(text)
+                            Orchestrator.dxfWorker.linesVelocity = !isNaN(value) && value >= 0 ? value : NaN
                         }
                     }
 
@@ -159,16 +139,10 @@ Item {
                         Layout.leftMargin: Scaler.margin1
                         Layout.rightMargin: Scaler.margin1
 
-                        text: appViewModel.dxfWorker.arcsVelocity === 0 ? "" : appViewModel.dxfWorker.arcsVelocity.toString()
-                        onTextChanged: {
-                            if (text === "") {
-                                appViewModel.dxfWorker.arcsVelocity = NaN;
-                            } else {
-                                // Ensure the text is a valid number
-                                if (parseFloat(text) >= 0) {
-                                    appViewModel.dxfWorker.arcsVelocity = parseFloat(text);
-                                }
-                            }
+                        text: Orchestrator.dxfWorker.arcsVelocity === 0 ? "" : Orchestrator.dxfWorker.arcsVelocity.toString()
+                        onEditingFinished: {
+                            var value = parseFloat(text)
+                            Orchestrator.dxfWorker.arcsVelocity = !isNaN(value) && value >= 0 ? value : NaN
                         }
                     }
 
@@ -179,16 +153,24 @@ Item {
                         Layout.leftMargin: Scaler.margin1
                         Layout.rightMargin: Scaler.margin1
 
-                        text: appViewModel.dxfWorker.circlesVelocity === 0 ? "" : appViewModel.dxfWorker.circlesVelocity.toString()
-                        onTextChanged: {
-                            if (text === "") {
-                                appViewModel.dxfWorker.circlesVelocity = NaN;
-                            } else {
-                                // Ensure the text is a valid number
-                                if (parseFloat(text) >= 0) {
-                                    appViewModel.dxfWorker.circlesVelocity = parseFloat(text);
-                                }
-                            }
+                        text: Orchestrator.dxfWorker.circlesVelocity === 0 ? "" : Orchestrator.dxfWorker.circlesVelocity.toString()
+                        onEditingFinished: {
+                            var value = parseFloat(text)
+                            Orchestrator.dxfWorker.circlesVelocity = !isNaN(value) && value >= 0 ? value : NaN
+                        }
+                    }
+
+                    LabeledInput {
+                        Layout.fillWidth: true
+                        label: "Lifting"
+                        placeholder: "50"
+                        Layout.leftMargin: Scaler.margin1
+                        Layout.rightMargin: Scaler.margin1
+
+                        text: Orchestrator.dxfWorker.lifting === 0 ? "" : Orchestrator.dxfWorker.lifting.toString()
+                        onEditingFinished: {
+                            var value = parseFloat(text)
+                            Orchestrator.dxfWorker.lifting = !isNaN(value) && value >= 0 ? value : NaN
                         }
                     }
                 }
@@ -231,9 +213,8 @@ Item {
                         Layout.rightMargin: Scaler.margin2
                         indicatorSize: Scaler.checkboxIndicatorSize2
                         spacing: Scaler.spacing2
-                        checked: appViewModel.dxfWorker.useDetector
-
-                        onCheckedChanged: appViewModel.dxfWorker.useDetector = checked
+                        checked: Orchestrator.dxfWorker.useDetector
+                        onCheckedChanged: Orchestrator.dxfWorker.useDetector = checked
                     }
 
                     TCheckBox {
@@ -243,9 +224,8 @@ Item {
                         Layout.rightMargin: Scaler.margin2
                         indicatorSize: Scaler.checkboxIndicatorSize2
                         spacing: Scaler.spacing2
-                        checked: appViewModel.dxfWorker.useOffset
-
-                        onCheckedChanged: appViewModel.dxfWorker.useOffset = checked
+                        checked: Orchestrator.dxfWorker.useOffset
+                        onCheckedChanged: Orchestrator.dxfWorker.useOffset = checked
                     }
                 }
             }
