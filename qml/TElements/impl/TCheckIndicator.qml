@@ -36,9 +36,14 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: 2
         color: ThemeManager.getColor("text")
-        source: "qrc:/assets/icons/check.svg"
+        source: "qrc:/data/icons/check.svg"
         scale: indicatorItem.checkState === Qt.Checked ? 1 : 0
         Behavior on scale { NumberAnimation { duration: animation_duration } }
+
+        Component.onCompleted: {
+            // Ensure the SVG is loaded before applying the color
+            console.log("SVG loaded, applying color:", color);
+        }
     }
 
     // idk what this is for, but it was in the original code

@@ -3,3 +3,7 @@ https://gitlab.ruhr-uni-bochum.de/hidalggc/anaconda-environment-backup/-/blob/5e
 https://doc.qt.io/qtforpython-6/examples/example_quick3d_customgeometry.html
 
 https://gist.github.com/danieloneill/0034098d06ead35d8048da635ea8f89c
+
+https://github.com/trin94/PySide6-project-template/tree/main
+
+https://mathworld.wolfram.com/B-Spline.html

@@ -34,7 +34,7 @@ Item {
                 hoverColor: ThemeManager.getColor("selection_1")
                 pressedColor: ThemeManager.getColor("selection_2")
 
-                iconSource: "qrc:/assets/icons/sun.svg"
+                iconSource: "qrc:/data/icons/sun.svg"
                 iconColor: ThemeManager.isLight() ? "#ffffff" : ThemeManager.getColor("text")
                 iconWidth: Scaler.iconSize3
                 iconHeight: Scaler.iconSize3
@@ -52,7 +52,7 @@ Item {
                 hoverColor: ThemeManager.getColor("selection_1")
                 pressedColor: ThemeManager.getColor("selection_2")
 
-                iconSource: "qrc:/assets/icons/moon.svg"
+                iconSource: "qrc:/data/icons/moon.svg"
                 iconColor: !ThemeManager.isLight() ? "#ffffff" : ThemeManager.getColor("text")
                 iconWidth: Scaler.iconSize3
                 iconHeight: Scaler.iconSize3

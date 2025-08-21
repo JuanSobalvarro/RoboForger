@@ -1,0 +1,31 @@
+[project]
+name = "RoboForger"
+version = "1.0.0-beta"
+description = "Application that converts 2D dxf file to rapid code"
+readme = "README.MD"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: GNU General Public License v3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Private :: Do Not Upload",
+]
+dependencies = [
+    "pyside6>=6.9.1",
+    "pyside6-essentials==6.9.1",
+    "pywin32>=310; sys_platform == 'win32'",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/JuanSobalvarro/RoboForger"
+Repository = "https://github.com/JuanSobalvarro/RoboForger"
+Issues = "https://github.com/JuanSobalvarro/RoboForger/issues"

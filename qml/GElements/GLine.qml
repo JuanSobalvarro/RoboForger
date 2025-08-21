@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick3D
 import QtQuick3D.Helpers
 
-import LineGeometry // Import your PySide6 LineGeometry
+import GeometryObjects
 
 
 
@@ -29,19 +29,6 @@ Model {
     materials: PrincipledMaterial {
         baseColor: lineColor
         lighting: PrincipledMaterial.NoLighting
-    }
-
-    // Component.onCompleted: {
-    //     console.log("Line Model initialized with", lines.length, "lines")
-    // }
-
-    Connections {
-        target: appViewModel.dxfWorker
-        function onScaleChanged() {
-            console.log("QML: appViewModel.dxfWorker.scale changed to", appViewModel.dxfWorker.scale);
-            // Update scaling for all lines
-            line.scaling = appViewModel.dxfWorker.scale;
-        }
     }
 }
 

@@ -45,6 +45,32 @@ class Figure:
 
         return tuple(round(coord, precision) for coord in point)
 
+    def get_min_points_vector(self):
+        """
+        Given the figures points this function returns the minimum values the figure's points take
+        """
+        if not self._points:
+            raise ValueError("The figure has no points.")
+
+        min_x = min(point[0] for point in self._points)
+        min_y = min(point[1] for point in self._points)
+        min_z = min(point[2] for point in self._points)
+
+        return (min_x, min_y, min_z)
+
+    def get_max_points_vector(self):
+        """
+        Given the figures points this function returns the maximum values the figure's points take
+        """
+        if not self._points:
+            raise ValueError("The figure has no points.")
+
+        max_x = max(point[0] for point in self._points)
+        max_y = max(point[1] for point in self._points)
+        max_z = max(point[2] for point in self._points)
+
+        return (max_x, max_y, max_z)
+
     def _add_lifted_points(self):
         """
         Adds a lifted point at the start and end of the figure points. Pre-down and end-lifted points

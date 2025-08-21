@@ -12,7 +12,7 @@ from RoboForger.detector.detector import Detector
 
 class Draw:
     def __init__(self, tool_name: str = "tool0", velocity: int = 1000,
-                 workspace_limits: Tuple[Point3D, Point3D] = ((-810.0, -810.0, 0.0), (810, 810, 0)),
+                 workspace_limits: Tuple[Point3D, Point3D] = ((-810.0, -810.0, -450.0), (810, 810, 450.0)),
                  origin: Point3D = (450.0, 0.0, 450.0), zero: Point3D = (0.0, 0.0, 0.0), use_detector: bool = True):
         self.figures: List[Figure] = []
         self.tool_name = tool_name
@@ -125,12 +125,28 @@ class Draw:
         self.instructions.append(f"        MoveAbsJ ZERO\\NoEOffs, v{self.velocity}, fine, {self.tool_name};")
 
     def add_figure(self, figure: Figure):
+        """
+        Handles figure validation logic and adds the figure to the drawing.
+        """
+        if not isinstance(figure, Figure):
+            raise TypeError("Expected a Figure instance.")
+        
+        # check for min vector
+        if not self._is_within_limits(figure.get_min_points_vector()):
+            raise ValueError("Figure is out of drawing limits.")
+
+        # check for max vector
+        if not self._is_within_limits(figure.get_max_points_vector()):
+            raise ValueError("Figure is out of drawing limits.")
+
         self.figures.append(figure)
 
     def add_figures(self, figures: List[Figure]):
         if not isinstance(figures, list):
             raise TypeError("Expected a list of Figure instances.")
-        self.figures.extend(figures)
+        
+        for figure in figures:
+            self.add_figure(figure)
 
     def generate_rapid_code(self, use_offset: bool) -> str:
         self.rob_targets.clear()

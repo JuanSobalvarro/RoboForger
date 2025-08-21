@@ -36,7 +36,7 @@ Item {
                     anchors.centerIn: parent
                     height: Scaler.scale(100)
                     fillMode: Image.PreserveAspectFit
-                    source: "qrc:/assets/img/logo.png"
+                    source: "qrc:/data/img/logo.png"
                     mipmap: true
                     smooth: true
                 }

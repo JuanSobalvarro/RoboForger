@@ -1,28 +1,29 @@
 import QtQuick
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 
 Item {
     id: svgItem
 
-    property string color: "#00000000"
+    property string color: "#ff0000ff"
     property bool mipmap: true
     property bool smooth: true
 
     property alias source: svgImage.source
 
     Image {
-        id: svgImage
+        id: svgImage    
         anchors.fill: parent
         fillMode: Image.PreserveAspectFit
-        source: "qrc:/assets/utils/monkey.svg"
+        source: "qrc:/data/utils/monkey.svg"
         mipmap: svgItem.mipmap
         smooth: svgItem.smooth
         visible: false
     }
 
-    ColorOverlay {
-        anchors.fill: parent
+    MultiEffect {
+        anchors.fill: svgImage
         source: svgImage
-        color: svgItem.color
+        colorization: 1.0
+        colorizationColor: svgItem.color
     }
 }

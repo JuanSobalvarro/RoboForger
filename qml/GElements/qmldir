@@ -2,3 +2,4 @@ module GElements
 GLine GLine.qml
 GArc GArc.qml
 GCircle GCircle.qml
+GSpline GSpline.qml

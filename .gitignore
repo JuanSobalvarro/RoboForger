@@ -8,3 +8,7 @@
 arctest
 build
 dist
+build-windows
+*.exe
+*.pycache
+*__pycache__*

@@ -13,7 +13,7 @@ class Arc(Figure):
         - by providing explicit start and end angles.
     """
 
-    def __init__(self, name: str, center: Optional[Point3D] = None, radius: float = 1, start_angle: float = 0, end_angle: float = 0,
+    def __init__(self, name: str, center: Point3D, radius: float = 1, start_angle: float = 0, end_angle: float = 0,
                  clockwise: bool = False, lifting: float = 100, velocity: int = 1000, float_precision: int = 2):
         """
         Initialize an Arc object.
@@ -43,9 +43,9 @@ class Arc(Figure):
         self.start, self.mid, self.end = Arc.arc_points(self.center, radius, self.start_angle, self.end_angle, clockwise)
 
         if Arc.arc_angle(self.start_angle, self.end_angle, self.clockwise) >= pi:
-            print("Angle greater than pi, splitting the arc into two segments.")
-            print(f"Init values from {start_angle} to {end_angle}")
-            print(f"Arc sa {self.start_angle}, ea {self.end_angle}, mid {self.mid_angle}")
+            # print("Angle greater than pi, splitting the arc into two segments.")
+            # print(f"Init values from {start_angle} to {end_angle}")
+            # print(f"Arc sa {self.start_angle}, ea {self.end_angle}, mid {self.mid_angle}")
 
             _, self.mid_1, _ = Arc.arc_points(self.center, radius, self.start_angle, self.mid_angle, clockwise)
             _, self.mid_2, _ = Arc.arc_points(self.center, radius, self.mid_angle, self.end_angle, clockwise)
@@ -183,7 +183,7 @@ class Arc(Figure):
         instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[1])}, v{global_velocity}, fine, {tool_name};\n")
 
         # if arcpoints are too close then do a MoveL instead of a MoveC
-        if distance_vectors(points[2], points[3]) < 0.5:
+        if distance_vectors(points[2], points[3]) < 0.1:
             instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[2])}, v{self.velocity}, fine, {tool_name};\n")
             instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[3])}, v{self.velocity}, fine, {tool_name};\n")
 
@@ -195,7 +195,7 @@ class Arc(Figure):
         if Arc.arc_angle(self.start_angle, self.end_angle, self.clockwise) >= pi:
 
             # if arcpoints are too close then do a MoveL instead of a MoveC
-            if distance_vectors(points[4], points[5]) < 0.5:
+            if distance_vectors(points[4], points[5]) < 0.1:
                 instructions.append(
                     f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[4])}, v{self.velocity}, fine, {tool_name};\n")
                 instructions.append(
@@ -212,7 +212,7 @@ class Arc(Figure):
         return instructions
 
     def __str__(self):
-        return f"Arc<name={self.name} start_point={self.start_point} end_point={self.end_point}>"
+        return f"Arc<name={self.name} center={self.center} radius={self.radius} start_angle={self.start_angle} end_angle={self.end_angle}>"
 
     def __repr__(self):
-        return f"Arc<name={self.name} start_point={self.start_point} end_point={self.end_point}>"
+        return f"Arc<name={self.name} center={self.center} radius={self.radius} start_angle={self.start_angle} end_angle={self.end_angle}>"

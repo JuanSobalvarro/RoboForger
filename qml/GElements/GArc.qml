@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick3D
 import QtQuick3D.Helpers
 
-import ArcGeometry // Import your PySide6 ArcGeometry
+import GeometryObjects
 
 Model {
     id: arcModel

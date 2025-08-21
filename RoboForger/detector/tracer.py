@@ -59,7 +59,7 @@ class Tracer:
         longest_trace: List[Point3D] = [vtx]
 
         first_adj = [adj for adj in graph[vtx] if adj not in globally_visited]
-        first_adj = sorted(first_adj , key=lambda x: len(graph[x]))
+        # first_adj = sorted(first_adj , key=lambda x: len(graph[x]))
         path: List[Tuple[Point3D, List[Point3D]]] = [(vtx, first_adj)]
 
         while path:
@@ -74,7 +74,7 @@ class Tracer:
             next_node = path[-1][1].pop()
             nodes_in_path = [x[0] for x in path]
             next_adj = [adj for adj in graph[next_node] if adj not in globally_visited and adj not in nodes_in_path]
-            next_adj = sorted(next_adj, key=lambda x: len(graph[x]))
+            # next_adj = sorted(next_adj, key=lambda x: len(graph[x]))
 
             next_step = (next_node, next_adj)
 
@@ -102,7 +102,7 @@ class Tracer:
 
                 trace = Tracer.find_vtx_trace(figure, graph, visited)
 
-                if len(trace) > len(longest_trace):
+                if len(trace) >= len(longest_trace):
                     longest_trace = trace
 
             if longest_trace:
@@ -141,10 +141,17 @@ class Tracer:
 
                 fig_trace.append(fig)
 
+            last_fig_list = vtx_fig_hash.get((vtx_trace[-1], vtx_trace[0]))
+
+            if last_fig_list:
+                last_fig = last_fig_list.pop()
+                if last_fig and last_fig not in fig_trace:
+                    fig_trace.append(last_fig)
+
             if fig_trace:
                 figure_traces.append(fig_trace)
 
-        # TEMPORAL SOLUTION, if figure not in figure traces append it
+        # JUST IN CASE IT OMITTED FIGURES APPEND IT AT THE FINAL
         for fig in figures:
             in_trace = False
             for fig_trace in figure_traces:
@@ -154,6 +161,8 @@ class Tracer:
 
             if not in_trace:
                 figure_traces.append([fig])
-                print(f"Figure {fig.name} not in traces, appending it as a single figure trace.")
+                # print(f"Figure {fig.name} not in traces, appending it as a single figure trace.")
 
+        # print(f"Vertex traces: {vtx_traces}")
+        # print(f"Figure traces: {figure_traces}")
         return figure_traces

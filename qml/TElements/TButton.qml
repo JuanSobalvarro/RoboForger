@@ -1,8 +1,6 @@
 // TComponents/TButton.qml
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 import Themes
 import Utils
 import Components

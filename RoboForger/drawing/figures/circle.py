@@ -73,7 +73,7 @@ class Circle(Figure):
         # Move to start point (down)
         instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[1])}, v{global_velocity}, fine, {tool_name};\n")
 
-        if distance_vectors(points[2], points[3]) < 0.5:
+        if distance_vectors(points[2], points[3]) < 0.1:
             # If the upper and lower points are too close, we can skip the arc movement
             instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[2])}, v{self.velocity}, fine, {tool_name};\n")
             instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[4])}, v{self.velocity}, fine, {tool_name};\n")
@@ -81,7 +81,7 @@ class Circle(Figure):
             # Create the upper half arc movement
             instructions.append(f"        MoveC Offs {Figure.offset_coord(origin_robtarget_name, origin, points[2])}, Offs {Figure.offset_coord(origin_robtarget_name, origin, points[3])}, v{self.velocity}, fine, {tool_name};\n")
 
-        if distance_vectors(points[4], points[5]) < 0.5:
+        if distance_vectors(points[4], points[5]) < 0.1:
             # If the lower points are too close, we can skip the arc movement
             instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[4])}, v{self.velocity}, fine, {tool_name};\n")
             instructions.append(f"        MoveL Offs {Figure.offset_coord(origin_robtarget_name, origin, points[5])}, v{self.velocity}, fine, {tool_name};\n")
