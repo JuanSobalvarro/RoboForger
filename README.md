@@ -14,3 +14,6 @@ Test the generation running the `main.py` file. Then compile using `pyinstaller 
 # You can try installer with this
 pyinstaller --name RoboForger --workpath build-windows --icon=build-aux/icon.ico --collect-binaries PySide6 --add-data "LICENSE;." --noconsole build/release/main.py --onefile
 ```
+
+# How does it look like
+![Screenshot](./docs/ss_v1.png)
