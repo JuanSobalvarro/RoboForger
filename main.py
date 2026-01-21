@@ -1,11 +1,14 @@
 #!/usr/bin/env python
+from RoboForger.app.application import RoboforgerApp
+import sys
 
 DEBUG = False
 
 def main():
-    from roboforger_app.startup import perform_startup
 
-    perform_startup(debug=DEBUG)
+    app = RoboforgerApp(sys.argv)
+
+    sys.exit(app.run())
 
 
 if __name__ == "__main__":

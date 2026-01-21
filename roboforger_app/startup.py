@@ -51,9 +51,7 @@ class StartUp:
         app = RoboforgerApp(sys.argv)
 
         app.set_window_icon()
-        app.set_up_signals()
         app.set_up_window_event_filter()
-        app.start_engine(debug=debug)
         app.set_up_window_effects()
         app.verify()
 
@@ -65,10 +63,10 @@ def perform_startup(debug: bool = False):
 
     we = StartUp()
 
-    we.configure_qt_application_data()
-    we.configure_environment_variables()
+    # we.configure_qt_application_data()
+    # we.configure_environment_variables()
 
-    we.import_resources()
-    we.import_bindings()
+    # we.import_resources()
+    # we.import_bindings()
 
     we.start_application(debug=debug)
