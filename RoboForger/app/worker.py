@@ -64,6 +64,8 @@ class ProcessWorker(QObject):
     processFinish = Signal()
     processError = Signal(str)
 
+    fileLoaded = Signal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -109,6 +111,8 @@ class ProcessWorker(QObject):
         except Exception as e:
             self.processError.emit(f"Failed loading file: {e}")
             return
+    
+        self.fileLoaded.emit()
 
     @Slot(dict)
     def start_processing(self, params: dict):

@@ -68,6 +68,12 @@ class RoboforgerApp(QApplication):
     def connect_signals(self):
         self._process_worker.processError.connect(self.show_error_message)
 
+        self._process_worker.fileLoaded.connect(
+            lambda: self.main_window.preview.load_figures(
+                self._process_worker._forger.get_raw_figures()
+            )
+        )
+
         self.main_window.load_file_request.connect(self._process_worker.load_file)
         self.main_window.process_file_request.connect(
             lambda: self._process_worker.start_processing(self._parameters.snapshot())
@@ -139,7 +145,6 @@ class RoboforgerApp(QApplication):
         self.main_window.config_panel.right_panel.on_superior_limit_z_changed.connect(
             lambda val: self._parameters.update_tuple("superior_limit", 2, val)
         )
-
 
     def run(self) -> int:
         # self.aboutQt()

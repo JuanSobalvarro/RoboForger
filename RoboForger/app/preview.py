@@ -4,7 +4,18 @@ from PySide6.Qt3DCore import Qt3DCore
 from PySide6.Qt3DExtras import Qt3DExtras
 from PySide6.Qt3DRender import Qt3DRender
 from PySide6.Qt3DInput import Qt3DInput
-from PySide6.QtCore import Qt
+from PySide6.QtCore import (
+    Qt,
+    Signal,
+    Slot,
+)
+from PySide6.QtGui import QMatrix3x3
+
+from RoboForger.app.models.line import Line, Polyline
+from RoboForger.app.models.arc import Arc
+from RoboForger.app.models.circle import Circle
+
+from typing import Any
 
 
 class Preview(QWidget):
@@ -31,7 +42,8 @@ class Preview(QWidget):
 
         self.keyboard = Qt3DInput.QKeyboardDevice(self.root_entity)
 
-        self.camera_controller = Qt3DExtras.QOrbitCameraController(self.root_entity, inversePan=True, inverseTilt=True, inverseXTranslate=True, inverseYTranslate=True)
+        self.camera_controller = Qt3DExtras.QFirstPersonCameraController(self.root_entity)
+        # self.camera_controller = Qt3DExtras.QOrbitCameraController(self.root_entity, inversePan=True, inverseTilt=True, inverseXTranslate=True, inverseYTranslate=True)
         self.camera_controller.setCamera(self.camera)
         self.camera_controller.setLinearSpeed(100)
         self.camera_controller.setLookSpeed(180)
@@ -50,110 +62,95 @@ class Preview(QWidget):
         self.light_transform.setTranslation(QVector3D(0, 50, 50))
         self.light_entity.addComponent(self.light_transform)
 
-        # self.add_axis_and_grid()
+        self.grid_entities: list[Qt3DCore.QEntity] = []
 
-        # test cube
-        self.cube_entity = Qt3DCore.QEntity(self.root_entity)
-        self.cube_mesh = Qt3DExtras.QCuboidMesh()
-        self.cube_mesh.setXExtent(10)
-        self.cube_mesh.setYExtent(10)
-        self.cube_mesh.setZExtent(10)
-        self.cube_entity.addComponent(self.cube_mesh)
-        self.cube_material = Qt3DExtras.QPhongMaterial()
-        self.cube_material.setDiffuse(QColor("#00FF00"))
-        self.cube_entity.addComponent(self.cube_material)
-        self.cube_transform = Qt3DCore.QTransform()
-        self.cube_transform.setTranslation(QVector3D(0, 0, 0))
-        self.cube_entity.addComponent(self.cube_transform)
+        self.add_axis_and_grid()
 
+        self.lines = []
+        self.arcs = []
+        self.circles = []
+
+    def clear_figures(self):
+        for line in self.lines:
+            line.setParent(None)
+        self.lines.clear()
+
+        for arc in self.arcs:
+            arc.setParent(None)
+        self.arcs.clear()
+
+        for circle in self.circles:
+            circle.setParent(None)
+        self.circles.clear()
+
+    @Slot(dict)
+    def load_figures(self, figures: dict[str, list[dict[str, Any]]]):
+        """
+        This is highly coupled with the Forger data structures.
+
+        Forger provides "RAW FIGURES" which is a dict of lists of raw entities.
+        Take a look at forger.py for more details.
+        """
+        print("Loading figures into preview...")
+        # clear previous entities
+        self.clear_figures()
+
+        raw_lines: list[dict] = figures.get("lines", [])
+        raw_arcs: list[dict] = figures.get("arcs", [])
+        raw_circles: list[dict] = figures.get("circles", [])
+
+        for line in raw_lines:
+            self.lines.append(
+                Line(
+                    QVector3D(*line["start"]),
+                    QVector3D(*line["end"]),
+                    QColor("#ffff00"),
+                    0.2,
+                    self.root_entity,
+                )
+            )
+
+        for arc in raw_arcs:
+            # self.arcs.append(
+            #     Arc(QVector3D(*center), float(radius), float(start_angle), float(end_angle), bool(clockwise), QColor("#00ffff"), 0.2, self.root_entity)
+            # )
+            pass
+
+        for circle in raw_circles:
+            pass
 
     def add_axis_and_grid(self):
-        # # X Axis (Red)
-        # self._create_axis_arrow(
-        #     "#FF0000", 20, 
-        #     QQuaternion.fromAxisAndAngle(QVector3D(0, 0, 1), -90)
-        # )
-        # # Y Axis (Green)
-        # self._create_axis_arrow(
-        #     "#00FF00", 20, 
-        #     QQuaternion()
-        # )
-        # # Z Axis (Blue)
-        # self._create_axis_arrow(
-        #     "#0000FF", 20, 
-        #     QQuaternion.fromAxisAndAngle(QVector3D(1, 0, 0), 90)
-        # )
+        self._create_grid(size=100, step=5)
 
-        self._create_grid(size=50, step=5)
-
-    def _create_axis_arrow(self, color, length, rotation):
-        root = self.root_entity
-        radius = 0.2
-        cone_height = 2.0
-
-        # Cylinder
-        cylinder_entity = Qt3DCore.QEntity(root)
-        mesh = Qt3DExtras.QCylinderMesh()
-        mesh.setRadius(radius)
-        mesh.setLength(length)
-        
-        material = Qt3DExtras.QPhongMaterial()
-        material.setDiffuse(QColor(color))
-        
-        transform = Qt3DCore.QTransform()
-        transform.setRotation(rotation)
-        
-        # FIX: Use rotatedVector() instead of * operator
-        offset_vector = QVector3D(0, length / 2.0, 0)
-        transform.setTranslation(rotation.rotatedVector(offset_vector))
-
-        cylinder_entity.addComponent(mesh)
-        cylinder_entity.addComponent(material)
-        cylinder_entity.addComponent(transform)
-
-        # Cone
-        cone_entity = Qt3DCore.QEntity(root)
-        cone_mesh = Qt3DExtras.QConeMesh()
-        cone_mesh.setBottomRadius(radius * 3)
-        cone_mesh.setLength(cone_height)
-        
-        cone_transform = Qt3DCore.QTransform()
-        cone_transform.setRotation(rotation)
-        
-        # FIX: Use rotatedVector() instead of * operator
-        cone_offset = QVector3D(0, length + (cone_height / 2.0), 0)
-        cone_transform.setTranslation(rotation.rotatedVector(cone_offset))
-
-        cone_entity.addComponent(cone_mesh)
-        cone_entity.addComponent(material)
-        cone_entity.addComponent(cone_transform)
+        # x axis
+        x_start = QVector3D(-100, 0, 0)
+        x_end = QVector3D(100, 0, 0)
+        x_axis = Line(x_start, x_end, QColor("#ff0000"), 0.1, self.root_entity)
+        self.grid_entities.append(x_axis)
+        # y axis
+        y_start = QVector3D(0, -100, 0)
+        y_end = QVector3D(0, 100, 0)
+        y_axis = Line(y_start, y_end, QColor("#00ff00"), 0.1, self.root_entity)
+        self.grid_entities.append(y_axis)
+        # z axis
+        z_start = QVector3D(0, 0, -100)
+        z_end = QVector3D(0, 0, 100)
+        z_axis = Line(z_start, z_end, QColor("#0000ff"), 0.1, self.root_entity)
+        self.grid_entities.append(z_axis)
 
     def _create_grid(self, size=50, step=5):
         grid_color = QColor("#ffffff")
         thickness = 0.05
         
         for i in range(-size, size + 1, step):
-            self._create_grid_line(QVector3D(i, 0, 0), size*2, thickness, grid_color, True)
-            self._create_grid_line(QVector3D(0, i, 0), size*2, thickness, grid_color, False)
+            # horizontal line
+            start_h = QVector3D(-size, 0, i)
+            end_h = QVector3D(size, 0, i)
+            line_h = Line(start_h, end_h, grid_color, thickness, self.root_entity)
+            self.grid_entities.append(line_h)
 
-    def _create_grid_line(self, position, length, thickness, color, is_vertical):
-        entity = Qt3DCore.QEntity(self.root_entity)
-        
-        mesh = Qt3DExtras.QCylinderMesh()
-        mesh.setRadius(thickness)
-        mesh.setLength(length)
-        
-        material = Qt3DExtras.QPhongMaterial()
-        material.setDiffuse(color)
-        
-        transform = Qt3DCore.QTransform()
-        
-        if is_vertical:
-            transform.setTranslation(position)
-        else:
-            transform.setRotation(QQuaternion.fromAxisAndAngle(QVector3D(0, 0, 1), -90))
-            transform.setTranslation(position)
-
-        entity.addComponent(mesh)
-        entity.addComponent(material)
-        entity.addComponent(transform)
+            # vertical line
+            start_v = QVector3D(i, 0, -size)
+            end_v = QVector3D(i, 0, size)
+            line_v = Line(start_v, end_v, grid_color, thickness, self.root_entity)
+            self.grid_entities.append(line_v)
