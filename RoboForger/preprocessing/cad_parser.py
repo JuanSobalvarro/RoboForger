@@ -1,8 +1,11 @@
 import ezdxf
 import os
+import subprocess
 from typing import List, Tuple, Dict, Any
 from RoboForger.types import Point3D, RawLine, RawArc, RawCircle, RawSpline
 
+
+BINARY_DWG2DXF_PATH = os.path.join(os.path.dirname(__file__), 'bin', 'libredwg', 'dwg2dxf.exe')
 
 class DXFParser:
     def __init__(self, filepath: str):
@@ -90,11 +93,21 @@ def dwg_to_dxf(dwg_filepath: str, output_filepath: str) -> bool:
     :param output_filepath: Path to save the converted DXF file.
     :return: True if conversion was successful, False otherwise.
     """
-    tool_path = os.path.join(os.path.dirname(__file__), '..', 'bin', 'dwg2dxf')
-    command = f"\"{tool_path}\" \"{dwg_filepath}\" -o \"{output_filepath}\""
-    result = os.system(command)
-    return result == 0
+    tool_path = BINARY_DWG2DXF_PATH
+    if not os.path.exists(BINARY_DWG2DXF_PATH):
+        raise FileNotFoundError(f"DWG to DXF converter not found at {BINARY_DWG2DXF_PATH}")
     
+    try:
+        result = subprocess.run([tool_path, dwg_filepath, '-o', output_filepath, '-y'], capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"DWG to DXF conversion failed: {result.stderr}")
+            return False
+    except Exception as e:
+        print(f"Error converting DWG to DXF: {e}")
+        return False
+    
+    return result.returncode == 0
+
 class CADParser:
     def __init__(self, filepath: str):
         self.filepath = filepath
@@ -106,12 +119,17 @@ class CADParser:
         elif file_ext == '.dwg':
             # Convert DWG to DXF first
             dxf_temp_path = filepath + '.dxf'
+            print(f"Temporal path for DXF: {dxf_temp_path}")
             if dwg_to_dxf(filepath, dxf_temp_path):
                 self.parser = DXFParser(dxf_temp_path)
             else:
-                raise ValueError(f"Failed to convert DWG to DXF: {filepath}")
+                raise ValueError(f"CADPARSER::Failed to convert DWG to DXF: {filepath}")
+            
+            # clean dxf
+            if os.path.exists(dxf_temp_path):
+                os.remove(dxf_temp_path)
         else:
-            raise ValueError(f"Unsupported file format: {file_ext}")
+            raise ValueError(f"CADPARSER::Unsupported file format: {file_ext}")
 
     def get_figures_parsed(self) -> Dict[str, Any]:
         if self.parser:

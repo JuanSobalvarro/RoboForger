@@ -40,7 +40,7 @@ class LabelAnchor(Enum):
 class Field(QWidget):
     value_changed = Signal(object)
 
-    def __init__(self, label_text: str, input_widget: QWidget, label_position: LabelPosition = LabelPosition.LEFT, label_anchor: LabelAnchor = LabelAnchor.CENTER, input_width: int = 70):
+    def __init__(self, label_text: str, input_widget: QWidget, default: str | bool | int | float = "", label_position: LabelPosition = LabelPosition.LEFT, label_anchor: LabelAnchor = LabelAnchor.CENTER, input_width: int = 70):
         """
         A Field is a UI component that contains a label and an input area (like a text box, dropdown, etc.)
 
@@ -53,6 +53,7 @@ class Field(QWidget):
         self.label_anchor = label_anchor
         self.input_widget = self.validate_input_widget(input_widget)
         self.input_widget.setFixedWidth(input_width)
+        self.default = default
 
         self.label = Label(self.label_text, self)
 
@@ -60,7 +61,24 @@ class Field(QWidget):
 
         self.setup_ui()
 
+        self.set_default()
+
         self.connect_signals()
+
+    def set_default(self):
+        """
+        Sets the default value to the input widget
+        """
+        if isinstance(self.input_widget, QLineEdit):
+            self.input_widget.setText(str(self.default))
+        elif isinstance(self.input_widget, QComboBox):
+            index = self.input_widget.findText(str(self.default))
+            if index != -1:
+                self.input_widget.setCurrentIndex(index)
+        elif isinstance(self.input_widget, QCheckBox):
+            self.input_widget.setChecked(bool(self.default))
+        elif isinstance(self.input_widget, QSpinBox):
+            self.input_widget.setValue(int(self.default))
 
     def validate_input_widget(self, widget: QWidget) -> QWidget:
         """

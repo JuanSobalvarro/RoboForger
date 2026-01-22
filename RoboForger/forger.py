@@ -158,8 +158,8 @@ class Forger:
     def get_splines(self) -> list[BSpline]:
         return self._splines
 
-    def parse_figures(self, dxf_file: str):
-        parser = CADParser(filepath=dxf_file)
+    def parse_figures(self, cad_file: str):
+        parser = CADParser(filepath=cad_file)
         figures = parser.get_figures_parsed()
         self._raw_lines = figures.get("lines", [])
         self._raw_arcs = figures.get("arcs", [])

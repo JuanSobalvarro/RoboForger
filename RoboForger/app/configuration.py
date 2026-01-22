@@ -48,7 +48,7 @@ class LeftPanel(QFrame):
         self.arc_vel_field: Field
         self.circle_velocity_field: Field
         self.lifting_height_field: Field
-        self.auto_trace: Field
+        self.auto_trace_field: Field
         self.offset_programming_field: Field
 
         self.setup_ui()
@@ -66,7 +66,7 @@ class LeftPanel(QFrame):
         parser_label = Label("Parser", self, tag=LabelTag.SUBHEADER)
         layout.addWidget(parser_label)
 
-        self.scale_factor_field = Field("Scale Factor", QLineEdit(), LabelPosition.LEFT)
+        self.scale_factor_field = Field("Scale Factor", QLineEdit(), 1.0, LabelPosition.LEFT)
         layout.addWidget(self.scale_factor_field)
 
         # separator
@@ -77,19 +77,19 @@ class LeftPanel(QFrame):
         converter_label = Label("Converter", self, tag=LabelTag.SUBHEADER)
         layout.addWidget(converter_label)
 
-        self.float_precision_field = Field("Float Precision", QLineEdit(), LabelPosition.LEFT)
+        self.float_precision_field = Field("Float Precision", QLineEdit(), 4, LabelPosition.LEFT)
         layout.addWidget(self.float_precision_field)
 
-        self.polyline_vel_field = Field("Polyline Velocity", QLineEdit(), LabelPosition.LEFT)
+        self.polyline_vel_field = Field("Polyline Velocity", QLineEdit(), 500.0, LabelPosition.LEFT)
         layout.addWidget(self.polyline_vel_field)
 
-        self.arc_vel_field = Field("Arc Velocity", QLineEdit(), LabelPosition.LEFT)
+        self.arc_vel_field = Field("Arc Velocity", QLineEdit(), 500.0, LabelPosition.LEFT)
         layout.addWidget(self.arc_vel_field)
 
-        self.circle_velocity_field = Field("Circle Velocity", QLineEdit(), LabelPosition.LEFT)
+        self.circle_velocity_field = Field("Circle Velocity", QLineEdit(), 500.0, LabelPosition.LEFT)
         layout.addWidget(self.circle_velocity_field)
 
-        self.lifting_height_field = Field("Lifting Height", QLineEdit(), LabelPosition.LEFT)
+        self.lifting_height_field = Field("Lifting Height", QLineEdit(), 50.0, LabelPosition.LEFT)
         layout.addWidget(self.lifting_height_field)
 
         separator = LineSeparator('horizontal')
@@ -99,10 +99,10 @@ class LeftPanel(QFrame):
         drawing_label = Label("Drawing and Rapid", self, tag=LabelTag.SUBHEADER)
         layout.addWidget(drawing_label)
 
-        self.auto_trace = Field("Use auto trace detection", QCheckBox(), LabelPosition.RIGHT)
-        layout.addWidget(self.auto_trace)
+        self.auto_trace_field = Field("Use auto trace detection", QCheckBox(), True, LabelPosition.RIGHT)
+        layout.addWidget(self.auto_trace_field)
 
-        self.offset_programming_field = Field("Use Offset Programming", QCheckBox(), LabelPosition.RIGHT)
+        self.offset_programming_field = Field("Use Offset Programming", QCheckBox(), True, LabelPosition.RIGHT)
         layout.addWidget(self.offset_programming_field)
 
         self.setLayout(layout)
@@ -114,7 +114,7 @@ class LeftPanel(QFrame):
         self.arc_vel_field.value_changed.connect(lambda v: safe_emit_value(self.on_arc_velocity_changed, v, float))
         self.circle_velocity_field.value_changed.connect(lambda v: safe_emit_value(self.on_circle_velocity_changed, v, float))
         self.lifting_height_field.value_changed.connect(lambda v: safe_emit_value(self.on_lifting_height_changed, v, float))
-        self.auto_trace.value_changed.connect(lambda v: safe_emit_value(self.on_auto_trace_changed, v, bool))
+        self.auto_trace_field.value_changed.connect(lambda v: safe_emit_value(self.on_auto_trace_changed, v, bool))
         self.offset_programming_field.value_changed.connect(lambda v: safe_emit_value(self.on_offset_programming_changed, v, bool))        
 
 
@@ -180,7 +180,7 @@ class RightPanel(QFrame):
         tool_label = Label("Tool", self, tag=LabelTag.SUBHEADER)
         layout.addWidget(tool_label)
 
-        self.tool_field = Field("Tool name", QLineEdit(), LabelPosition.LEFT)
+        self.tool_field = Field("Tool name", QLineEdit(), "tool0", LabelPosition.LEFT)
         layout.addWidget(self.tool_field)
 
         # workspace limits
@@ -192,24 +192,24 @@ class RightPanel(QFrame):
         
         inf_left_layout = QVBoxLayout()
 
-        self.inferior_limit_x_field = Field("X", QLineEdit(), LabelPosition.LEFT)
+        self.inferior_limit_x_field = Field("X", QLineEdit(), -300.0, LabelPosition.LEFT)
         inf_left_layout.addWidget(self.inferior_limit_x_field)
 
-        self.inferior_limit_y_field = Field("Y", QLineEdit(), LabelPosition.LEFT)
+        self.inferior_limit_y_field = Field("Y", QLineEdit(), -300.0, LabelPosition.LEFT)
         inf_left_layout.addWidget(self.inferior_limit_y_field)
 
-        self.inferior_limit_z_field = Field("Z", QLineEdit(), LabelPosition.LEFT)
+        self.inferior_limit_z_field = Field("Z", QLineEdit(), -100.0, LabelPosition.LEFT)
         inf_left_layout.addWidget(self.inferior_limit_z_field)
 
         sup_right_layout = QVBoxLayout()
 
-        self.superior_limit_x_field = Field("X", QLineEdit(), LabelPosition.RIGHT)
+        self.superior_limit_x_field = Field("X", QLineEdit(), 800.0, LabelPosition.RIGHT)
         sup_right_layout.addWidget(self.superior_limit_x_field)
 
-        self.superior_limit_y_field = Field("Y", QLineEdit(), LabelPosition.RIGHT)
+        self.superior_limit_y_field = Field("Y", QLineEdit(), 800.0, LabelPosition.RIGHT)
         sup_right_layout.addWidget(self.superior_limit_y_field)
 
-        self.superior_limit_z_field = Field("Z", QLineEdit(), LabelPosition.RIGHT)
+        self.superior_limit_z_field = Field("Z", QLineEdit(), 800.0, LabelPosition.RIGHT)
         sup_right_layout.addWidget(self.superior_limit_z_field)
 
         vectors_layout.addLayout(inf_left_layout)
@@ -225,24 +225,24 @@ class RightPanel(QFrame):
 
         origin_layout = QVBoxLayout()
 
-        self.origin_x_field = Field("Origin X", QLineEdit(), LabelPosition.LEFT)
+        self.origin_x_field = Field("Origin X", QLineEdit(), 450.0, LabelPosition.LEFT)
         origin_layout.addWidget(self.origin_x_field)
 
-        self.origin_y_field = Field("Origin Y", QLineEdit(), LabelPosition.LEFT)
+        self.origin_y_field = Field("Origin Y", QLineEdit(), 450.0, LabelPosition.LEFT)
         origin_layout.addWidget(self.origin_y_field)
 
-        self.origin_z_field = Field("Origin Z", QLineEdit(), LabelPosition.LEFT)
+        self.origin_z_field = Field("Origin Z", QLineEdit(), 0.0, LabelPosition.LEFT)
         origin_layout.addWidget(self.origin_z_field)
 
         zero_layout = QVBoxLayout()
 
-        self.zero_x_field = Field("Zero X", QLineEdit(), LabelPosition.RIGHT)
+        self.zero_x_field = Field("Zero X", QLineEdit(), 0.0, LabelPosition.RIGHT)
         zero_layout.addWidget(self.zero_x_field)
 
-        self.zero_y_field = Field("Zero Y", QLineEdit(), LabelPosition.RIGHT)
+        self.zero_y_field = Field("Zero Y", QLineEdit(), 0.0, LabelPosition.RIGHT)
         zero_layout.addWidget(self.zero_y_field)
 
-        self.zero_z_field = Field("Zero Z", QLineEdit(), LabelPosition.RIGHT)
+        self.zero_z_field = Field("Zero Z", QLineEdit(), 0.0, LabelPosition.RIGHT)
         zero_layout.addWidget(self.zero_z_field)
 
         references_layout.addLayout(origin_layout)
@@ -283,7 +283,7 @@ class RightPanel(QFrame):
         self.save_button.clicked.connect(self.on_save_rapid_clicked)
 
 class ConfigurationPanel(QWidget):
-    
+
     load_file_request = Signal()
     process_file_request = Signal()
     save_file_request = Signal()
@@ -297,10 +297,15 @@ class ConfigurationPanel(QWidget):
 
         self.setup_ui()
 
+        self.connect_signals()
+
     def setup_ui(self):
 
         self.current_layout.addWidget(self.left_panel)
         self.current_layout.addWidget(self.right_panel)
 
     def connect_signals(self):
-        pass
+        self.right_panel.on_load_dxf_clicked.connect(self.load_file_request)
+        self.right_panel.on_process_clicked.connect(self.process_file_request)
+        self.right_panel.on_save_rapid_clicked.connect(self.save_file_request)
+        

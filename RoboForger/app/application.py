@@ -67,8 +67,11 @@ class RoboforgerApp(QApplication):
 
     def connect_signals(self):
         self._process_worker.processError.connect(self.show_error_message)
+
         self.main_window.load_file_request.connect(self._process_worker.load_file)
-        self.main_window.process_file_request.connect(self._process_worker.start_processing)
+        self.main_window.process_file_request.connect(
+            lambda: self._process_worker.start_processing(self._parameters.snapshot())
+        )
         self.main_window.save_file_request.connect(self._process_worker.save_rapid_code)
 
         # connect parameters

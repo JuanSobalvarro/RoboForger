@@ -86,9 +86,11 @@ class ProcessWorker(QObject):
         """
         Load a DXF file for processing.
         """
+        print("Loading CAD file...")
         # open file dialog 
         file_dialog = QFileDialog()
-        file_dialog.setNameFilter("DXF, DWG (*.dxf *.dwg)")
+        # filter for DWG and DXF files
+        file_dialog.setNameFilter("CAD Files (*.dxf *.dwg)")
         if file_dialog.exec():
             selected_files = file_dialog.selectedFiles()
             if selected_files:
