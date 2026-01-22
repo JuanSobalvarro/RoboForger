@@ -6,6 +6,7 @@ from PySide6.Qt3DRender import Qt3DRender
 from PySide6.Qt3DInput import Qt3DInput
 from PySide6.QtCore import Qt
 
+
 class Preview(QWidget):
     def __init__(self):
         super().__init__()
@@ -49,7 +50,6 @@ class Preview(QWidget):
         self.light_transform.setTranslation(QVector3D(0, 50, 50))
         self.light_entity.addComponent(self.light_transform)
 
-
         # self.add_axis_and_grid()
 
         # test cube
@@ -65,7 +65,6 @@ class Preview(QWidget):
         self.cube_transform = Qt3DCore.QTransform()
         self.cube_transform.setTranslation(QVector3D(0, 0, 0))
         self.cube_entity.addComponent(self.cube_transform)
-
 
 
     def add_axis_and_grid(self):

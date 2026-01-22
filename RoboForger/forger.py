@@ -227,3 +227,21 @@ class Forger:
         with open(save_path, 'w') as file:
             file.write(self._rapid_code)
         print(f"RAPID code exported to {save_path}")
+
+    def parameters_dict(self) -> dict:
+        return {
+            "origin": self._origin,
+            "zero": self._zero,
+            "scale": self._pre_scale,
+            "float_precision": self._float_precision,
+            "lifting": self._lifting,
+            "tool_name": self._tool_name,
+            "lines_velocity": self._polyline_velocity,
+            "arcs_velocity": self._arc_velocity,
+            "circles_velocity": self._circle_velocity,
+            "splines_velocity": self._spline_velocity,
+            "inferior_limit": self._workspace_limits[0],
+            "superior_limit": self._workspace_limits[1],
+            "use_detector": self._use_intelligent_traces,
+            "use_offset": self._use_offset_programming
+        }

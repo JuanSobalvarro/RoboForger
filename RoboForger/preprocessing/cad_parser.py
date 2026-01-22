@@ -4,7 +4,7 @@ from typing import List, Tuple, Dict, Any
 from RoboForger.types import Point3D, RawLine, RawArc, RawCircle, RawSpline
 
 
-class CADParser:
+class DXFParser:
     def __init__(self, filepath: str):
         self.doc = ezdxf.readfile(filepath)
         self._msp = self.doc.modelspace()
@@ -81,3 +81,40 @@ class CADParser:
             'circles': self.get_circles(),
             'splines': self.get_splines()
         }
+    
+def dwg_to_dxf(dwg_filepath: str, output_filepath: str) -> bool:
+    """
+    Converts the DWG file to DXF format using the `dwg2dxf` command line tool.
+    
+    :param dwg_filepath: Path to the input DWG file.
+    :param output_filepath: Path to save the converted DXF file.
+    :return: True if conversion was successful, False otherwise.
+    """
+    tool_path = os.path.join(os.path.dirname(__file__), '..', 'bin', 'dwg2dxf')
+    command = f"\"{tool_path}\" \"{dwg_filepath}\" -o \"{output_filepath}\""
+    result = os.system(command)
+    return result == 0
+    
+class CADParser:
+    def __init__(self, filepath: str):
+        self.filepath = filepath
+        self.parser = None
+
+        file_ext = os.path.splitext(filepath)[1].lower()
+        if file_ext == '.dxf':
+            self.parser = DXFParser(filepath)
+        elif file_ext == '.dwg':
+            # Convert DWG to DXF first
+            dxf_temp_path = filepath + '.dxf'
+            if dwg_to_dxf(filepath, dxf_temp_path):
+                self.parser = DXFParser(dxf_temp_path)
+            else:
+                raise ValueError(f"Failed to convert DWG to DXF: {filepath}")
+        else:
+            raise ValueError(f"Unsupported file format: {file_ext}")
+
+    def get_figures_parsed(self) -> Dict[str, Any]:
+        if self.parser:
+            return self.parser.get_figures_parsed()
+        else:
+            raise ValueError("No parser available for the given file.")
