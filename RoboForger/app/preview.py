@@ -125,15 +125,23 @@ class Preview(QWidget):
         print(f"Loaded {len(self.lines)} lines.")
 
         for arc in raw_arcs:
-            # self.arcs.append(
-            #     Arc(QVector3D(*center), float(radius), float(start_angle), float(end_angle), bool(clockwise), QColor("#00ffff"), 0.2, self.root_entity)
-            # )
-            pass
+            center = arc["center"]
+            radius = arc["radius"]
+            start_angle = arc["start_angle"]
+            end_angle = arc["end_angle"]
+            clockwise = arc["clockwise"]
+            self.arcs.append(
+                Arc(QVector3D(*center), float(radius), float(start_angle), float(end_angle), bool(clockwise), QColor("#0000ff"), 0.2, self.root_entity)
+            )
 
         print(f"Loaded {len(self.arcs)} arcs.")
 
         for circle in raw_circles:
-            pass
+            center = circle["center"]
+            radius = circle["radius"]
+            self.circles.append(
+                Circle(QVector3D(*center), float(radius), QColor("#00ff00"), 0.2, self.root_entity)
+            )
 
         print(f"Loaded {len(self.circles)} circles.")
 

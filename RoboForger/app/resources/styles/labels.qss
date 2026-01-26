@@ -1,7 +1,7 @@
 
 QLabel {
     font-family: "Roboto", "Segoe UI", sans-serif;
-    color: #eeeeee;
+    color: #e0e0e0;
     background-color: transparent;
     padding: 0px;
 }
@@ -9,9 +9,12 @@ QLabel {
 QLabel[tag="header"] {
     font-size: 24px;
     font-weight: 700; 
-    color: #eeeeee;
-    margin-bottom: 8px;
-    letter-spacing: 0.5px; 
+    color: #ffffff;
+    letter-spacing: 1.2px; 
+    margin-bottom: 12px;
+    margin-top: 4px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid #444444;
 }
 
 QLabel[tag="subheader"] {

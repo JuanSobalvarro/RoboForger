@@ -17,22 +17,12 @@ class LabelTag(Enum):
     NORMAL = 2
     SMALL = 3
 
-STYLESHEETS = {
-    LabelTag.HEADER: """
-        font-size: 16pt;
-        font-weight: bold;
-    """,
-    LabelTag.SUBHEADER: """
-        font-size: 12pt;
-        font-weight: bold;
-    """,
-    LabelTag.NORMAL: """
-        font-size: 10pt;
-    """,
-    LabelTag.SMALL: """
-        font-size: 8pt;
-    """,
-}
+
+class LabelAnchor(Enum):
+    LEFT = 0
+    CENTER = 1
+    RIGHT = 2
+
 
 class Label(QLabel):
     def __init__(self, text: str, parent: QWidget | None = None, color: QColor = QColor("#FFFFFF"), tag: LabelTag = LabelTag.NORMAL, stylesheet: str = ""):

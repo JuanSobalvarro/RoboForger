@@ -14,7 +14,7 @@ from PySide6.QtCore import (
     SignalInstance,
 )
 
-from RoboForger.app.components.field import Field, LabelPosition
+from RoboForger.app.components.field import Field, LabelPosition, LabelAnchor
 from RoboForger.app.components.separator import LineSeparator
 from RoboForger.app.components.label import Label, LabelTag
 
@@ -99,10 +99,10 @@ class LeftPanel(QFrame):
         drawing_label = Label("Drawing and Rapid", self, tag=LabelTag.SUBHEADER)
         layout.addWidget(drawing_label)
 
-        self.auto_trace_field = Field("Use auto trace detection", QCheckBox(), True, LabelPosition.RIGHT)
+        self.auto_trace_field = Field("Use auto trace detection", QCheckBox(), True, LabelPosition.RIGHT, LabelAnchor.LEFT)
         layout.addWidget(self.auto_trace_field)
 
-        self.offset_programming_field = Field("Use Offset Programming", QCheckBox(), True, LabelPosition.RIGHT)
+        self.offset_programming_field = Field("Use Offset Programming", QCheckBox(), True, LabelPosition.RIGHT, LabelAnchor.LEFT)
         layout.addWidget(self.offset_programming_field)
 
         self.setLayout(layout)
@@ -183,6 +183,10 @@ class RightPanel(QFrame):
         self.tool_field = Field("Tool name", QLineEdit(), "tool0", LabelPosition.LEFT)
         layout.addWidget(self.tool_field)
 
+        # separator
+        separator = LineSeparator('horizontal')
+        layout.addWidget(separator)
+
         # workspace limits
         # TODO: implement a small square showing the limit vectors visually
         workspace_label = Label("Workspace Limits InfLeft - SupRight", self, tag=LabelTag.SUBHEADER)
@@ -217,6 +221,10 @@ class RightPanel(QFrame):
 
         layout.addLayout(vectors_layout)
 
+        # separator
+        separator = LineSeparator('horizontal')
+        layout.addWidget(separator)
+
         # References section
         references_label = Label("References", self, tag=LabelTag.SUBHEADER)
         layout.addWidget(references_label)
@@ -248,6 +256,10 @@ class RightPanel(QFrame):
         references_layout.addLayout(origin_layout)
         references_layout.addLayout(zero_layout)
         layout.addLayout(references_layout)
+
+        # separator
+        separator = LineSeparator('horizontal')
+        layout.addWidget(separator)
 
         # Processing section
         # temporal buttons since we should use custom ones with icons later
