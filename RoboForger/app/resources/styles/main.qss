@@ -1,0 +1,7 @@
+QPlainTextEdit[tag="console"] {
+    background-color: #1e1e1e;
+    color: #dcdcdc;
+    border: none;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+}

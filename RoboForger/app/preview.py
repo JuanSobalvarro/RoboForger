@@ -19,8 +19,20 @@ from typing import Any
 
 
 class Preview(QWidget):
-    def __init__(self):
+    def __init__(self, grid_size: int = 200, grid_step: int = 10):
+        """
+        A 3D preview widget using Qt3D.
+
+        The plane is the XY plane, with Z being vertical since most robotics applications use Z as up.
+
+        :param grid_size: The size of the grid to be displayed.
+        :param grid_step: The step between grid lines.
+        """
         super().__init__()
+
+        self.grid_size: int = grid_size
+        self.grid_step: int = grid_step
+
         self.view = Qt3DExtras.Qt3DWindow()
         self.view.defaultFrameGraph().setClearColor(QColor("#000000"))
 
@@ -110,47 +122,57 @@ class Preview(QWidget):
                 )
             )
 
+        print(f"Loaded {len(self.lines)} lines.")
+
         for arc in raw_arcs:
             # self.arcs.append(
             #     Arc(QVector3D(*center), float(radius), float(start_angle), float(end_angle), bool(clockwise), QColor("#00ffff"), 0.2, self.root_entity)
             # )
             pass
 
+        print(f"Loaded {len(self.arcs)} arcs.")
+
         for circle in raw_circles:
             pass
 
+        print(f"Loaded {len(self.circles)} circles.")
+
     def add_axis_and_grid(self):
-        self._create_grid(size=100, step=5)
+        self._create_grid()
 
         # x axis
-        x_start = QVector3D(-100, 0, 0)
-        x_end = QVector3D(100, 0, 0)
+        x_start = QVector3D(-self.grid_size, 0, 0)
+        x_end = QVector3D(self.grid_size, 0, 0)
         x_axis = Line(x_start, x_end, QColor("#ff0000"), 0.1, self.root_entity)
         self.grid_entities.append(x_axis)
         # y axis
-        y_start = QVector3D(0, -100, 0)
-        y_end = QVector3D(0, 100, 0)
+        y_start = QVector3D(0, -self.grid_size, 0)
+        y_end = QVector3D(0, self.grid_size, 0)
         y_axis = Line(y_start, y_end, QColor("#00ff00"), 0.1, self.root_entity)
         self.grid_entities.append(y_axis)
         # z axis
-        z_start = QVector3D(0, 0, -100)
-        z_end = QVector3D(0, 0, 100)
+        z_start = QVector3D(0, 0, -self.grid_size)
+        z_end = QVector3D(0, 0, self.grid_size)
         z_axis = Line(z_start, z_end, QColor("#0000ff"), 0.1, self.root_entity)
         self.grid_entities.append(z_axis)
 
-    def _create_grid(self, size=50, step=5):
+    def _create_grid(self):
         grid_color = QColor("#ffffff")
         thickness = 0.05
         
-        for i in range(-size, size + 1, step):
+        for i in range(-self.grid_size, self.grid_size + 1, self.grid_step):
             # horizontal line
-            start_h = QVector3D(-size, 0, i)
-            end_h = QVector3D(size, 0, i)
+            start_h = QVector3D(-self.grid_size, i, 0)
+            end_h = QVector3D(self.grid_size, i, 0)
+
             line_h = Line(start_h, end_h, grid_color, thickness, self.root_entity)
+            
             self.grid_entities.append(line_h)
 
             # vertical line
-            start_v = QVector3D(i, 0, -size)
-            end_v = QVector3D(i, 0, size)
+            start_v = QVector3D(i, -self.grid_size, 0)
+            end_v = QVector3D(i, self.grid_size, 0)
+            
             line_v = Line(start_v, end_v, grid_color, thickness, self.root_entity)
+            
             self.grid_entities.append(line_v)

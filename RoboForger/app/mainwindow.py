@@ -46,11 +46,11 @@ class RoboMainWindow(QMainWindow):
         min_preview_width = int(self.width() * 2 / 3) 
         self.preview.setMinimumWidth(min_preview_width)
 
-        min_preview_height = int(self.height() / 2)
+        min_preview_height = int(self.height() * 2 / 3)
         self.preview.setMinimumHeight(min_preview_height)
 
         # SET MAXIMUM SIZE CONSTRAINTS
-        self.preview.setMaximumSize(QSize(int(self.width() * 2 / 3), int(self.height() / 2)))
+        self.preview.setMaximumSize(QSize(int(self.width() * 2 / 3), int(self.height() * 2 / 3)))
         
         # CONFIGURE STRETCH FACTORS (Proportions) 
         
