@@ -22,7 +22,6 @@ class RoboMainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("RoboForger")
         # Initial size
         self.setGeometry(100, 100, 1200, 800) 
 

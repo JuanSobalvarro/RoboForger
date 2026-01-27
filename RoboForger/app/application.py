@@ -1,6 +1,7 @@
 import os
 import sys
 from PySide6.QtWidgets import QApplication, QWidget, QDialog, QVBoxLayout
+from PySide6.QtGui import QIcon
 from typing import List
 
 from RoboForger.app.components.label import Label
@@ -10,10 +11,14 @@ from RoboForger.app.models.parameters import ProcessingParameters
 
 
 class RoboforgerApp(QApplication):
-    def __init__(self, argv):
+    def __init__(self, argv, resource_dir):
         super().__init__(argv)
 
         self.widgets: List[QWidget] = []
+        self._resource_dir = resource_dir
+
+        self.setApplicationName("RoboForger")
+        self.setWindowIcon(QIcon(os.path.join(resource_dir, "icon.ico")))
 
         # setup environment
         self.setup_environment()
@@ -34,7 +39,7 @@ class RoboforgerApp(QApplication):
         os.environ["QT3D_RENDERER"] = "opengl"
 
     def load_stylesheet(self, filenames: List[str] = []):
-        stylesheet_dir = os.path.join(os.path.dirname(__file__), "resources", "styles")
+        stylesheet_dir = os.path.join(self._resource_dir, "styles")
         stylesheet = ""
         for file in filenames:
             try:

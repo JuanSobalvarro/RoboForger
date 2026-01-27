@@ -1,6 +1,7 @@
 """
 This module creates a Draw class that is used to generate the Rapid Code given a CAD file.
 """
+import os
 from typing import Tuple
 from RoboForger.types import Point3D, RawLine, RawArc, RawCircle, RawSpline
 from RoboForger.drawing.figures import PolyLine, Arc, Circle, BSpline
@@ -17,7 +18,8 @@ class Forger:
     - Drawing detection: Logic for drawing, order of figures and maybe intelligent tracing
     - Code Generation: Translate traces and points into RAPID code
     """
-    def __init__(self, 
+    def __init__(self,
+        resource_dir: str = "",
         origin: Point3D = (450.0, 0, 450.0),
         zero: Point3D = (0.0, 0.0, 0.0),
         pre_scale: float = 1.0,
@@ -33,6 +35,8 @@ class Forger:
         use_intelligent_traces: bool = True,
         use_offset_programming: bool = True
         ):
+
+        self._resource_dir = resource_dir
 
         self._origin = origin
         self._zero = zero
@@ -159,7 +163,7 @@ class Forger:
         return self._splines
 
     def parse_figures(self, cad_file: str):
-        parser = CADParser(filepath=cad_file)
+        parser = CADParser(filepath=cad_file, binary_dwg2dxf_path=os.path.join(self._resource_dir, 'bin', 'libredwg', 'dwg2dxf.exe'))
         figures = parser.get_figures_parsed()
         self._raw_lines = figures.get("lines", [])
         self._raw_arcs = figures.get("arcs", [])

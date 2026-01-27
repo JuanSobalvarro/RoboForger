@@ -17,3 +17,6 @@ pyinstaller --name RoboForger --workpath build-windows --icon=build-aux/icon.ico
 
 # How does it look like
 ![Screenshot](./docs/ss_v1.png)
+
+## Thx to
+- LibreDWG for the binaries

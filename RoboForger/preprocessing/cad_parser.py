@@ -85,7 +85,7 @@ class DXFParser:
             'splines': self.get_splines()
         }
     
-def dwg_to_dxf(dwg_filepath: str, output_filepath: str) -> bool:
+def dwg_to_dxf(dwg_filepath: str, output_filepath: str, tool_path: str) -> bool:
     """
     Converts the DWG file to DXF format using the `dwg2dxf` command line tool.
     
@@ -93,9 +93,8 @@ def dwg_to_dxf(dwg_filepath: str, output_filepath: str) -> bool:
     :param output_filepath: Path to save the converted DXF file.
     :return: True if conversion was successful, False otherwise.
     """
-    tool_path = BINARY_DWG2DXF_PATH
-    if not os.path.exists(BINARY_DWG2DXF_PATH):
-        raise FileNotFoundError(f"DWG to DXF converter not found at {BINARY_DWG2DXF_PATH}")
+    if not os.path.exists(tool_path):
+        raise FileNotFoundError(f"DWG to DXF converter not found at {tool_path}")
     
     try:
         result = subprocess.run([tool_path, dwg_filepath, '-o', output_filepath, '-y'], capture_output=True, text=True)
@@ -109,9 +108,13 @@ def dwg_to_dxf(dwg_filepath: str, output_filepath: str) -> bool:
     return result.returncode == 0
 
 class CADParser:
-    def __init__(self, filepath: str):
+    def __init__(self, filepath: str, binary_dwg2dxf_path: str):
         self.filepath = filepath
         self.parser = None
+        self.binary_path = binary_dwg2dxf_path
+
+        if not os.path.exists(self.binary_path):
+            raise FileNotFoundError(f"CADPARSER::DWG to DXF converter not found at {self.binary_path}")
 
         file_ext = os.path.splitext(filepath)[1].lower()
         if file_ext == '.dxf':
@@ -120,7 +123,7 @@ class CADParser:
             # Convert DWG to DXF first
             dxf_temp_path = filepath + '.dxf'
             print(f"Temporal path for DXF: {dxf_temp_path}")
-            if dwg_to_dxf(filepath, dxf_temp_path):
+            if dwg_to_dxf(filepath, dxf_temp_path, self.binary_path):
                 self.parser = DXFParser(dxf_temp_path)
             else:
                 raise ValueError(f"CADPARSER::Failed to convert DWG to DXF: {filepath}")
