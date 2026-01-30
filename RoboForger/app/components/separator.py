@@ -18,4 +18,6 @@ class LineSeparator(QWidget):
             line.setFrameShape(QFrame.Shape.HLine)
             line.setFrameShadow(QFrame.Shadow.Sunken)
 
+        line.setProperty("tag", "separator")
+
         layout.addWidget(line)

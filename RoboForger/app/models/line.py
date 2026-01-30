@@ -19,7 +19,7 @@ class Line(Qt3DCore.QEntity):
 
         self.material = Qt3DExtras.QPhongMaterial()
         self.material.setAmbient(self.color)
-        self.material.setDiffuse(QColor(0, 0, 0)) # ignore lighting effects
+        self.material.setDiffuse(self.color) # ignore lighting effects
         self.material.setSpecular(QColor(0, 0, 0)) # ignore lighting effects
         self.addComponent(self.material)
 

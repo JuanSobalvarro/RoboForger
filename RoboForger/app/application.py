@@ -28,10 +28,13 @@ class RoboforgerApp(QApplication):
             "labels.qss",
         ])
 
-        self._process_worker = ProcessWorker()
+        self._process_worker = ProcessWorker(resource_dir=resource_dir)
         self._parameters = ProcessingParameters()
 
         self.setup_main_window()
+
+        # default maximized
+        self.main_window.showMaximized()
 
         self.connect_signals()
 

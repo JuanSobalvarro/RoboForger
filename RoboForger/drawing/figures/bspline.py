@@ -1,6 +1,6 @@
 from .figure import Figure
 from typing import List, Tuple
-from RoboForger.types import Point3D
+from RoboForger.fig_types import Point3D
 
 import numpy as np
 

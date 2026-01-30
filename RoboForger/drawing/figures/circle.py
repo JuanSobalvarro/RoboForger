@@ -1,5 +1,5 @@
 from .figure import Figure
-from RoboForger.types import Point3D
+from RoboForger.fig_types import Point3D
 from typing import List
 from RoboForger.utils import distance_vectors
 

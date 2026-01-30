@@ -22,7 +22,7 @@ class Circle(Qt3DCore.QEntity):
         self.addComponent(self.torus_mesh)
         self.material = Qt3DExtras.QPhongMaterial(self)
         self.material.setAmbient(self.color)
-        self.material.setDiffuse(QColor(0, 0, 0)) 
+        self.material.setDiffuse(self.color) 
         self.material.setSpecular(QColor(0, 0, 0))
         self.addComponent(self.material)
 

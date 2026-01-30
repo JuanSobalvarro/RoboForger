@@ -3,10 +3,14 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QWidget,
     QSizePolicy,
+    QSplitter,
+    QVBoxLayout,
+    QFrame,
 )
 from PySide6.QtCore import (
     QSize,
     Signal,
+    Qt,
 )
 
 from RoboForger.app.configuration import ConfigurationPanel
@@ -15,51 +19,57 @@ from RoboForger.app.console import Console
 
 
 class RoboMainWindow(QMainWindow):
-    
+
     load_file_request = Signal()
     process_file_request = Signal()
     save_file_request = Signal()
 
     def __init__(self):
         super().__init__()
-        # Initial size
-        self.setGeometry(100, 100, 1200, 800) 
+
+        self.resize(1200, 700)
+        self.setWindowTitle("RoboForger")
 
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
 
-        layout = QGridLayout(central_widget)
-        
-        # widgets
-        
+        main_splitter = QSplitter(Qt.Orientation.Horizontal, central_widget)
+
         self.config_panel = ConfigurationPanel()
-        layout.addWidget(self.config_panel, 0, 0, 2, 1)
+        self.config_panel.setMinimumWidth(280)
+        # self.config_panel.setMaximumWidth(420)
+
+        right_splitter = QSplitter(Qt.Orientation.Vertical, central_widget)
+        # TODO: Customize directly the splitter handle so the hover is not captured by the separator line
 
         self.preview = Preview()
-        layout.addWidget(self.preview, 0, 1)
-
+        self.separator_line = QFrame()
+        self.separator_line.setFixedHeight(2)   # visual + grab area
+        self.separator_line.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Fixed
+        )
+        self.separator_line.setProperty("tag", "separator_collapsible")
         self.console = Console()
-        layout.addWidget(self.console, 1, 1)
 
-        # SET MINIMUM SIZE CONSTRAINTS 
-        min_preview_width = int(self.width() * 2 / 3) 
-        self.preview.setMinimumWidth(min_preview_width)
+        right_splitter.addWidget(self.preview)
+        right_splitter.addWidget(self.separator_line)
+        right_splitter.addWidget(self.console)
 
-        min_preview_height = int(self.height() * 2 / 3)
-        self.preview.setMinimumHeight(min_preview_height)
+        # Initial proportions (preview dominant)
+        right_splitter.setStretchFactor(0, 3)
+        right_splitter.setStretchFactor(1, 1)
 
-        # SET MAXIMUM SIZE CONSTRAINTS
-        self.preview.setMaximumSize(QSize(int(self.width() * 2 / 3), int(self.height() * 2 / 3)))
-        
-        # CONFIGURE STRETCH FACTORS (Proportions) 
-        
-        layout.setColumnStretch(0, 1)
-        layout.setColumnStretch(1, 2)
+        main_splitter.addWidget(self.config_panel)
+        main_splitter.addWidget(right_splitter)
 
-        layout.setRowStretch(0, 1)
-        layout.setRowStretch(1, 1)
+        main_splitter.setStretchFactor(0, 0)
+        main_splitter.setStretchFactor(1, 1)
 
-        self.setLayout(layout)
+        # Layout wrapper
+        layout = QVBoxLayout(central_widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(main_splitter)
 
         self.connect_signals()
 

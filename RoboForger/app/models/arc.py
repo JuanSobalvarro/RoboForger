@@ -28,7 +28,7 @@ class Arc(Qt3DCore.QEntity):
 
         self.line_entities = []
         
-        print("Drawing arc:", center, radius, start_angle, end_angle, clockwise)
+        # print("Drawing arc:", center, radius, start_angle, end_angle, clockwise)
 
         self.draw_arc()
 

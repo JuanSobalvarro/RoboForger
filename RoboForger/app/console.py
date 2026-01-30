@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QFrame,
     QPlainTextEdit,
+    QSizePolicy,
 )
 from PySide6.QtGui import QFont, QColor, QTextCursor
 from PySide6.QtCore import QObject, Signal, Slot, Qt
@@ -84,6 +85,13 @@ class Console(QFrame):
     """
     def __init__(self):
         super().__init__()
+
+        self.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Maximum
+        )
+        self.setMinimumHeight(120)
+        # self.setMaximumHeight(260)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)

@@ -5,3 +5,33 @@ QPlainTextEdit[tag="console"] {
     font-family: 'Consolas', 'Courier New', monospace;
     font-size: 12px;
 }
+
+QFrame[tag="separator"] {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 rgba(255,255,255,0),
+        stop:0.2 rgba(255,255,255,80),
+        stop:0.8 rgba(255,255,255,80),
+        stop:1 rgba(255,255,255,0)
+    );
+}
+
+QFrame[tag="separator_collapsible"] {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 rgba(255,255,255,0),
+        stop:0.2 rgba(255,255,255,40),
+        stop:0.8 rgba(255,255,255,40),
+        stop:1 rgba(255,255,255,0)
+    );
+}
+
+QFrame:hover[tag="separator_collapsible"] {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 rgba(100,180,255,0),
+        stop:0.2 rgba(100,180,255,120),
+        stop:0.8 rgba(100,180,255,120),
+        stop:1 rgba(100,180,255,0)
+    );
+}

@@ -5,7 +5,7 @@ parameters such as tool name, velocity, workspace limits, origin, and zero point
 Draw 'draws' the figures one after another, if detector is enabled it will unify figures that are close to each other
 """
 from typing import Any, List, Tuple
-from RoboForger.types import Point3D
+from RoboForger.fig_types import Point3D
 from .figures.figure import Figure
 from RoboForger.detector.detector import Detector
 

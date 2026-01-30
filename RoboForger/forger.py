@@ -3,7 +3,7 @@ This module creates a Draw class that is used to generate the Rapid Code given a
 """
 import os
 from typing import Tuple
-from RoboForger.types import Point3D, RawLine, RawArc, RawCircle, RawSpline
+from RoboForger.fig_types import Point3D, RawLine, RawArc, RawCircle, RawSpline
 from RoboForger.drawing.figures import PolyLine, Arc, Circle, BSpline
 from RoboForger.preprocessing.cad_parser import CADParser
 from RoboForger.preprocessing.converter import Converter
@@ -37,6 +37,9 @@ class Forger:
         ):
 
         self._resource_dir = resource_dir
+
+        if not os.path.exists(self._resource_dir):
+            raise FileNotFoundError(f"Resource directory not found at {self._resource_dir}")
 
         self._origin = origin
         self._zero = zero
@@ -234,6 +237,7 @@ class Forger:
 
     def parameters_dict(self) -> dict:
         return {
+            "resource_dir": self._resource_dir,
             "origin": self._origin,
             "zero": self._zero,
             "scale": self._pre_scale,

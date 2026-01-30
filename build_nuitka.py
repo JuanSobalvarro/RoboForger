@@ -2,46 +2,78 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+import argparse
 
-ENTRY_POINT = "main.py"
+ENTRY_POINT = "RoboForger/main.py"
 OUTPUT_NAME = "RoboForger"
 
-def build():
-    current_dir = Path(os.getcwd())
-    resources_dir = os.path.join(current_dir, "RoboForger", "resources")
-    
+def build(debug=False):
+    project_root = Path(__file__).parent
+    resources_dir = project_root / "RoboForger" / "resources"
+    bin_dir = resources_dir / "bin" / "libredwg"
+
     cmd = [
         sys.executable, "-m", "nuitka",
-        "--standalone",          # Create a folder with all dependencies
-        # "--onefile",           # one file for single exe
+        "--standalone",
         f"--output-filename={OUTPUT_NAME}",
         "--output-dir=dist",
 
         "--enable-plugin=pyside6",
-        "--windows-disable-console",
-        f"--windows-icon-from-ico={os.path.join(resources_dir, 'icon.ico')}",
-        
+        # TO REMEMBER: qt plugins are the folders from PySide6 library where the dlls
+        # are stored. For example, the "platforms" folder contains the "qwindows.dll" file
+        # renderers for 3D rendering (opengl)
+        # platforms for Windows platform support
+        "--include-qt-plugins=renderers,platforms",
+
+        f"--windows-icon-from-ico={resources_dir / 'icon.ico'}",
+
         f"--include-data-dir={resources_dir}=resources",
+        f"--include-data-files={bin_dir / 'dwg2dxf.exe'}=resources/bin/libredwg/dwg2dxf.exe",
+
+        "--nofollow-import-to=typing",
+        "--nofollow-import-to=types",
         
-        "--lto=no",              # Link Time Optimization (Set 'yes' for release, 'no' for speed)
-        "--jobs=4",              # Use 4 CPU cores
+        # exclude unittest library if found
+        # "--nofollow-import-to=unittest",
+
+        "--msvc=latest",
+
+        "--company-name=JuSo",
+        "--product-name=RoboForger",
+        "--file-version=2.0.0",
+
+        "--windows-console-mode=disable",
+
+        "--jobs=8",
+        "--lto=no" if debug else "--lto=yes",
 
         ENTRY_POINT
     ]
 
-    print("--- Starting Nuitka Build ---")
-    print(f"Command: {' '.join(cmd)}")
-    
-    try:
-        subprocess.run(cmd, check=True)
-        print("\nBuild Successful!")
-        print(f"Artifacts are in: dist/{OUTPUT_NAME}.dist")
-    except subprocess.CalledProcessError:
-        print("\nBuild Failed")
+    if debug:
+        cmd += [
+            "--debug",
+            "--unstripped",
+            "--no-debug-immortal-assumptions",
+            "--python-flag=-v",
+            "--windows-console-mode=force",
+        ]
+
+    print("\n--- Starting Nuitka Build ---")
+    print(" ".join(cmd))
+
+    subprocess.run(cmd, check=True)
+
+    print("\nBuild successful!")
+    print(f"Output: dist/{OUTPUT_NAME}.dist")
 
 if __name__ == "__main__":
-    if not os.path.exists("pyproject.toml"):
-        print("Error: Please run this script from the project root directory.")
+    if not Path("pyproject.toml").exists():
+        print("Run this script from the project root")
         sys.exit(1)
-        
-    build()
+
+    parser = argparse.ArgumentParser(description="Build RoboForger with Nuitka")
+    parser.add_argument("--debug", action="store_true", help="Build in debug mode")
+    args = parser.parse_args()
+
+    build(debug=True if args.debug else False)

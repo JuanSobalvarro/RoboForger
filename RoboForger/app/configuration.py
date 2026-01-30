@@ -8,6 +8,8 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QCheckBox,
     QPushButton,
+    QSizePolicy,
+    QScrollArea,
 )
 from PySide6.QtCore import (
     Signal,
@@ -17,6 +19,7 @@ from PySide6.QtCore import (
 from RoboForger.app.components.field import Field, LabelPosition, LabelAnchor
 from RoboForger.app.components.separator import LineSeparator
 from RoboForger.app.components.label import Label, LabelTag
+from RoboForger.app.utils import make_scrollable
 
 from typing import Any
 
@@ -173,8 +176,8 @@ class RightPanel(QFrame):
         layout: QLayout = QVBoxLayout(self)
 
         # Title label
-        title_label = Label("Coords Parameters", self, tag=LabelTag.HEADER)
-        layout.addWidget(title_label)
+        # title_label = Label("Coords Parameters", self, tag=LabelTag.HEADER)
+        # layout.addWidget(title_label)
 
         # tool section
         tool_label = Label("Tool", self, tag=LabelTag.SUBHEADER)
@@ -313,8 +316,21 @@ class ConfigurationPanel(QWidget):
 
     def setup_ui(self):
 
-        self.current_layout.addWidget(self.left_panel)
-        self.current_layout.addWidget(self.right_panel)
+        self.left_panel.setSizePolicy(
+            QSizePolicy.Policy.Preferred,
+            QSizePolicy.Policy.Expanding
+        )
+
+        self.right_panel.setSizePolicy(
+            QSizePolicy.Policy.Preferred,
+            QSizePolicy.Policy.Expanding
+        )
+
+        self.left_panel.setMinimumWidth(280)
+        self.right_panel.setMinimumWidth(320)
+
+        self.current_layout.addWidget(make_scrollable(self.left_panel))
+        self.current_layout.addWidget(make_scrollable(self.right_panel))
 
     def connect_signals(self):
         self.right_panel.on_load_dxf_clicked.connect(self.load_file_request)

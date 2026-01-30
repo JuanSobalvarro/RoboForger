@@ -1,6 +1,6 @@
 from typing import List
 from .figure import Figure
-from RoboForger.types import Point3D
+from RoboForger.fig_types import Point3D
 
 
 class PolyLine(Figure):

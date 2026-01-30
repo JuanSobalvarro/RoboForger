@@ -1,5 +1,5 @@
 from typing import List
-from RoboForger.types import Point3D
+from RoboForger.fig_types import Point3D
 
 
 class Figure:

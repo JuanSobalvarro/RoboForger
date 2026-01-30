@@ -22,6 +22,7 @@ def _processing_function(file_path: str, result_queue: multiprocessing.Queue, pa
     """
     try:
         forger = Forger(
+            resource_dir=params["resource_dir"],
             origin=params["origin"],
             zero=params["zero"],
             pre_scale=params["scale"],
@@ -66,12 +67,11 @@ class ProcessWorker(QObject):
 
     fileLoaded = Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, resource_dir: str, parent=None):
         super().__init__(parent)
 
         # forger instance (preview for figures)
-        self._forger = Forger()
-
+        self._forger = Forger(resource_dir=resource_dir)
         # process/threading
         self._process: multiprocessing.Process | None = None
         self._result_queue: multiprocessing.Queue | None = None
@@ -125,7 +125,8 @@ class ProcessWorker(QObject):
                 return
             if not self._selected_file_path:
                 # print("No file selected. Please load a DXF file before starting processing.")
-                print("No file selected. Please load a CAD file(DXF, DWG) before starting processing.")
+                # print("No file selected. Please load a CAD file(DXF, DWG) before starting processing.")
+                self.processError.emit("No file selected. Please load a CAD file(DXF, DWG) before starting processing.")
                 return
             # if not self._validate_parameters():
             #     print("Invalid parameters. Please check your settings.")
@@ -133,6 +134,7 @@ class ProcessWorker(QObject):
 
             self._is_running = True
             self.processStart.emit()
+            logging.log(level=logging.INFO, msg="Starting processing...")
 
             self._result_queue = multiprocessing.Queue()
             params = self._forger.parameters_dict()
@@ -149,7 +151,7 @@ class ProcessWorker(QObject):
 
         except Exception as e:
             self._is_running = False
-            self.processError.emit(str(e))
+            self.processError.emit(f"Exception starting processing: {str(e)}")
 
     @Slot()
     def save_rapid_code(self):
@@ -187,13 +189,14 @@ class ProcessWorker(QObject):
             result = self._result_queue.get()
             if isinstance(result, Exception):
                 self._rapid_code = ""
-                self.processError.emit(str(result))
+                self.processError.emit(f"Exception during processing: {str(result)}")
             else:
                 self._rapid_code = result.get("rapid_code", "")
+                logging.log(level=logging.INFO, msg="Processing finished successfully.")
                 self.processFinish.emit()
         except Exception as e:
             self._rapid_code = ""
-            self.processError.emit(str(e))
+            self.processError.emit(f"Exception during monitoring: {str(e)}")
         finally:
             try:
                 if self._process:

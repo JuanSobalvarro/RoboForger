@@ -2,7 +2,7 @@ import ezdxf
 import os
 import subprocess
 from typing import List, Tuple, Dict, Any
-from RoboForger.types import Point3D, RawLine, RawArc, RawCircle, RawSpline
+from RoboForger.fig_types import Point3D, RawLine, RawArc, RawCircle, RawSpline
 
 
 BINARY_DWG2DXF_PATH = os.path.join(os.path.dirname(__file__), 'bin', 'libredwg', 'dwg2dxf.exe')
