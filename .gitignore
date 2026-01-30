@@ -12,3 +12,4 @@ build-windows
 *.exe
 *.pycache
 *__pycache__*
+installer

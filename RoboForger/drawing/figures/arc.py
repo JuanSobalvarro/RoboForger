@@ -1,6 +1,6 @@
 from .figure import Figure
 from typing import List, Tuple, Union, Optional
-from RoboForger.types import Point3D
+from RoboForger.fig_types import Point3D
 from math import sqrt, atan2, pi, cos, sin, radians
 from RoboForger.utils import round_tuple, normalize_angle, normalize_angle_deg, vector_norm, distance_vectors
 

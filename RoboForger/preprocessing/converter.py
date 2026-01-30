@@ -2,7 +2,7 @@
 This module converts CAD objects to RoboForger objects.
 """
 from typing import List, Any, Dict
-from RoboForger.types import Point3D, RawLine, RawCircle, RawArc, RawSpline
+from RoboForger.fig_types import Point3D, RawLine, RawCircle, RawArc, RawSpline
 from RoboForger.drawing.figures import PolyLine, Arc, Circle, Figure, BSpline
 from math import cos, sin, radians, pi, degrees
 from RoboForger.utils import real_coord2robo_coord

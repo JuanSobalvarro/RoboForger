@@ -1,4 +1,0 @@
-module Components.Header
-Header Header.qml
-HeaderContent HeaderContent.qml
-AutoWidthMenu AutoWidthMenu.qml

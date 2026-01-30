@@ -1,8 +1,9 @@
 """
 This module creates a Draw class that is used to generate the Rapid Code given a CAD file.
 """
+import os
 from typing import Tuple
-from RoboForger.types import Point3D, RawLine, RawArc, RawCircle, RawSpline
+from RoboForger.fig_types import Point3D, RawLine, RawArc, RawCircle, RawSpline
 from RoboForger.drawing.figures import PolyLine, Arc, Circle, BSpline
 from RoboForger.preprocessing.cad_parser import CADParser
 from RoboForger.preprocessing.converter import Converter
@@ -17,7 +18,8 @@ class Forger:
     - Drawing detection: Logic for drawing, order of figures and maybe intelligent tracing
     - Code Generation: Translate traces and points into RAPID code
     """
-    def __init__(self, 
+    def __init__(self,
+        resource_dir: str = "",
         origin: Point3D = (450.0, 0, 450.0),
         zero: Point3D = (0.0, 0.0, 0.0),
         pre_scale: float = 1.0,
@@ -33,6 +35,11 @@ class Forger:
         use_intelligent_traces: bool = True,
         use_offset_programming: bool = True
         ):
+
+        self._resource_dir = resource_dir
+
+        if not os.path.exists(self._resource_dir):
+            raise FileNotFoundError(f"Resource directory not found at {self._resource_dir}")
 
         self._origin = origin
         self._zero = zero
@@ -158,8 +165,8 @@ class Forger:
     def get_splines(self) -> list[BSpline]:
         return self._splines
 
-    def parse_figures(self, dxf_file: str):
-        parser = CADParser(filepath=dxf_file)
+    def parse_figures(self, cad_file: str):
+        parser = CADParser(filepath=cad_file, binary_dwg2dxf_path=os.path.join(self._resource_dir, 'bin', 'libredwg', 'dwg2dxf.exe'))
         figures = parser.get_figures_parsed()
         self._raw_lines = figures.get("lines", [])
         self._raw_arcs = figures.get("arcs", [])
@@ -227,3 +234,22 @@ class Forger:
         with open(save_path, 'w') as file:
             file.write(self._rapid_code)
         print(f"RAPID code exported to {save_path}")
+
+    def parameters_dict(self) -> dict:
+        return {
+            "resource_dir": self._resource_dir,
+            "origin": self._origin,
+            "zero": self._zero,
+            "scale": self._pre_scale,
+            "float_precision": self._float_precision,
+            "lifting": self._lifting,
+            "tool_name": self._tool_name,
+            "lines_velocity": self._polyline_velocity,
+            "arcs_velocity": self._arc_velocity,
+            "circles_velocity": self._circle_velocity,
+            "splines_velocity": self._spline_velocity,
+            "inferior_limit": self._workspace_limits[0],
+            "superior_limit": self._workspace_limits[1],
+            "use_detector": self._use_intelligent_traces,
+            "use_offset": self._use_offset_programming
+        }

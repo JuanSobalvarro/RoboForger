@@ -1,27 +1,16 @@
 from .figure import Figure
 from typing import List, Tuple
-from RoboForger.types import Point3D\
+from RoboForger.fig_types import Point3D
 
 import numpy as np
-from scipy import interpolate as spi
 
 class BSpline(Figure):
-    """
-    Represents a B-Spline figure in RoboForger.
-    Inherits from the Figure class and adds functionality specific to B-Splines.
-
-    Spline will be approximated using MoveL commands between calculated points.
-    """
-
     def __init__(self, name: str, degree: int, closed: bool, knots: List[float], weights: List[float], control_points: List[Point3D], fit_points: List[Point3D], interpolation_precision: float = 10, lifting: float = 100, velocity: int = 1000, float_precision: int = 6):
-        """
-        :param interpolation_precision: Amount of points per unity of distance
-        """
         self.degree = degree
         self.closed = closed
-        self.knots = knots
-        self.weights = weights
-        self.control_points = control_points
+        self.knots = np.array(knots, dtype=float)
+        self.weights = np.array(weights, dtype=float) if weights else None
+        self.control_points = np.array(control_points, dtype=float)
         self.fit_points = fit_points
         self.num_points = self.get_num_points(interpolation_precision)
 
@@ -30,34 +19,79 @@ class BSpline(Figure):
         super().__init__(name, points, lifting, velocity, float_precision)
 
     def get_num_points(self, interpolation_precision: float) -> int:
-        """
-        This function calculates the interpolation precision (amount of points) based on the distance
-        between the maximum and minimum control points.
-        """
         num_points = 0
-
-        if self.control_points:
-            max_point_x = np.max(self.control_points, axis=0)
-            max_point_y = np.max(self.control_points, axis=1)
-            min_point_x = np.min(self.control_points, axis=0)
-            min_point_y = np.min(self.control_points, axis=1)
-            distance = np.linalg.norm(max_point_x - min_point_x) + np.linalg.norm(max_point_y - min_point_y)
+        if len(self.control_points) > 0:
+            max_p = np.max(self.control_points, axis=0)
+            min_p = np.min(self.control_points, axis=0)
+            # Simple bounding box approximation
+            distance = np.linalg.norm(max_p - min_p)
             if distance > 0:
                 num_points = int(distance * interpolation_precision / 10)
+                # Ensure a minimum resolution so small splines don't look like triangles
+                num_points = max(num_points, 20) 
             print(f"Num Points: {num_points}")
-
         return num_points
 
     def get_all_points(self) -> List[Point3D]:
-
-        # Create a B-Spline object using scipy
-        spline = spi.BSpline(self.knots, self.control_points, self.degree)
+        # Domain of the spline (usually [knots[degree], knots[-degree-1]])
+        start_t = self.knots[self.degree]
+        end_t = self.knots[-self.degree - 1]
         
-        t_values = np.linspace(self.knots[self.degree], self.knots[-self.degree-1], self.num_points)
+        # Create evaluation parameters (t)
+        t_values = np.linspace(start_t, end_t, self.num_points)
 
-        points = spline(t_values)
+        # Evaluate using pure numpy
+        points = self._evaluate_spline(t_values)
 
         return points.tolist()
+
+    def _evaluate_spline(self, t_values: np.ndarray) -> np.ndarray:
+        """
+        Evaluates the B-Spline (or NURBS) at given t parameters using De Boor's algorithm.
+        Supports Weights (NURBS) if self.weights is present.
+        """
+        n = len(self.control_points) - 1
+        p = self.degree
+        knots = self.knots
+        
+        # If we have weights, convert to Homogeneous coordinates (x*w, y*w, z*w, w)
+        if self.weights is not None and len(self.weights) == len(self.control_points):
+            # Shape (N, 4) -> [wx, wy, wz, w]
+            ctrl_h = np.column_stack((self.control_points * self.weights[:, None], self.weights))
+        else:
+            # Shape (N, 3)
+            ctrl_h = self.control_points
+
+        result_points = []
+
+        for t in t_values:
+            # Find the knot span index 'k' such that knots[k] <= t < knots[k+1]
+            # We clip to ensure we don't go out of bounds at the very end
+            k = np.searchsorted(knots, t, side='right') - 1
+            k = np.clip(k, p, n)
+
+            # De Boor's Algorithm
+            # Copy the relevant control points for this span
+            d = ctrl_h[k - p : k + 1].copy()
+
+            for r in range(1, p + 1):
+                for j in range(p, r - 1, -1):
+                    denom = knots[j + k - r + 1] - knots[j + k - p]
+                    alpha = (t - knots[j + k - p]) / denom if denom != 0 else 0.0
+                    d[j] = (1.0 - alpha) * d[j - 1] + alpha * d[j]
+
+            # The result is the last point in the array
+            final_val = d[p]
+
+            # Convert back from Homogeneous if needed (NURBS projection)
+            if self.weights is not None:
+                # Divide x,y,z by w
+                point_3d = final_val[:3] / final_val[3]
+                result_points.append(point_3d)
+            else:
+                result_points.append(final_val)
+
+        return np.array(result_points)
 
     def move_instructions_offset(self, origin_robtarget_name: str, origin: Point3D = (450.0, 0.0, 450.0), tool_name: str = "tool0", global_velocity: int = 1000) -> List[str]:
         instructions = []
