@@ -19,6 +19,8 @@ def _processing_function(file_path: str, result_queue: multiprocessing.Queue, pa
     """
     Run the full pipeline inside a separate process using Forger and return the RAPID code.
     Any exception is put back into the queue to be handled in the UI thread.
+
+    TODO: Add stdout and stderr capturing to send back logs to the main process.
     """
     try:
         forger = Forger(
@@ -88,7 +90,7 @@ class ProcessWorker(QObject):
         """
         Load a DXF file for processing.
         """
-        print("Loading CAD file...")
+        logging.info("Loading CAD file...")
         # open file dialog 
         file_dialog = QFileDialog()
         # filter for DWG and DXF files

@@ -7,6 +7,8 @@ from typing import List, Dict, Any, Tuple
 from RoboForger.drawing.figures import Figure
 from RoboForger.detector.tracer import Tracer
 
+import logging
+
 
 class Detector:
     def __init__(self, figures: List[Figure]):
@@ -26,10 +28,10 @@ class Detector:
         """
         Prints the detected traces in a readable format.
         """
-        print("================Detected traces=================")
+        logging.info("================Detected traces=================")
         for i, trace in enumerate(traces):
-            print(f"Trace {i + 1}: {[figure.name for figure in trace]}")
-        print("================================================")
+            logging.info(f"Trace {i + 1}: {[figure.name for figure in trace]}")
+        logging.info("================================================")
 
     def detect_and_simplify(self) -> List[Figure]:
         """
@@ -73,7 +75,7 @@ class Detector:
 
             simplified_figures.extend(trace)
 
-        print(f"Simplified figures detected in total: {len(simplified_figures)}")
+        logging.info(f"Simplified figures detected in total: {len(simplified_figures)}")
 
         return simplified_figures
 

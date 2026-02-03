@@ -14,7 +14,7 @@ from PySide6.QtCore import (
 )
 
 from RoboForger.app.configuration import ConfigurationPanel
-from RoboForger.app.preview import Preview
+from RoboForger.app.preview.preview import Preview
 from RoboForger.app.console import Console
 
 

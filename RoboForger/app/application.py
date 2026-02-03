@@ -7,7 +7,7 @@ from typing import List
 from RoboForger.app.components.label import Label
 from RoboForger.app.mainwindow import RoboMainWindow
 from RoboForger.app.worker import ProcessWorker
-from RoboForger.app.models.parameters import ProcessingParameters
+from RoboForger.app.geometries.parameters import ProcessingParameters
 
 
 class RoboforgerApp(QApplication):

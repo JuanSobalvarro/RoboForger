@@ -2,7 +2,7 @@ from PySide6.Qt3DCore import Qt3DCore
 from PySide6.Qt3DExtras import Qt3DExtras
 from PySide6.QtGui import QColor, QVector3D
 
-from RoboForger.app.models.line import Polyline
+from RoboForger.app.geometries.line import Polyline, PolylineSharedResources
 
 import numpy as np
 import math
@@ -19,7 +19,7 @@ class Arc(Qt3DCore.QEntity):
 
     TODO: Support arcs in arbitrary planes.
     """
-    def __init__(self, center: QVector3D, radius: float, start_angle: float, end_angle: float, clockwise: bool, color: QColor, thickness: float, rounded_corners: bool = False, parent=None):
+    def __init__(self, center: QVector3D, radius: float, start_angle: float, end_angle: float, clockwise: bool, shared_resources: PolylineSharedResources, parent=None):
         super().__init__(parent)
 
         self.center = center
@@ -27,10 +27,7 @@ class Arc(Qt3DCore.QEntity):
         self.start_angle = start_angle
         self.end_angle = end_angle
         self.clockwise = clockwise
-        self.thickness = thickness
-        self.rounded_corners = rounded_corners
-
-        self.color = color
+        self.shared_resources = shared_resources
 
         self.polyline: Polyline | None = None
 
@@ -56,7 +53,7 @@ class Arc(Qt3DCore.QEntity):
         # print(f"Sweep angle: {sweep_angle} radians.")
 
         # Desired chord error
-        chord_error = 0.01  # in the same units as radius
+        chord_error = 0.1  # in the same units as radius
         num_segments = int(sweep_angle / self.segment_angle(chord_error))
 
         if num_segments < 2:
@@ -79,7 +76,7 @@ class Arc(Qt3DCore.QEntity):
 
         # print(f"Arc with {len(positions)} segments: {positions}")
 
-        self.polyline = Polyline(positions, self.color, self.thickness, self.rounded_corners, self)
+        self.polyline = Polyline(positions, self.shared_resources, self)
 
     def segment_angle(self, chord_error: float) -> float:
         """
@@ -87,5 +84,13 @@ class Arc(Qt3DCore.QEntity):
         """
         if self.radius == 0:
             return 0.0
-        angle = 2 * math.acos(1 - (chord_error / self.radius))
+        div = 1 - (chord_error / self.radius)
+        
+        if div < -1:
+            div = -1
+        
+        if div > 1:
+            div = 1
+
+        angle = 2 * math.acos(div)
         return angle
