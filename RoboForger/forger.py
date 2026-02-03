@@ -2,7 +2,8 @@
 This module creates a Draw class that is used to generate the Rapid Code given a CAD file.
 """
 import os
-from typing import Tuple
+from typing import Tuple, Sequence
+from RoboForger.drawing.figures.figure import Figure
 from RoboForger.fig_types import Point3D, RawLine, RawArc, RawCircle, RawSpline
 from RoboForger.drawing.figures import PolyLine, Arc, Circle, BSpline
 from RoboForger.preprocessing.cad_parser import CADParser
@@ -65,6 +66,9 @@ class Forger:
         self._arcs: list[Arc] = []
         self._circles: list[Circle] = []
         self._splines: list[BSpline] = []
+
+        self._parsed: bool = False # flag to know if figures have been parsed
+        self._converted: bool = False # flag to know if figures have been converted
 
         self._rapid_code: str = ""
 
@@ -166,19 +170,34 @@ class Forger:
         return self._splines
 
     def parse_figures(self, cad_file: str):
-        parser = CADParser(filepath=cad_file, binary_dwg2dxf_path=os.path.join(self._resource_dir, 'bin', 'libredwg', 'dwg2dxf.exe'))
+        if not os.path.exists(cad_file):
+            raise FileNotFoundError(f"CAD file not found at {cad_file}")
+        
+        if self._parsed:
+            self._parsed = False  # reset parsed flag if new parsing is done
+
+        try:
+            parser = CADParser(filepath=cad_file, binary_dwg2dxf_path=os.path.join(self._resource_dir, 'bin', 'libredwg', 'dwg2dxf.exe'))
+        except Exception as e:
+            raise RuntimeError(f"Failed to initialize CAD parser: {e}")
+        
         figures = parser.get_figures_parsed()
         self._raw_lines = figures.get("lines", [])
         self._raw_arcs = figures.get("arcs", [])
         self._raw_circles = figures.get("circles", [])
         self._raw_splines = figures.get("splines", [])
 
+        self._parsed = True
+
+        if self._converted:
+            self._converted = False  # reset converted flag if new parsing is done
+
     def convert_figures(self):
         converter = Converter(float_precision=self._float_precision, pre_scale=self._pre_scale, lifting=self._lifting, origin=self._origin)
-        figures = converter.convert_figures(lines=self._raw_lines,
-                                            arcs=self._raw_arcs,
-                                            circles=self._raw_circles,
-                                            splines=self._raw_splines)
+        figures: dict[str, list[PolyLine | Arc | Circle | BSpline]] = converter.convert_figures(lines=self._raw_lines,
+                                                                                                arcs=self._raw_arcs,
+                                                                                                circles=self._raw_circles,
+                                                                                                splines=self._raw_splines)
         self._polylines = figures.get("lines", [])
         self._arcs = figures.get("arcs", [])
         self._circles = figures.get("circles", [])
@@ -192,6 +211,11 @@ class Forger:
 
         for circle in self._circles:
             circle.set_velocity(self._circle_velocity)
+
+        # for spline in self._splines:
+        #     spline.set_velocity(self._spline_velocity)
+
+        self._converted = True
 
     def get_raw_figures(self) -> dict:
         return {

@@ -78,7 +78,7 @@ class RoboforgerApp(QApplication):
 
         self._process_worker.fileLoaded.connect(
             lambda: self.main_window.preview.load_figures(
-                self._process_worker._forger.get_raw_figures()
+                self._process_worker._forger.get_figures()
             )
         )
 

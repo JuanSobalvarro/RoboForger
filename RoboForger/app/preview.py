@@ -23,11 +23,14 @@ from PySide6.QtGui import (
     QColor,
 )
 
-from RoboForger.app.models.line import Line, Polyline
+from RoboForger.drawing.figures import PolyLine as FPolyline, Arc as FArc, Circle as FCircle, BSpline as FBSpline, Figure
+
+from RoboForger.app.models.line import Polyline
 from RoboForger.app.models.arc import Arc
 from RoboForger.app.models.circle import Circle
 
-from typing import Any
+from typing import Any, List, Dict
+import logging
 
 
 class WASDCameraController(Qt3DExtras.QAbstractCameraController):
@@ -163,9 +166,9 @@ class WASDCameraController(Qt3DExtras.QAbstractCameraController):
             move_vector -= right_vector
         if Qt.Key.Key_D in self.keys_pressed:
             move_vector += right_vector
-        if Qt.Key.Key_Q in self.keys_pressed:
-            move_vector += up_vector
         if Qt.Key.Key_E in self.keys_pressed:
+            move_vector += up_vector
+        if Qt.Key.Key_Q in self.keys_pressed:
             move_vector -= up_vector
         if Qt.Key.Key_Shift in self.keys_pressed:
             self.turbo_active = True
@@ -183,7 +186,7 @@ class WASDCameraController(Qt3DExtras.QAbstractCameraController):
 
 
 class Preview(QWidget):
-    def __init__(self, grid_size: int = 200, grid_step: int = 10, parent=None):
+    def __init__(self, grid_size: int = 1000, grid_step: int = 50, parent=None):
         """
         A 3D preview widget using Qt3D.
 
@@ -218,11 +221,11 @@ class Preview(QWidget):
             QSizePolicy.Policy.Expanding
         )
 
-        # === Scene Root ===
+        # scene
         self.root_entity = Qt3DCore.QEntity()
         self.view.setRootEntity(self.root_entity)
 
-        # === Camera ===
+        # camera
         self.camera = self.view.camera()
         self.camera.lens().setPerspectiveProjection(
             45.0,
@@ -231,10 +234,9 @@ class Preview(QWidget):
             5000.0
         )
 
-        self.camera.setPosition(QVector3D(0, 0, 200))
+        self.camera.setPosition(QVector3D(0, 0, 2000))
         self.camera.setViewCenter(QVector3D(0, 0, 0))
 
-        # === Input ===
         self.input_settings = Qt3DInput.QInputSettings(self.root_entity)
         self.input_settings.setEventSource(self.view)
         self.root_entity.addComponent(self.input_settings)
@@ -251,16 +253,17 @@ class Preview(QWidget):
         )
 
         self.grid_entities: list[Qt3DCore.QEntity] = []
-        self.lines = []
+        self.polylines: List[Polyline] = []
         self.arcs = []
         self.circles = []
+        self.splines = []
 
         self.add_axis_and_grid()
 
     def clear_figures(self):
-        for line in self.lines:
-            line.setParent(None)
-        self.lines.clear()
+        for pline in self.polylines:
+            pline.setParent(None)
+        self.polylines.clear()
 
         for arc in self.arcs:
             arc.setParent(None)
@@ -271,7 +274,7 @@ class Preview(QWidget):
         self.circles.clear()
 
     @Slot(dict)
-    def load_figures(self, figures: dict[str, list[dict[str, Any]]]):
+    def load_figures(self, figures: dict[str, List[FPolyline | FArc | FCircle | FBSpline]]):
         """
         This is highly coupled with the Forger data structures.
 
@@ -282,73 +285,79 @@ class Preview(QWidget):
         # clear previous entities
         self.clear_figures()
 
-        raw_lines: list[dict] = figures.get("lines", [])
-        raw_arcs: list[dict] = figures.get("arcs", [])
-        raw_circles: list[dict] = figures.get("circles", [])
+        polylines: List[FPolyline] = figures.get("polylines", []) # type: ignore
+        arcs: List[FArc] = figures.get("arcs", []) # type: ignore
+        circles: List[FCircle] = figures.get("circles", []) # type: ignore
+        splines: List[FBSpline] = figures.get("splines", []) # type: ignore
 
-        for line in raw_lines:
-            self.lines.append(
-                Line(
-                    QVector3D(*line["start"]),
-                    QVector3D(*line["end"]),
-                    QColor("#ffff00"),
-                    0.2,
-                    self.root_entity,
-                )
+        logging.info(f"Preview loading {len(polylines)} polylines, {len(arcs)} arcs, {len(circles)} circles, {len(splines)} splines.")
+
+        for pline in polylines:
+            points = [QVector3D(pt[0], pt[1], pt[2]) for pt in pline.get_points()[1:-1]]  # skip first and last (lifting)
+            entity = Polyline(points, QColor("#0000ff"), 0.5, True, self.root_entity)
+            self.polylines.append(entity)
+
+        for arc in arcs:
+            center = QVector3D(arc.center[0], arc.center[1], arc.center[2]) 
+            entity = Arc(
+                center,
+                arc.radius,
+                arc.start_angle,
+                arc.end_angle,
+                arc.clockwise,
+                QColor("#00ff00"),
+                0.5,
+                True,
+                self.root_entity
             )
+            self.arcs.append(entity)
+            print(f"Added arc with size of: {arc.__sizeof__()} bytes.")
 
-        print(f"Loaded {len(self.lines)} lines.")
-
-        for arc in raw_arcs:
-            center = arc["center"]
-            radius = arc["radius"]
-            start_angle = arc["start_angle"]
-            end_angle = arc["end_angle"]
-            clockwise = arc["clockwise"]
-            self.arcs.append(
-                Arc(QVector3D(*center), float(radius), float(start_angle), float(end_angle), bool(clockwise), QColor("#0000ff"), 0.2, self.root_entity)
+        for circle in circles:
+            center = QVector3D(circle.center[0], circle.center[1], circle.center[2])
+            entity = Circle(
+                center,
+                circle.radius,
+                QColor("#ffff00"),
+                0.5,
+                self.root_entity
             )
+            self.circles.append(entity)
 
-        print(f"Loaded {len(self.arcs)} arcs.")
+        # TODO: splines
 
-        for circle in raw_circles:
-            center = circle["center"]
-            radius = circle["radius"]
-            self.circles.append(
-                Circle(QVector3D(*center), float(radius), QColor("#00ff00"), 0.2, self.root_entity)
-            )
-
-        print(f"Loaded {len(self.circles)} circles.")
 
     def add_axis_and_grid(self):
         self._create_grid()
 
+        grid_thickness = 1.5
+
         # x axis
         x_start = QVector3D(-self.grid_size, 0, 0)
         x_end = QVector3D(self.grid_size, 0, 0)
-        x_axis = Line(x_start, x_end, QColor("#ff0000"), 0.1, self.root_entity)
+        x_axis = Polyline([x_start, x_end], QColor("#ff0000"), grid_thickness, True, self.root_entity)
         self.grid_entities.append(x_axis)
         # y axis
         y_start = QVector3D(0, -self.grid_size, 0)
         y_end = QVector3D(0, self.grid_size, 0)
-        y_axis = Line(y_start, y_end, QColor("#00ff00"), 0.1, self.root_entity)
+        y_axis = Polyline([y_start, y_end], QColor("#00ff00"), grid_thickness, True, self.root_entity)
         self.grid_entities.append(y_axis)
         # z axis
         z_start = QVector3D(0, 0, -self.grid_size)
         z_end = QVector3D(0, 0, self.grid_size)
-        z_axis = Line(z_start, z_end, QColor("#0000ff"), 0.1, self.root_entity)
+        z_axis = Polyline([z_start, z_end], QColor("#0000ff"), grid_thickness, True, self.root_entity)
         self.grid_entities.append(z_axis)
 
     def _create_grid(self):
         grid_color = QColor("#ffffff")
-        thickness = 0.05
+        thickness = 0.5
         
         for i in range(-self.grid_size, self.grid_size + 1, self.grid_step):
             # horizontal line
             start_h = QVector3D(-self.grid_size, i, 0)
             end_h = QVector3D(self.grid_size, i, 0)
 
-            line_h = Line(start_h, end_h, grid_color, thickness, self.root_entity)
+            line_h = Polyline([start_h, end_h], grid_color, thickness, False, self.root_entity)
             
             self.grid_entities.append(line_h)
 
@@ -356,6 +365,6 @@ class Preview(QWidget):
             start_v = QVector3D(i, -self.grid_size, 0)
             end_v = QVector3D(i, self.grid_size, 0)
             
-            line_v = Line(start_v, end_v, grid_color, thickness, self.root_entity)
+            line_v = Polyline([start_v, end_v], grid_color, thickness, False, self.root_entity)
             
             self.grid_entities.append(line_v)

@@ -108,6 +108,7 @@ class ProcessWorker(QObject):
 
         try:
             self._forger.parse_figures(self._selected_file_path)
+            self._forger.convert_figures()
         except Exception as e:
             self.processError.emit(f"Failed loading file: {e}")
             return

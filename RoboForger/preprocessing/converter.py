@@ -88,7 +88,7 @@ class Converter:
                                       float_precision=self.float_precision))
         return spline_figs
 
-    def convert_figures(self, lines: List[RawLine], arcs: List[RawArc], circles: List[RawCircle], splines: List[RawSpline]) -> Dict[str, List[Figure]]:
+    def convert_figures(self, lines: List[RawLine], arcs: List[RawArc], circles: List[RawCircle], splines: List[RawSpline]) -> Dict[str, List[PolyLine | Arc | Circle | BSpline]]:
         """
         Converts all figures into a list of Figure objects.
         """
