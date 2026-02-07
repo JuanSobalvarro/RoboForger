@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QSplitter,
     QVBoxLayout,
     QFrame,
+    QToolBar,
 )
 from PySide6.QtCore import (
     QSize,
@@ -29,6 +30,9 @@ class RoboMainWindow(QMainWindow):
 
         self.resize(1200, 700)
         self.setWindowTitle("RoboForger")
+
+        # configure window toolbar 
+        self.load_toolbar()
 
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
@@ -72,6 +76,19 @@ class RoboMainWindow(QMainWindow):
         layout.addWidget(main_splitter)
 
         self.connect_signals()
+
+    def load_toolbar(self):
+        toolbar = QToolBar("Main Toolbar", self)
+        toolbar.setIconSize(QSize(16, 16))
+        toolbar.setMaximumSize(QSize(16777215, 20))
+        toolbar.setMinimumSize(QSize(0, 20))
+        toolbar.setMovable(False)
+
+        # help menu
+        # toolbar.addAction("Help", self.show_help_message)
+
+
+        self.addToolBar(toolbar)
 
     def connect_signals(self):
         self.config_panel.load_file_request.connect(self.load_file_request)

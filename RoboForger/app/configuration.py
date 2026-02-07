@@ -329,8 +329,8 @@ class ConfigurationPanel(QWidget):
         self.left_panel.setMinimumWidth(280)
         self.right_panel.setMinimumWidth(320)
 
-        self.current_layout.addWidget(make_scrollable(self.left_panel))
-        self.current_layout.addWidget(make_scrollable(self.right_panel))
+        self.current_layout.addWidget(make_scrollable(self.left_panel, scroll_horizontally=False, scroll_vertically=True))
+        self.current_layout.addWidget(make_scrollable(self.right_panel, scroll_horizontally=False, scroll_vertically=True))
 
     def connect_signals(self):
         self.right_panel.on_load_dxf_clicked.connect(self.load_file_request)

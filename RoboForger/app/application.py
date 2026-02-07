@@ -7,7 +7,8 @@ from typing import List
 from RoboForger.app.components.label import Label
 from RoboForger.app.mainwindow import RoboMainWindow
 from RoboForger.app.worker import ProcessWorker
-from RoboForger.app.geometries.parameters import ProcessingParameters
+from RoboForger.app.preview.drawing.parameters import ProcessingParameters
+from RoboForger.utils import get_resource_path
 
 
 class RoboforgerApp(QApplication):
@@ -18,7 +19,7 @@ class RoboforgerApp(QApplication):
         self._resource_dir = resource_dir
 
         self.setApplicationName("RoboForger")
-        self.setWindowIcon(QIcon(os.path.join(resource_dir, "icon.ico")))
+        self.setWindowIcon(QIcon(get_resource_path("icon.ico")))
 
         # setup environment
         self.setup_environment()
@@ -42,7 +43,7 @@ class RoboforgerApp(QApplication):
         os.environ["QT3D_RENDERER"] = "opengl"
 
     def load_stylesheet(self, filenames: List[str] = []):
-        stylesheet_dir = os.path.join(self._resource_dir, "styles")
+        stylesheet_dir = get_resource_path("styles")
         stylesheet = ""
         for file in filenames:
             try:

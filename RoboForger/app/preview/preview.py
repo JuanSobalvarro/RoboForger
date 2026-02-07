@@ -19,6 +19,7 @@ from PySide6.QtCore import (
     QEvent,
     QObject,
     QPoint,
+    QByteArray,
 )
 from PySide6.QtGui import (
     QKeyEvent,
@@ -27,16 +28,21 @@ from PySide6.QtGui import (
     QColor,
     QFont,
 )
+from PySide6.QtQml import qmlRegisterType
+from PySide6.QtQuickWidgets import QQuickWidget
+from PySide6.QtCore import QUrl
 
-from RoboForger.app.preview.drawing import PreviewDrawing
+from RoboForger.app.preview.drawing.drawing import PreviewDrawing
+from RoboForger.app.preview.drawing.polyline.geometry import PolylineGeometry, PolylineBatchGeometry
+from RoboForger.app.preview.drawing.arc.geometry import ArcGeometry
+from RoboForger.app.preview.drawing.circle.geometry import CircleGeometry
+
 from RoboForger.drawing.figures import PolyLine as FPolyline, Arc as FArc, Circle as FCircle, BSpline as FBSpline, Figure
 
-from RoboForger.app.geometries.line import Polyline, PolylineSharedResources
-from RoboForger.app.geometries.arc import Arc
-from RoboForger.app.geometries.circle import Circle
+# from RoboForger.app.preview.camera import WASDCameraController
+# from RoboForger.app.preview.overlay import PreviewOverlay
 
-from RoboForger.app.preview.camera import WASDCameraController
-from RoboForger.app.preview.overlay import PreviewOverlay
+from RoboForger.utils import get_resource_path
 
 from typing import Any, List, Dict
 import logging
@@ -57,21 +63,33 @@ class Preview(QWidget):
         self.grid_size = grid_size
         self.grid_step = grid_step
 
-        self.view = Qt3DExtras.Qt3DWindow()
-        self.view.defaultFrameGraph().setClearColor(QColor("#101010"))
+        self.load_geometries_into_qml()
 
-        self.container = self.createWindowContainer(self.view)
-        # self.container.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        # self.container.setSizePolicy(
-        #     QSizePolicy.Policy.Expanding,
-        #     QSizePolicy.Policy.Expanding
-        # )
+        self.preview_drawing = PreviewDrawing(
+            grid_size=self.grid_size,
+            grid_step=self.grid_step,
+            parent=self
+        )
 
-        self.overlay = PreviewOverlay(self.container)
+        self.qml_widget = QQuickWidget()
+        self.qml_widget.setParent(self)
+        self.qml_widget.setResizeMode(QQuickWidget.ResizeMode.SizeRootObjectToView)
+        self.qml_widget.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        
+        self.load_models_into_qml()
+        
+        self.qml_widget.setSource(QUrl.fromLocalFile(get_resource_path("qml/PreviewScene.qml")))
+
+
+        if self.qml_widget.status() != QQuickWidget.Status.Ready:
+            for error in self.qml_widget.errors():
+                logging.error(f"QML Error: {error.toString()}")
+            raise RuntimeError("Failed to load PreviewScene.qml")
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.container)
+        layout.addWidget(self.qml_widget)
+
 
         self.setMinimumSize(200, 200)
         self.setSizePolicy(
@@ -79,66 +97,36 @@ class Preview(QWidget):
             QSizePolicy.Policy.Expanding
         )
 
-        # scene
-        self.root_entity = Qt3DCore.QEntity()
-        self.view.setRootEntity(self.root_entity)
+    def load_geometries_into_qml(self):
+        qmlRegisterType(PolylineGeometry, "RoboForger.Geometries", 1, 0, "PolylineGeometry") # type: ignore
+        qmlRegisterType(ArcGeometry, "RoboForger.Geometries", 1, 0, "ArcGeometry") # type: ignore
+        qmlRegisterType(CircleGeometry, "RoboForger.Geometries", 1, 0, "CircleGeometry") # type: ignore
+        qmlRegisterType(PolylineBatchGeometry, "RoboForger.Geometries", 1, 0, "PolylineBatchGeometry") # type: ignore
 
-        # camera
-        self.camera = self.view.camera()
-        self.camera.lens().setPerspectiveProjection(
-            45.0,
-            16.0 / 9.0,   # updated dynamically later
-            0.1,
-            5000.0
+    def load_models_into_qml(self):
+        self.qml_widget.rootContext().setContextProperty(
+            "gridPolylineModel",
+            self.preview_drawing.grid_polyline_model
         )
-
-        self.camera.setPosition(QVector3D(0, 0, 2000))
-        self.camera.setViewCenter(QVector3D(0, 0, 0))
-
-        self.input_settings = Qt3DInput.QInputSettings(self.root_entity)
-        self.input_settings.setEventSource(self.view)
-        self.root_entity.addComponent(self.input_settings)
-
-        self.keyboard_device = Qt3DInput.QKeyboardDevice(self.root_entity)
-        self.mouse_device = Qt3DInput.QMouseDevice(self.root_entity)
-
-        self.wasd_controller = WASDCameraController(
-            150.0,
-            self.camera,
-            self.keyboard_device,
-            self.mouse_device,
-            self.root_entity
+        self.qml_widget.rootContext().setContextProperty(
+            "axisPolylineModel",
+            self.preview_drawing.axis_polyline_model
         )
-
-        self.preview_drawing = PreviewDrawing(
-            grid_size=self.grid_size,
-            grid_step=self.grid_step,
-            root_entity=self.root_entity,
-            parent=self
+        self.qml_widget.rootContext().setContextProperty(
+            "drawingPolylineModel",
+            self.preview_drawing.drawing_polyline_model
         )
-
-        self.preview_drawing.figuresLoaded.connect(self.update_overlay_stats)
-
-        self.update_overlay_stats()
-
-    def update_camera_coords(self):
-        """Called whenever the camera moves."""
-        pos = self.camera.position()
-        self.overlay.set_camera_position(pos.x(), pos.y(), pos.z())
-
-    def reset_camera_position(self):
-        """Resets camera to default home position."""
-        self.camera.setPosition(QVector3D(0, 0, 2000))
-        self.camera.setViewCenter(QVector3D(0, 0, 0))
-        self.camera.setUpVector(QVector3D(0, 1, 0))
-
-    def update_overlay_stats(self):
-        """Pushes current counts to the overlay."""
-        self.overlay.set_stats(
-            polylines=len(self.preview_drawing.polylines),
-            arcs=len(self.preview_drawing.arcs),
-            circles=len(self.preview_drawing.circles),
-            splines=len(self.preview_drawing.splines)
+        self.qml_widget.rootContext().setContextProperty(
+            "drawingArcModel",
+            self.preview_drawing.drawing_arc_model
+        )
+        self.qml_widget.rootContext().setContextProperty(
+            "drawingCircleModel",
+            self.preview_drawing.drawing_circle_model
+        )
+        self.qml_widget.rootContext().setContextProperty(
+            "limitsPolylineModel",
+            self.preview_drawing.limits_polyline_model
         )
 
     @Slot()
@@ -150,3 +138,12 @@ class Preview(QWidget):
         self.preview_drawing.load_figures(
             figures
         )
+
+    @Slot()
+    def load_limits(
+        self,
+        limit1: QVector3D,
+        limit2: QVector3D
+    ):
+        """Loads the workspace limits into the 3D preview."""
+        self.preview_drawing.load_limits_square(limit1, limit2)

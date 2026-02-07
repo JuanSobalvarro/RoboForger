@@ -1,5 +1,10 @@
 from math import tau, pi
 
+import os
+import sys
+from pathlib import Path
+
+
 def real_coord2robo_coord(vx: tuple[float, float, float], trans: tuple[float, float, float] = (450, 0, 350)) -> tuple[float, float, float]:
 
     if not isinstance(vx, tuple):
@@ -113,3 +118,27 @@ def distance_vectors(vector1: tuple[float, float, float], vector2: tuple[float, 
         float: The distance between the two vectors.
     """
     return vector_norm(tuple(v1 - v2 for v1, v2 in zip(vector1, vector2)))
+
+def get_resources_dir() -> Path:
+    if "__compiled__" in globals():
+        # nuitka Resources are next to the executable
+        base_dir = Path(sys.executable).parent
+    else:
+        # Standard Python Resources are relative to this file, remember that if resources folder are moved or missing, this will break
+        base_dir = Path(__file__).resolve().parent
+
+    resource_dir = base_dir / "resources"
+
+    if not resource_dir.exists():
+        raise FileNotFoundError(
+            f"Resource dir missing.\n"
+            f"Expected at: {resource_dir}\n"
+            f"Base dir was: {base_dir}\n"
+            f"Is Compiled: {'__compiled__' in globals()}"
+        )
+
+    return resource_dir
+
+def get_resource_path(relative_path: str) -> str:
+    resource_dir = get_resources_dir()
+    return os.path.join(resource_dir, relative_path)

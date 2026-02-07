@@ -23,7 +23,7 @@ def build(debug=False):
         # are stored. For example, the "platforms" folder contains the "qwindows.dll" file
         # renderers for 3D rendering (opengl)
         # platforms for Windows platform support
-        "--include-qt-plugins=renderers,platforms",
+        "--include-qt-plugins=renderers,platforms,qml",
 
         f"--windows-icon-from-ico={resources_dir / 'icon.ico'}",
 
@@ -40,7 +40,7 @@ def build(debug=False):
 
         "--company-name=JuSo",
         "--product-name=RoboForger",
-        "--file-version=2.0.0",
+        "--file-version=2.1.0",
 
         "--windows-console-mode=disable",
 

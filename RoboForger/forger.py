@@ -11,6 +11,46 @@ from RoboForger.preprocessing.converter import Converter
 from RoboForger.drawing.draw import Draw
 
 
+class ForgerParameters:
+    """
+    A class to define the parameters for the Forger class.
+    """
+    # slots is used in python to limit the attributes of a class and save memory
+    __slots__ = (
+        "resource_dir",
+        "origin",
+        "zero",
+        "pre_scale",
+        "float_precision",
+        "lifting",
+        "tool_name",
+        "global_velocity",
+        "polyline_velocity",
+        "arc_velocity",
+        "circle_velocity",
+        "spline_velocity",
+        "workspace_limits",
+        "use_intelligent_traces",
+        "use_offset_programming"
+    )
+    def __init__(self):
+        self.resource_dir: str = ""
+        self.origin: Point3D = (450.0, 0, 450.0)
+        self.zero: Point3D = (0.0, 0.0, 0.0)
+        self.pre_scale: float = 1.0
+        self.float_precision: int = 4
+        self.lifting: float = 50.0
+        self.tool_name: str = "tool0"
+        self.global_velocity: int = 1000
+        self.polyline_velocity: int = 1000
+        self.arc_velocity: int = 1000
+        self.circle_velocity: int = 1000
+        self.spline_velocity: int = 1000
+        self.workspace_limits: Tuple[Point3D, Point3D] = ((-100, -700, -100), (800, 700, 800))
+        self.use_intelligent_traces: bool = True
+        self.use_offset_programming: bool = True
+
+
 class Forger:
     """
     The forger class generalize the utilization of roboforger in 4 steps:
