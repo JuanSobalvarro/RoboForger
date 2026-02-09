@@ -31,28 +31,15 @@ Rectangle {
         }
 
         Text {
-            text: `Frame time: ${view3d.renderStats.frameTime.toFixed(2)} ms`
+            text: `G API: ${view3d.renderStats.graphicsApiName}`
             color: "#303030"
             font.pixelSize: 11
         }
 
         Text {
-            text: `Draw calls: ${view3d.renderStats.drawCallCount}`
+            text: `Render time: ${view3d.renderStats.renderTime} ms`
             color: "#303030"
             font.pixelSize: 11
-        }
-
-        Text {
-            text: `Vertices: ${view3d.renderStats.drawVertexCount}`
-            color: "#303030"
-            font.pixelSize: 11
-        }
-
-        Text {
-            text: `GPU time: ${view3d.renderStats.lastCompletedGpuTime.toFixed(2)} ms`
-            color: "#303030"
-            font.pixelSize: 11
-            visible: view3d.renderStats.lastCompletedGpuTime > 0
         }
     }
 }

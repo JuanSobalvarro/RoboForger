@@ -9,6 +9,7 @@ from RoboForger.app.mainwindow import RoboMainWindow
 from RoboForger.app.worker import ProcessWorker
 from RoboForger.app.preview.drawing.parameters import ProcessingParameters
 from RoboForger.utils import get_resource_path
+from RoboForger.app.config import GlobalConfig
 
 
 class RoboforgerApp(QApplication):
@@ -17,6 +18,8 @@ class RoboforgerApp(QApplication):
 
         self.widgets: List[QWidget] = []
         self._resource_dir = resource_dir
+
+        self._global_config = GlobalConfig(self)
 
         self.setApplicationName("RoboForger")
         self.setWindowIcon(QIcon(get_resource_path("icon.ico")))
@@ -29,8 +32,8 @@ class RoboforgerApp(QApplication):
             "labels.qss",
         ])
 
-        self._process_worker = ProcessWorker(resource_dir=resource_dir)
-        self._parameters = ProcessingParameters()
+        self._parameters = ProcessingParameters() # singleton for processing parameters, shared across the app
+        self._process_worker = ProcessWorker(parameters=self._parameters,)
 
         self.setup_main_window()
 
@@ -40,7 +43,8 @@ class RoboforgerApp(QApplication):
         self.connect_signals()
 
     def setup_environment(self):
-        os.environ["QT3D_RENDERER"] = "opengl"
+        pass
+        # os.environ["QT3D_RENDERER"] = "opengl"
 
     def load_stylesheet(self, filenames: List[str] = []):
         stylesheet_dir = get_resource_path("styles")
@@ -57,7 +61,7 @@ class RoboforgerApp(QApplication):
         self.setStyleSheet(stylesheet)
 
     def setup_main_window(self):
-        self.main_window = RoboMainWindow()
+        self.main_window = RoboMainWindow(self._parameters, self._global_config)
 
         self.widgets.append(self.main_window)
     
@@ -88,72 +92,6 @@ class RoboforgerApp(QApplication):
             lambda: self._process_worker.start_processing(self._parameters.snapshot())
         )
         self.main_window.save_file_request.connect(self._process_worker.save_rapid_code)
-
-        # connect parameters
-        self.main_window.config_panel.left_panel.on_scale_factor_changed.connect(
-            lambda val: self._parameters.update("scale_factor", val)
-        )
-        self.main_window.config_panel.left_panel.on_float_precision_changed.connect(
-            lambda val: self._parameters.update("float_precision", val)
-        )
-        self.main_window.config_panel.left_panel.on_polyline_velocity_changed.connect(
-            lambda val: self._parameters.update("lines_velocity", val)
-        )
-        self.main_window.config_panel.left_panel.on_arc_velocity_changed.connect(
-            lambda val: self._parameters.update("arcs_velocity", val)
-        )
-        self.main_window.config_panel.left_panel.on_circle_velocity_changed.connect(
-            lambda val: self._parameters.update("circles_velocity", val)
-        )
-        self.main_window.config_panel.left_panel.on_lifting_height_changed.connect(
-            lambda val: self._parameters.update("lifting", val)
-        )
-        self.main_window.config_panel.left_panel.on_auto_trace_changed.connect(
-            lambda val: self._parameters.update("use_detector", val)
-        )
-        self.main_window.config_panel.left_panel.on_offset_programming_changed.connect(
-            lambda val: self._parameters.update("use_offset", val)
-        )
-
-        self.main_window.config_panel.right_panel.on_tool_name_changed.connect(
-            lambda val: self._parameters.update("tool_name", val)
-        )
-        self.main_window.config_panel.right_panel.on_origin_x_changed.connect(
-            lambda val: self._parameters.update_tuple("origin", 0, val)
-        )
-        self.main_window.config_panel.right_panel.on_origin_y_changed.connect(
-            lambda val: self._parameters.update_tuple("origin", 1, val)
-        )
-        self.main_window.config_panel.right_panel.on_origin_z_changed.connect(
-            lambda val: self._parameters.update_tuple("origin", 2, val)
-        )
-        self.main_window.config_panel.right_panel.on_zero_x_changed.connect(
-            lambda val: self._parameters.update_tuple("zero", 0, val)
-        )
-        self.main_window.config_panel.right_panel.on_zero_y_changed.connect(
-            lambda val: self._parameters.update_tuple("zero", 1, val)
-        )
-        self.main_window.config_panel.right_panel.on_zero_z_changed.connect(
-            lambda val: self._parameters.update_tuple("zero", 2, val)
-        )
-        self.main_window.config_panel.right_panel.on_inferior_limit_x_changed.connect(
-            lambda val: self._parameters.update_tuple("inferior_limit", 0, val)
-        )
-        self.main_window.config_panel.right_panel.on_inferior_limit_y_changed.connect(
-            lambda val: self._parameters.update_tuple("inferior_limit", 1, val)
-        )
-        self.main_window.config_panel.right_panel.on_inferior_limit_z_changed.connect(
-            lambda val: self._parameters.update_tuple("inferior_limit", 2, val)
-        )
-        self.main_window.config_panel.right_panel.on_superior_limit_x_changed.connect(
-            lambda val: self._parameters.update_tuple("superior_limit", 0, val)
-        )
-        self.main_window.config_panel.right_panel.on_superior_limit_y_changed.connect(
-            lambda val: self._parameters.update_tuple("superior_limit", 1, val)
-        )
-        self.main_window.config_panel.right_panel.on_superior_limit_z_changed.connect(
-            lambda val: self._parameters.update_tuple("superior_limit", 2, val)
-        )
 
     def run(self) -> int:
         # self.aboutQt()

@@ -20,6 +20,7 @@ from RoboForger.app.components.field import Field, LabelPosition, LabelAnchor
 from RoboForger.app.components.separator import LineSeparator
 from RoboForger.app.components.label import Label, LabelTag
 from RoboForger.app.utils import make_scrollable
+from RoboForger.app.preview.drawing.parameters import ProcessingParameters
 
 from typing import Any
 
@@ -303,8 +304,10 @@ class ConfigurationPanel(QWidget):
     process_file_request = Signal()
     save_file_request = Signal()
 
-    def __init__(self):
+    def __init__(self, parameters: ProcessingParameters):
         super().__init__()
+
+        self.parameters = parameters
         
         self.current_layout = QHBoxLayout(self)
         self.left_panel = LeftPanel()
@@ -337,3 +340,49 @@ class ConfigurationPanel(QWidget):
         self.right_panel.on_process_clicked.connect(self.process_file_request)
         self.right_panel.on_save_rapid_clicked.connect(self.save_file_request)
         
+        # parameters connection
+        self.left_panel.on_scale_factor_changed.connect(
+            lambda val: self.parameters.set("scale_factor", val)
+        )
+        self.left_panel.on_float_precision_changed.connect(
+            lambda val: self.parameters.set("float_precision", val)
+        )
+        self.left_panel.on_polyline_velocity_changed.connect(
+            lambda val: self.parameters.set("lines_velocity", val)
+        )
+        self.left_panel.on_arc_velocity_changed.connect(
+            lambda val: self.parameters.set("arcs_velocity", val)
+        )
+        self.left_panel.on_circle_velocity_changed.connect(
+            lambda val: self.parameters.set("circles_velocity", val)
+        )
+        self.left_panel.on_lifting_height_changed.connect(
+            lambda val: self.parameters.set("lifting", val)
+        )
+        self.left_panel.on_auto_trace_changed.connect(
+            lambda val: self.parameters.set("use_detector", val)
+        )
+        self.left_panel.on_offset_programming_changed.connect(
+            lambda val: self.parameters.set("use_offset", val)
+        )
+
+        self.right_panel.on_inferior_limit_x_changed.connect(
+            lambda v: self.parameters.set_workspace_limit(0, 0, v)
+        )
+        self.right_panel.on_inferior_limit_y_changed.connect(
+            lambda v: self.parameters.set_workspace_limit(0, 1, v)
+        )
+        self.right_panel.on_inferior_limit_z_changed.connect(
+            lambda v: self.parameters.set_workspace_limit(0, 2, v)
+        )
+
+        self.right_panel.on_superior_limit_x_changed.connect(
+            lambda v: self.parameters.set_workspace_limit(1, 0, v)
+        )
+        self.right_panel.on_superior_limit_y_changed.connect(
+            lambda v: self.parameters.set_workspace_limit(1, 1, v)
+        )
+        self.right_panel.on_superior_limit_z_changed.connect(
+            lambda v: self.parameters.set_workspace_limit(1, 2, v)
+        )
+    

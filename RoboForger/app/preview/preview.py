@@ -7,11 +7,6 @@ from PySide6.QtWidgets import (
     QPushButton,
     QStackedLayout,
 )
-from PySide6.Qt3DCore import Qt3DCore
-from PySide6.Qt3DExtras import Qt3DExtras
-from PySide6.Qt3DRender import Qt3DRender
-from PySide6.Qt3DInput import Qt3DInput
-from PySide6.Qt3DLogic import Qt3DLogic
 from PySide6.QtCore import (
     Qt,
     Signal,
