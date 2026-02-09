@@ -24,7 +24,7 @@ def build(debug=False):
         # are stored. For example, the "platforms" folder contains the "qwindows.dll" file
         # renderers for 3D rendering (opengl)
         # platforms for Windows platform support
-        "--include-qt-plugins=qml,platforms,styles",
+        "--include-qt-plugins=qml,platforms,styles,renderers",
 
         "--nofollow-import-to=typing",
         "--nofollow-import-to=types",
@@ -35,7 +35,6 @@ def build(debug=False):
         "--noinclude-dlls=qt6lab*",
         "--noinclude-dlls=qt6location*",
         "--noinclude-dlls=qt6multimedia*",
-        "--noinclude-dlls=qt6network*",
         "--noinclude-dlls=qt6pdf*",
         "--noinclude-dlls=qt6positioning*",
         "--noinclude-dlls=qt6scxml*",
@@ -46,6 +45,7 @@ def build(debug=False):
         "--noinclude-dlls=qt6text*",
         "--noinclude-dlls=qt6virtual*",
         "--noinclude-dlls=qt6web*",
+        # "--noinclude-dlls=qt6network*",
         # "--noinclude-dlls=qt63d*", # just testing, will also remove 3d from quick
         # "--noinclude-dlls=qt6*",
 
