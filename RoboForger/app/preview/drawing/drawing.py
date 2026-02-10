@@ -4,6 +4,7 @@ from PySide6.QtCore import QObject, Slot, Signal
 from RoboForger.app.preview.drawing.polyline.model import PolylineListModel
 from RoboForger.app.preview.drawing.arc.model import ArcListModel
 from RoboForger.app.preview.drawing.circle.model import CircleListModel
+from RoboForger.app.config import GlobalConfig
 
 from RoboForger.drawing.figures import PolyLine as FPolyline, Arc as FArc, Circle as FCircle, BSpline as FBSpline
 
@@ -16,12 +17,11 @@ class PreviewDrawing(QObject):
     
     figuresLoaded = Signal()
 
-    def __init__(self, grid_size: int = 1000, grid_step: int = 50, parent=None):
+    def __init__(self, global_config: GlobalConfig, parent=None):
 
         super().__init__(parent)
         
-        self.grid_size = grid_size
-        self.grid_step = grid_step
+        self.global_config = global_config
 
         # self.grid_polyline_model = PolylineBatchModel(self)
         self.grid_polyline_model = PolylineListModel(self)
@@ -33,6 +33,10 @@ class PreviewDrawing(QObject):
         self.splines = []
 
         self.add_axis_and_grid()
+
+        # connect signals
+        self.global_config.grid_size_changed.connect(lambda _: self.add_axis_and_grid())
+        self.global_config.grid_step_changed.connect(lambda _: self.add_axis_and_grid())
 
     def clear_figures(self):
         self.drawing_polyline_model.clear()
@@ -101,29 +105,33 @@ class PreviewDrawing(QObject):
         self.figuresLoaded.emit()
 
     def add_axis_and_grid(self):
+        # clear previous axis and grid
+        self.grid_polyline_model.clear()
+        self.axis_polyline_model.clear()
+
         self._create_grid()
 
         grid_thickness = 4
 
         # x axis
-        x_start = QVector3D(-self.grid_size, 0, 0)
-        x_end = QVector3D(self.grid_size, 0, 0)
+        x_start = QVector3D(-self.global_config.grid_size, 0, 0)
+        x_end = QVector3D(self.global_config.grid_size, 0, 0)
         self.axis_polyline_model.add_polyline(
             [x_start, x_end],
             color=QColor("#ff0000"),
             thickness=grid_thickness
         )
         # y axis
-        y_start = QVector3D(0, -self.grid_size, 0)
-        y_end = QVector3D(0, self.grid_size, 0)
+        y_start = QVector3D(0, -self.global_config.grid_size, 0)
+        y_end = QVector3D(0, self.global_config.grid_size, 0)
         self.axis_polyline_model.add_polyline(
             [y_start, y_end],
             color=QColor("#00ff00"),
             thickness=grid_thickness
         )
         # z axis
-        z_start = QVector3D(0, 0, -self.grid_size)
-        z_end = QVector3D(0, 0, self.grid_size)
+        z_start = QVector3D(0, 0, -self.global_config.grid_size)
+        z_end = QVector3D(0, 0, self.global_config.grid_size)
         self.axis_polyline_model.add_polyline(
             [z_start, z_end],
             color=QColor("#0000ff"),
@@ -135,17 +143,17 @@ class PreviewDrawing(QObject):
         thickness = 2
         
         points = []
-        for i in range(-self.grid_size, self.grid_size + 1, self.grid_step):
+        for i in range(-self.global_config.grid_size, self.global_config.grid_size + 1, self.global_config.grid_step):
             # horizontal line
-            start_h = QVector3D(-self.grid_size, i, 0)
-            end_h = QVector3D(self.grid_size, i, 0)
+            start_h = QVector3D(-self.global_config.grid_size, i, 0)
+            end_h = QVector3D(self.global_config.grid_size, i, 0)
 
             # horizontal line
             points.append((start_h, end_h))   
 
             # vertical line
-            start_v = QVector3D(i, -self.grid_size, 0)
-            end_v = QVector3D(i, self.grid_size, 0)
+            start_v = QVector3D(i, -self.global_config.grid_size, 0)
+            end_v = QVector3D(i, self.global_config.grid_size, 0)
             
             points.append((start_v, end_v))
 
@@ -168,18 +176,28 @@ class PreviewDrawing(QObject):
         # )
     
     @Slot(QVector3D, QVector3D)
-    def load_limits_square(self, vector1: QVector3D, vector2: QVector3D):
+    def load_limits_cube(self, vector1: QVector3D, vector2: QVector3D):
         # clear previous limits
         self.limits_polyline_model.clear()
 
-        # create a square with the two vectors as diagonal
-        v1 = vector1
-        v2 = vector2
-        v3 = QVector3D(vector1.x(), vector2.y(), 0)
-        v4 = QVector3D(vector2.x(), vector1.y(), 0)
-
-        self.limits_polyline_model.add_polyline(
-            [v1, v3, v2, v4, v1],
-            color=QColor("#ff6600"),
-            thickness=2
-        )
+        # create cube from limits
+        p1 = vector1
+        p2 = QVector3D(vector2.x(), vector1.y(), vector1.z())
+        p3 = QVector3D(vector2.x(), vector2.y(), vector1.z())
+        p4 = QVector3D(vector1.x(), vector2.y(), vector1.z())
+        p5 = QVector3D(vector1.x(), vector1.y(), vector2.z())
+        p6 = QVector3D(vector2.x(), vector1.y(), vector2.z())
+        p7 = vector2
+        p8 = QVector3D(vector1.x(), vector2.y(), vector2.z())
+        
+        edges = [
+            (p1, p2), (p2, p3), (p3, p4), (p4, p1), # bottom face
+            (p5, p6), (p6, p7), (p7, p8), (p8, p5), # top face
+            (p1, p5), (p2, p6), (p3, p7), (p4, p8)  # vertical edges
+        ]
+        for start, end in edges:
+            self.limits_polyline_model.add_polyline(
+                [start, end],
+                color=QColor("#ff00ff"),
+                thickness=2
+            )

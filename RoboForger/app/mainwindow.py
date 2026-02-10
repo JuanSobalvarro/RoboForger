@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import (
     QImage,
     QPixmap,
+    QVector3D,
 )
 from PySide6.QtCore import (
     QSize,
@@ -62,7 +63,8 @@ class RoboMainWindow(QMainWindow):
         right_splitter = QSplitter(Qt.Orientation.Vertical, central_widget)
         # TODO: Customize directly the splitter handle so the hover is not captured by the separator line
 
-        self.preview = Preview()
+        self.preview = Preview(global_config=self.global_config)
+        self.load_limits()
         self.separator_line = QFrame()
         self.separator_line.setFixedHeight(2)   # visual + grab area
         self.separator_line.setSizePolicy(
@@ -93,7 +95,18 @@ class RoboMainWindow(QMainWindow):
 
         self.connect_signals()
 
+    def load_limits(self):
+
+        tuple_limits = self.parameters.get("workspace_limits")
+        vector1 = QVector3D(*tuple_limits[0])
+        vector2 = QVector3D(*tuple_limits[1])
+
+        self.preview.load_limits(vector1, vector2)
+
+
     def connect_signals(self):
         self.config_panel.load_file_request.connect(self.load_file_request)
         self.config_panel.process_file_request.connect(self.process_file_request)
         self.config_panel.save_file_request.connect(self.save_file_request)
+
+        self.parameters.parameter_changed.connect(self.load_limits)

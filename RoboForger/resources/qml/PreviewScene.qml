@@ -31,24 +31,20 @@ Item {
         }
 
         // grid
-        // LineRenderer {
-        //     shapeGeometry: PolylineBatchGeometry {
-        //         batchedPoints: gridPolylineModel ? gridPolylineModel.points : []
-        //         thickness: gridPolylineModel ? gridPolylineModel.thickness : 1.0
-        //     }
-        //     shapeColor: gridPolylineModel ? gridPolylineModel.color : "gray"
-
-        //     // Component.onCompleted: {
-        //     //     // ensure the geometry updates when the model changes
-        //     //     if (gridPolylineModel) {
-        //     //         console.log("Grid polyline model connected")
-        //     //         console.log("Points:", gridPolylineModel.points)
-        //     //         console.log("Thickness:", gridPolylineModel.thickness)
-        //     //     }
-        //     // }
-        // }
         Repeater3D {
             model: gridPolylineModel
+            delegate: LineRenderer {
+                shapeColor: model.color
+                shapeGeometry: PolylineGeometry {
+                    points: model.points
+                    thickness: model.thickness
+                }
+            }
+        }
+
+        // limits 
+        Repeater3D {
+            model: limitsPolylineModel
             delegate: LineRenderer {
                 shapeColor: model.color
                 shapeGeometry: PolylineGeometry {

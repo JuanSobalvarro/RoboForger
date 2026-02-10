@@ -342,7 +342,7 @@ class ConfigurationPanel(QWidget):
         
         # parameters connection
         self.left_panel.on_scale_factor_changed.connect(
-            lambda val: self.parameters.set("scale_factor", val)
+            lambda val: self.parameters.set("pre_scale", val)
         )
         self.left_panel.on_float_precision_changed.connect(
             lambda val: self.parameters.set("float_precision", val)

@@ -25,6 +25,7 @@ from RoboForger.drawing.figures import PolyLine as FPolyline, Arc as FArc, Circl
 # from RoboForger.app.preview.overlay import PreviewOverlay
 
 from RoboForger.utils import get_resource_path
+from RoboForger.app.config import GlobalConfig
 
 from typing import Any, List, Dict
 import logging
@@ -32,7 +33,7 @@ import time
 
 
 class Preview(QWidget):
-    def __init__(self, grid_size: int = 1000, grid_step: int = 50, parent=None):
+    def __init__(self, global_config: GlobalConfig, parent=None):
         """
         A 3D preview widget using Qt3D.
 
@@ -42,14 +43,12 @@ class Preview(QWidget):
         """
         super().__init__(parent)
 
-        self.grid_size = grid_size
-        self.grid_step = grid_step
+        self.global_config = global_config
 
         self.load_geometries_into_qml()
 
         self.preview_drawing = PreviewDrawing(
-            grid_size=self.grid_size,
-            grid_step=self.grid_step,
+            global_config=self.global_config,
             parent=self
         )
 
@@ -121,11 +120,11 @@ class Preview(QWidget):
             figures
         )
 
-    @Slot()
+    @Slot(QVector3D, QVector3D)
     def load_limits(
         self,
         limit1: QVector3D,
         limit2: QVector3D
     ):
         """Loads the workspace limits into the 3D preview."""
-        self.preview_drawing.load_limits_square(limit1, limit2)
+        self.preview_drawing.load_limits_cube(limit1, limit2)

@@ -46,7 +46,7 @@ Rectangle {
 
     RenderStatsOverlay {
         id: renderStatsOverlay
-        visible: true
+        visible: false // default hidden
         view3d: overlayRoot.view3d
     }
 

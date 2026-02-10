@@ -112,7 +112,7 @@ class Forger:
             self._parsed = False  # reset parsed flag if new parsing is done
 
         try:
-            parser = CADParser(filepath=cad_file, binary_dwg2dxf_path=get_resource_path("bin/dwg2dxf"))
+            parser = CADParser(filepath=cad_file, binary_dwg2dxf_path=get_resource_path("bin/libredwg/dwg2dxf.exe"))
         except Exception as e:
             raise RuntimeError(f"Failed to initialize CAD parser: {e}")
         
