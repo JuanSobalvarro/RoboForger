@@ -1,5 +1,5 @@
 #define AppName "RoboForger"
-#define AppVersion "2.0.0"
+#define AppVersion "2.1.0"
 #define AppPublisher "JuSo"
 #define AppExeName "RoboForger.exe"
 #define BuildDir "./dist/main.dist"
