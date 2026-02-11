@@ -60,7 +60,8 @@ class MenuBar(QMenuBar):
             action.setText(f"{label}: {value}")
 
     def _setup_config_menu(self):
-        config_menu = self.addMenu("Config")
+        config_menu = self.addMenu("Configuration")
+        config_menu.setToolTip("Configure processing parameters, this config is shared across the app and will affect all processing operations. Also it will be saved and loaded on app restart")
 
         def add_tracked_action(key, initial_value):
             label = self.labels_map.get(key, key)

@@ -25,6 +25,7 @@ class ProcessingParameters(QObject):
         setattr(self._model, key, value)
 
         self.parameter_changed.emit(key, value)
+        print(f"Parameter '{key}' changed to {value}")
         self.parameters_changed.emit()
 
     def set_tuple_item(self, key: str, index: int, value):

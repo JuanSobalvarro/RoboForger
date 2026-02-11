@@ -60,6 +60,12 @@ class PolylineListModel(QAbstractListModel):
 
     def all_thicknesses(self):
         return {item["thickness"] for item in self._items}
+    
+    def update_color(self, color: QColor):
+        for index in range(len(self._items)):
+            self._items[index]["color"] = color
+            model_index = self.index(index)
+            self.dataChanged.emit(model_index, model_index, [self.ColorRole])
 
 
 class PolylineBatchModel(QObject):

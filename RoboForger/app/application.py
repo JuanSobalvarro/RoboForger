@@ -30,6 +30,7 @@ class RoboforgerApp(QApplication):
         self.load_stylesheet([
             "main.qss",
             "labels.qss",
+            "menubar.qss",
         ])
 
         self._parameters = ProcessingParameters() # singleton for processing parameters, shared across the app
@@ -89,7 +90,7 @@ class RoboforgerApp(QApplication):
 
         self.main_window.load_file_request.connect(self._process_worker.load_file)
         self.main_window.process_file_request.connect(
-            lambda: self._process_worker.start_processing(self._parameters.snapshot())
+            lambda: self._process_worker.start_processing()
         )
         self.main_window.save_file_request.connect(self._process_worker.save_rapid_code)
 

@@ -47,7 +47,7 @@ class ForgerParameters:
         self.circle_velocity = 1000
         self.spline_velocity = 1000
 
-        self.workspace_limits = ((-100, -700, -100), (800, 700, 800))
+        self.workspace_limits = ((-600, -800, -200), (800, 800, 1200))
         self.use_intelligent_traces = True
         self.use_offset_programming = True
 
@@ -73,6 +73,10 @@ class ForgerParameters:
         for key, value in data.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
+    def __str__(self):
+        return f"ForgerParameters(origin={self.origin}, zero={self.zero}, pre_scale={self.pre_scale}, float_precision={self.float_precision}, lifting={self.lifting}, tool_name='{self.tool_name}', global_velocity={self.global_velocity}, polyline_velocity={self.polyline_velocity}, arc_velocity={self.arc_velocity}, circle_velocity={self.circle_velocity}, spline_velocity={self.spline_velocity}, workspace_limits={self.workspace_limits}, use_intelligent_traces={self.use_intelligent_traces}, use_offset_programming={self.use_offset_programming})"
+
 
 
 class Forger:
@@ -139,6 +143,7 @@ class Forger:
         self._splines = figures.get("splines", []) # type: ignore
 
         for line in self._polylines:
+            # print(f"Polyline with velocity: {self._params.polyline_velocity}")
             line.set_velocity(self._params.polyline_velocity)
 
         for arc in self._arcs:

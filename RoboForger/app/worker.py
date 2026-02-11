@@ -132,6 +132,8 @@ class ProcessWorker(QObject):
 
             self._result_queue = multiprocessing.Queue()
 
+            print(f"Starting process with parameters: {self._parameters.backend_parameters()}")
+
             self._process = multiprocessing.Process(
                 target=_processing_function,
                 name="DxfProcessingWorker",

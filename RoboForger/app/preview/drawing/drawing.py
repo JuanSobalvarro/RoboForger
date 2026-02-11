@@ -37,6 +37,10 @@ class PreviewDrawing(QObject):
         # connect signals
         self.global_config.grid_size_changed.connect(lambda _: self.add_axis_and_grid())
         self.global_config.grid_step_changed.connect(lambda _: self.add_axis_and_grid())
+        # self.global_config.grid_color_changed.connect(lambda _: self.grid_polyline_model.update_color(self.global_config.grid_color))
+        # self.global_config.polyline_color_changed.connect(lambda _: self.drawing_polyline_model.update_color(self.global_config.polyline_color))
+        # self.global_config.arc_color_changed.connect(lambda _: self.drawing_arc_model.update_color(self.global_config.arc_color))
+        # self.global_config.circle_color_changed.connect(lambda _: self.drawing_circle_model.update_color(self.global_config.circle_color))
 
     def clear_figures(self):
         self.drawing_polyline_model.clear()
@@ -68,7 +72,7 @@ class PreviewDrawing(QObject):
             points = [QVector3D(pt[0], pt[1], pt[2]) for pt in pline.get_points()[1:-1]]  # skip first and last (lifting)
             self.drawing_polyline_model.add_polyline(
                 points,
-                color=QColor("#0000ff"),
+                color=self.global_config.polyline_color,
                 thickness=1
             )
         
@@ -83,7 +87,7 @@ class PreviewDrawing(QObject):
                 arc.start_angle,
                 arc.end_angle,
                 arc.clockwise,
-                QColor("#00ff00"),
+                self.global_config.arc_color,
                 1
             )
 
@@ -94,7 +98,7 @@ class PreviewDrawing(QObject):
             self.drawing_circle_model.add_circle(
                 center,
                 circle.radius,
-                QColor("#ffff00"),
+                self.global_config.circle_color,
                 1
             )
 
@@ -118,7 +122,7 @@ class PreviewDrawing(QObject):
         x_end = QVector3D(self.global_config.grid_size, 0, 0)
         self.axis_polyline_model.add_polyline(
             [x_start, x_end],
-            color=QColor("#ff0000"),
+            color=self.global_config.x_axis_color,
             thickness=grid_thickness
         )
         # y axis
@@ -126,7 +130,7 @@ class PreviewDrawing(QObject):
         y_end = QVector3D(0, self.global_config.grid_size, 0)
         self.axis_polyline_model.add_polyline(
             [y_start, y_end],
-            color=QColor("#00ff00"),
+            color=self.global_config.y_axis_color,
             thickness=grid_thickness
         )
         # z axis
@@ -134,12 +138,12 @@ class PreviewDrawing(QObject):
         z_end = QVector3D(0, 0, self.global_config.grid_size)
         self.axis_polyline_model.add_polyline(
             [z_start, z_end],
-            color=QColor("#0000ff"),
+            color=self.global_config.z_axis_color,
             thickness=grid_thickness
         )
 
     def _create_grid(self):
-        grid_color = QColor("#888888")
+        grid_color = self.global_config.grid_color
         thickness = 2
         
         points = []
@@ -198,6 +202,6 @@ class PreviewDrawing(QObject):
         for start, end in edges:
             self.limits_polyline_model.add_polyline(
                 [start, end],
-                color=QColor("#ff00ff"),
+                color=self.global_config.limits_color,
                 thickness=2
             )

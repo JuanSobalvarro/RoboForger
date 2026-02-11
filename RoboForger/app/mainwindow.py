@@ -98,8 +98,13 @@ class RoboMainWindow(QMainWindow):
     def load_limits(self):
 
         tuple_limits = self.parameters.get("workspace_limits")
+        origin = self.parameters.get("origin")
         vector1 = QVector3D(*tuple_limits[0])
         vector2 = QVector3D(*tuple_limits[1])
+
+        # now we need to adjust the limits by the origin, since the preview is centered at the origin
+        vector1 += QVector3D(*origin)
+        vector2 += QVector3D(*origin)
 
         self.preview.load_limits(vector1, vector2)
 
