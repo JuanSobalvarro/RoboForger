@@ -45,6 +45,11 @@ def build(debug=False):
         "--noinclude-dlls=qt6text*",
         "--noinclude-dlls=qt6virtual*",
         "--noinclude-dlls=qt6web*",
+        "--noinclude-dlls=qt6graphs*",
+        "--noinclude-dlls=qt63dextras*",
+        "--noinclude-dlls=qt63dinput*",
+        "--noinclude-dlls=qt63dlogic*",
+        "--noinclude-dlls=qt63drender*",
         # "--noinclude-dlls=qt6network*",
         # "--noinclude-dlls=qt63d*", # just testing, will also remove 3d from quick
         # "--noinclude-dlls=qt6*",
@@ -55,6 +60,7 @@ def build(debug=False):
         # DATA FILES
         f"--include-data-dir={resources_dir}=resources",
         f"--include-data-files={bin_dir / 'dwg2dxf.exe'}=resources/bin/libredwg/dwg2dxf.exe",
+        f"--include-data-files={bin_dir / 'libredwg-0.dll'}=resources/bin/libredwg/libredwg-0.dll",
 
         "--msvc=latest",
 
