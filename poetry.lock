@@ -249,6 +249,18 @@ files = [
 dev = ["black", "mypy", "pytest"]
 
 [[package]]
+name = "pyopengl"
+version = "3.1.10"
+description = "Standard OpenGL bindings for Python"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "pyopengl-3.1.10-py3-none-any.whl", hash = "sha256:794a943daced39300879e4e47bd94525280685f42dbb5a998d336cfff151d74f"},
+    {file = "pyopengl-3.1.10.tar.gz", hash = "sha256:c4a02d6866b54eb119c8e9b3fb04fa835a95ab802dd96607ab4cdb0012df8335"},
+]
+
+[[package]]
 name = "pyparsing"
 version = "3.3.2"
 description = "pyparsing - Classes and methods to define and execute parsing grammars"
@@ -462,4 +474,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "6fd6136ee32b734f842fb0df2ee355f88a7f69b71206f31bd3068051bc3a5fff"
+content-hash = "924f62b326e7ffe54e778d2d128608be0038bd2b82e4c141b4b8f540cf11532e"

@@ -7,7 +7,8 @@ from PySide6.QtCore import (
     Slot,
 )
 
-from RoboForger.forger import Forger
+from RoboForger.forger import Forger, ForgerParameters
+from RoboForger.app.preview.drawing.parameters import ProcessingParameters
 
 import multiprocessing
 import threading
@@ -15,28 +16,18 @@ import logging
 from math import isnan
 
 
-def _processing_function(file_path: str, result_queue: multiprocessing.Queue, params: dict):
+def _processing_function(file_path: str, result_queue: multiprocessing.Queue, params: ForgerParameters):
     """
     Run the full pipeline inside a separate process using Forger and return the RAPID code.
     Any exception is put back into the queue to be handled in the UI thread.
+
+    Also remember that the arguments should be picklable, so we need to make sure ForgerParameters is always picklable
+
+    TODO: Add stdout and stderr capturing to send back logs to the main process.
     """
     try:
         forger = Forger(
-            resource_dir=params["resource_dir"],
-            origin=params["origin"],
-            zero=params["zero"],
-            pre_scale=params["scale"],
-            float_precision=params["float_precision"],
-            lifting=params["lifting"],
-            tool_name=params["tool_name"],
-            global_velocity=params["lines_velocity"],
-            polyline_velocity=params["lines_velocity"],
-            arc_velocity=params["arcs_velocity"],
-            circle_velocity=params["circles_velocity"],
-            spline_velocity=params.get("splines_velocity", params["lines_velocity"]),
-            workspace_limits=(params["inferior_limit"], params["superior_limit"]),
-            use_intelligent_traces=params["use_detector"],
-            use_offset_programming=params["use_offset"],
+            parameters=params,
         )
 
         # Full pipeline
@@ -67,11 +58,13 @@ class ProcessWorker(QObject):
 
     fileLoaded = Signal()
 
-    def __init__(self, resource_dir: str, parent=None):
+    def __init__(self, parameters: ProcessingParameters, parent=None):
         super().__init__(parent)
 
         # forger instance (preview for figures)
-        self._forger = Forger(resource_dir=resource_dir)
+        self._parameters = parameters
+        self._forger = Forger(parameters.backend_parameters())
+        
         # process/threading
         self._process: multiprocessing.Process | None = None
         self._result_queue: multiprocessing.Queue | None = None
@@ -88,7 +81,7 @@ class ProcessWorker(QObject):
         """
         Load a DXF file for processing.
         """
-        print("Loading CAD file...")
+        logging.info("Loading CAD file...")
         # open file dialog 
         file_dialog = QFileDialog()
         # filter for DWG and DXF files
@@ -108,14 +101,15 @@ class ProcessWorker(QObject):
 
         try:
             self._forger.parse_figures(self._selected_file_path)
+            self._forger.convert_figures()
         except Exception as e:
             self.processError.emit(f"Failed loading file: {e}")
             return
     
         self.fileLoaded.emit()
 
-    @Slot(dict)
-    def start_processing(self, params: dict):
+    @Slot()
+    def start_processing(self):
         """
         Starts the processing in a separate process.
         """
@@ -137,12 +131,13 @@ class ProcessWorker(QObject):
             logging.log(level=logging.INFO, msg="Starting processing...")
 
             self._result_queue = multiprocessing.Queue()
-            params = self._forger.parameters_dict()
+
+            print(f"Starting process with parameters: {self._parameters.backend_parameters()}")
 
             self._process = multiprocessing.Process(
                 target=_processing_function,
                 name="DxfProcessingWorker",
-                args=(self._selected_file_path, self._result_queue, params),
+                args=(self._selected_file_path, self._result_queue, self._parameters.backend_parameters()),
             )
             self._process.start()
 
@@ -186,6 +181,9 @@ class ProcessWorker(QObject):
 
     def _monitor_process(self):
         try:
+            if not self._result_queue:
+                raise RuntimeError("Result queue is not initialized.")
+            
             result = self._result_queue.get()
             if isinstance(result, Exception):
                 self._rapid_code = ""

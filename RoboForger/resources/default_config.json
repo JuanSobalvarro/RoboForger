@@ -1,0 +1,14 @@
+{
+    "chord_error": 0.1,
+    "show_limit_square": true,
+    "grid_size": 1000,
+    "grid_step": 50,
+    "polyline_color": "#0000ff",
+    "arc_color": "#00ff00",
+    "circle_color": "#ffff00",
+    "x_axis_color": "#ff0000",
+    "y_axis_color": "#00ff00",
+    "z_axis_color": "#0000ff",
+    "grid_color": "#888888",
+    "limits_color": "#ff00ff"
+}

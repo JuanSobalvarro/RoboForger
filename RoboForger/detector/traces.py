@@ -10,6 +10,8 @@ from typing import List, Dict, Tuple, Set
 from RoboForger.drawing.figures import Figure
 from .enums import ConnectionType
 
+import logging
+
 
 def is_figure_connected(start_figure: Figure, end_figure: Figure) -> ConnectionType:
 
@@ -61,15 +63,15 @@ def print_graph(graph: Dict[Figure, List[Figure]]) -> None:
     """
     Print the graph in a readable format.
     """
-    print("===============Graph Adjacency List================")
+    logging.info("===============Graph Adjacency List================")
     for figure, neighbors in graph.items():
-        print(f"Figure {figure.name} has {len(neighbors)} neighbors:")
+        logging.info(f"Figure {figure.name} has {len(neighbors)} neighbors:")
 
         for n in neighbors:
             neighbor = n
-            print(f"  - {neighbor.name} with connection type {is_figure_connected(figure, neighbor).name}")
-
-    print("====================================================")
+            logging.info(f"  - {neighbor.name} with connection type {is_figure_connected(figure, neighbor).name}")
+            
+    logging.info("====================================================")
 
 def trace_for_figure(
     figure: Figure,

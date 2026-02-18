@@ -1,0 +1,43 @@
+QMenuBar {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+    font-family: "Segoe UI", "Roboto", sans-serif;
+    font-size: 13px;
+    border-bottom: 1px solid #3d3d3d;
+}
+
+QMenuBar::item {
+    background-color: transparent;
+    padding: 8px 12px;
+    margin: 0px;
+}
+
+QMenuBar::item:selected {
+    background-color: #3d3d3d;
+    border-radius: 4px;
+}
+
+QMenu {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+    border: 1px solid #454545;
+    border-radius: 6px;
+    padding: 5px;
+}
+
+QMenu::item {
+    padding: 6px 25px 6px 10px; /* Right padding for shortcuts */
+    border-radius: 4px;
+    margin: 2px;
+}
+
+QMenu::item:selected {
+    background-color: #0078d4; /* Accent Blue */
+    color: white;
+}
+
+QMenu::separator {
+    height: 1px;
+    background: #454545;
+    margin: 5px 10px;
+}

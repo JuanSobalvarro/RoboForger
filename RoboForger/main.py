@@ -1,16 +1,12 @@
 from RoboForger.app.application import RoboforgerApp
+from RoboForger.utils import get_resources_dir
+
 import sys
 import os
 import traceback
 import ctypes
 
 DEBUG = False
-
-def resolve_resource_path():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    if "__compiled__" in globals():
-        return os.path.join(base_dir, "resources")
-    return os.path.join(base_dir, "resources")
 
 def show_crash_dialog(error_msg):
     """
@@ -21,7 +17,7 @@ def show_crash_dialog(error_msg):
 
 def main():
     try:
-        resource_dir = resolve_resource_path()
+        resource_dir = get_resources_dir()
 
         if not os.path.exists(resource_dir):
             raise FileNotFoundError(f"Resource directory not found at {resource_dir}")

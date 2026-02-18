@@ -20,6 +20,7 @@ from RoboForger.app.components.field import Field, LabelPosition, LabelAnchor
 from RoboForger.app.components.separator import LineSeparator
 from RoboForger.app.components.label import Label, LabelTag
 from RoboForger.app.utils import make_scrollable
+from RoboForger.app.preview.drawing.parameters import ProcessingParameters
 
 from typing import Any
 
@@ -35,6 +36,7 @@ class LeftPanel(QFrame):
     
     on_scale_factor_changed = Signal(float)
     on_float_precision_changed = Signal(int)
+    on_global_velocity_changed = Signal(float)
     on_polyline_velocity_changed = Signal(float)
     on_arc_velocity_changed = Signal(float)
     on_circle_velocity_changed = Signal(float)
@@ -83,13 +85,16 @@ class LeftPanel(QFrame):
         self.float_precision_field = Field("Float Precision", QLineEdit(), 4, LabelPosition.LEFT)
         layout.addWidget(self.float_precision_field)
 
-        self.polyline_vel_field = Field("Polyline Velocity", QLineEdit(), 500.0, LabelPosition.LEFT)
+        self.global_vel_field = Field("Global Velocity", QLineEdit(), 1000.0, LabelPosition.LEFT)
+        layout.addWidget(self.global_vel_field)
+
+        self.polyline_vel_field = Field("Polyline Velocity", QLineEdit(), 1000.0, LabelPosition.LEFT)
         layout.addWidget(self.polyline_vel_field)
 
-        self.arc_vel_field = Field("Arc Velocity", QLineEdit(), 500.0, LabelPosition.LEFT)
+        self.arc_vel_field = Field("Arc Velocity", QLineEdit(), 1000.0, LabelPosition.LEFT)
         layout.addWidget(self.arc_vel_field)
 
-        self.circle_velocity_field = Field("Circle Velocity", QLineEdit(), 500.0, LabelPosition.LEFT)
+        self.circle_velocity_field = Field("Circle Velocity", QLineEdit(), 1000.0, LabelPosition.LEFT)
         layout.addWidget(self.circle_velocity_field)
 
         self.lifting_height_field = Field("Lifting Height", QLineEdit(), 50.0, LabelPosition.LEFT)
@@ -113,6 +118,7 @@ class LeftPanel(QFrame):
     def connect_signals(self):
         self.scale_factor_field.value_changed.connect(lambda v: safe_emit_value(self.on_scale_factor_changed, v, float))
         self.float_precision_field.value_changed.connect(lambda v: safe_emit_value(self.on_float_precision_changed, v, int))
+        self.global_vel_field.value_changed.connect(lambda v: safe_emit_value(self.on_global_velocity_changed, v, float))
         self.polyline_vel_field.value_changed.connect(lambda v: safe_emit_value(self.on_polyline_velocity_changed, v, float))
         self.arc_vel_field.value_changed.connect(lambda v: safe_emit_value(self.on_arc_velocity_changed, v, float))
         self.circle_velocity_field.value_changed.connect(lambda v: safe_emit_value(self.on_circle_velocity_changed, v, float))
@@ -303,8 +309,10 @@ class ConfigurationPanel(QWidget):
     process_file_request = Signal()
     save_file_request = Signal()
 
-    def __init__(self):
+    def __init__(self, parameters: ProcessingParameters):
         super().__init__()
+
+        self.parameters = parameters
         
         self.current_layout = QHBoxLayout(self)
         self.left_panel = LeftPanel()
@@ -329,11 +337,81 @@ class ConfigurationPanel(QWidget):
         self.left_panel.setMinimumWidth(280)
         self.right_panel.setMinimumWidth(320)
 
-        self.current_layout.addWidget(make_scrollable(self.left_panel))
-        self.current_layout.addWidget(make_scrollable(self.right_panel))
+        self.current_layout.addWidget(make_scrollable(self.left_panel, scroll_horizontally=False, scroll_vertically=True))
+        self.current_layout.addWidget(make_scrollable(self.right_panel, scroll_horizontally=False, scroll_vertically=True))
 
     def connect_signals(self):
         self.right_panel.on_load_dxf_clicked.connect(self.load_file_request)
         self.right_panel.on_process_clicked.connect(self.process_file_request)
         self.right_panel.on_save_rapid_clicked.connect(self.save_file_request)
         
+        # parameters connection
+        self.left_panel.on_scale_factor_changed.connect(
+            lambda val: self.parameters.set("pre_scale", val)
+        )
+        self.left_panel.on_float_precision_changed.connect(
+            lambda val: self.parameters.set("float_precision", val)
+        )
+        self.left_panel.on_global_velocity_changed.connect(
+            lambda val: self.parameters.set("global_velocity", val)
+        )
+        self.left_panel.on_polyline_velocity_changed.connect(
+            lambda val: self.parameters.set("polyline_velocity", val)
+        )
+        self.left_panel.on_arc_velocity_changed.connect(
+            lambda val: self.parameters.set("arc_velocity", val)
+        )
+        self.left_panel.on_circle_velocity_changed.connect(
+            lambda val: self.parameters.set("circle_velocity", val)
+        )
+        self.left_panel.on_lifting_height_changed.connect(
+            lambda val: self.parameters.set("lifting", val)
+        )
+        self.left_panel.on_auto_trace_changed.connect(
+            lambda val: self.parameters.set("use_intelligent_traces", val)
+        )
+        self.left_panel.on_offset_programming_changed.connect(
+            lambda val: self.parameters.set("use_offset_programming", val)
+        )
+
+        self.right_panel.on_inferior_limit_x_changed.connect(
+            lambda v: self.parameters.set_workspace_limit(0, 0, v)
+        )
+        self.right_panel.on_inferior_limit_y_changed.connect(
+            lambda v: self.parameters.set_workspace_limit(0, 1, v)
+        )
+        self.right_panel.on_inferior_limit_z_changed.connect(
+            lambda v: self.parameters.set_workspace_limit(0, 2, v)
+        )
+
+        self.right_panel.on_superior_limit_x_changed.connect(
+            lambda v: self.parameters.set_workspace_limit(1, 0, v)
+        )
+        self.right_panel.on_superior_limit_y_changed.connect(
+            lambda v: self.parameters.set_workspace_limit(1, 1, v)
+        )
+        self.right_panel.on_superior_limit_z_changed.connect(
+            lambda v: self.parameters.set_workspace_limit(1, 2, v)
+        )
+
+        self.right_panel.on_origin_x_changed.connect(
+            lambda v: self.parameters.set("origin", (v, self.parameters.get("origin")[1], self.parameters.get("origin")[2]))
+        )
+        self.right_panel.on_origin_y_changed.connect(
+            lambda v: self.parameters.set("origin", (self.parameters.get("origin")[0], v, self.parameters.get("origin")[2]))
+        )
+
+        self.right_panel.on_origin_z_changed.connect(
+            lambda v: self.parameters.set("origin", (self.parameters.get("origin")[0], self.parameters.get("origin")[1], v))
+        )
+
+        self.right_panel.on_zero_x_changed.connect(
+            lambda v: self.parameters.set("zero", (v, self.parameters.get("zero")[1], self.parameters.get("zero")[2]))
+        )
+        self.right_panel.on_zero_y_changed.connect(
+            lambda v: self.parameters.set("zero", (self.parameters.get("zero")[0], v, self.parameters.get("zero")[2]))
+        )
+        self.right_panel.on_zero_z_changed.connect(
+            lambda v: self.parameters.set("zero", (self.parameters.get("zero")[0], self.parameters.get("zero")[1], v))
+        )
+    

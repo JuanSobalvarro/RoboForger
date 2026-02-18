@@ -1,15 +1,18 @@
 import ezdxf
 import os
 import subprocess
+import io
+import tempfile
 from typing import List, Tuple, Dict, Any
 from RoboForger.fig_types import Point3D, RawLine, RawArc, RawCircle, RawSpline
 
 
-BINARY_DWG2DXF_PATH = os.path.join(os.path.dirname(__file__), 'bin', 'libredwg', 'dwg2dxf.exe')
-
 class DXFParser:
-    def __init__(self, filepath: str):
-        self.doc = ezdxf.readfile(filepath)
+    def __init__(self, stream: io.StringIO):
+        try:
+            self.doc = ezdxf.read(stream)
+        except Exception as e:
+            raise ValueError(f"Failed to parse DXF content using ezdxf: {e}")
         self._msp = self.doc.modelspace()
 
     def set_doc(self, file_path: str):
@@ -85,52 +88,87 @@ class DXFParser:
             'splines': self.get_splines()
         }
     
-def dwg_to_dxf(dwg_filepath: str, output_filepath: str, tool_path: str) -> bool:
+def dwg_to_dxf(dwg_filepath: str, tool_path: str) -> str:
     """
-    Converts the DWG file to DXF format using the `dwg2dxf` command line tool.
-    
-    :param dwg_filepath: Path to the input DWG file.
-    :param output_filepath: Path to save the converted DXF file.
-    :return: True if conversion was successful, False otherwise.
+    Converts DWG to DXF using LibreDWG's dwg2dxf tool.
+    Uses a temporary directory to store the generated DXF.
+    Returns DXF content as string.
     """
+
     if not os.path.exists(tool_path):
         raise FileNotFoundError(f"DWG to DXF converter not found at {tool_path}")
-    
+
+    if not os.path.exists(dwg_filepath):
+        raise FileNotFoundError(f"DWG file not found: {dwg_filepath}")
+
     try:
-        result = subprocess.run([tool_path, dwg_filepath, '-o', output_filepath, '-y'], capture_output=True, text=True)
-        if result.returncode != 0:
-            print(f"DWG to DXF conversion failed: {result.stderr}")
-            return False
+        with tempfile.TemporaryDirectory(dir=os.getcwd()) as tmpdir:
+
+            base_name = os.path.splitext(os.path.basename(dwg_filepath))[0]
+            output_path = os.path.join(tmpdir, base_name + ".dxf")
+
+            # LibreDWG dwg2dxf syntax:
+            # dwg2dxf input.dwg -o output.dxf
+            cmd = [
+                tool_path,
+                dwg_filepath,
+                "-o",
+                output_path,
+                "--as=r2018"
+            ]
+
+            result = subprocess.run(cmd, capture_output=True, text=True)
+
+            print(f"DWG to DXF conversion stdout:\n{result.stdout}")
+
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"DWG to DXF conversion failed:\n{result.stderr}"
+                )
+
+            if not os.path.exists(output_path):
+                raise RuntimeError("Conversion completed but DXF file not created.")
+
+            # Read DXF content
+            with open(output_path, "r", encoding="utf-8", errors="ignore") as f:
+                return f.read()
     except Exception as e:
-        print(f"Error converting DWG to DXF: {e}")
-        return False
-    
-    return result.returncode == 0
+        raise RuntimeError(f"Error during DWG to DXF conversion: {e}")
 
 class CADParser:
-    def __init__(self, filepath: str, binary_dwg2dxf_path: str):
+    def __init__(self, filepath: str, binary_dwg2dxf_path: str, temp_dir: str = "temp"):
         self.filepath = filepath
         self.parser = None
         self.binary_path = binary_dwg2dxf_path
+        self.temp_dir = temp_dir
 
         if not os.path.exists(self.binary_path):
             raise FileNotFoundError(f"CADPARSER::DWG to DXF converter not found at {self.binary_path}")
 
         file_ext = os.path.splitext(filepath)[1].lower()
         if file_ext == '.dxf':
-            self.parser = DXFParser(filepath)
+            stream = io.StringIO()
+            with open(filepath, 'r') as f:
+                stream.write(f.read())
+            stream.seek(0)
+            self.parser = DXFParser(stream)
         elif file_ext == '.dwg':
-            # Convert DWG to DXF first
-            dxf_temp_path = filepath + '.dxf'
-            print(f"Temporal path for DXF: {dxf_temp_path}")
-            if dwg_to_dxf(filepath, dxf_temp_path, self.binary_path):
-                self.parser = DXFParser(dxf_temp_path)
+            dxf_content = dwg_to_dxf(filepath, self.binary_path)
+            # dxf_content = clean_dxf_content(dxf_content)
+            # print(f"New lines in DXF content: {sdxf_content.count('\n')}. Lines: {len(dxf_content.splitlines())}")
+            if dxf_content:
+                stream = io.StringIO(initial_value=dxf_content)
+                stream.seek(0)
+
+                # debug save file
+                # output_path = os.path.splitext(filepath)[0] + ".dxf"
+                # with open(output_path, 'w') as f:
+                #     f.write(stream.getvalue())
+
+                self.parser = DXFParser(stream)
+
             else:
                 raise ValueError(f"CADPARSER::Failed to convert DWG to DXF: {filepath}")
-            
-            # clean dxf
-            if os.path.exists(dxf_temp_path):
-                os.remove(dxf_temp_path)
         else:
             raise ValueError(f"CADPARSER::Unsupported file format: {file_ext}")
 

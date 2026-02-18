@@ -13,3 +13,6 @@ build-windows
 *.pycache
 *__pycache__*
 installer
+notes.md
+nuitka*
+libredwg*

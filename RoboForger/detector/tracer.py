@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple, Any, Set
 from RoboForger.fig_types import Point3D
 
 import time
+import logging
 
 
 class Tracer:
@@ -12,17 +13,17 @@ class Tracer:
     def __init__(self, figures: List[Figure]):
         self.figures = figures
 
-        print(f"{len(figures)} figures inputted")
+        logging.info(f"{len(figures)} figures inputted")
 
         self.graph = self.create_graph_from_figures(figures)
         # print(f"Graph adjacency list: {self.graph}")
 
         # Benchmark printing
-        print(f"Initial time saved:")
+        logging.info(f"Initial time saved:")
         init_time = time.time()
         self.vtx_traces = self.find_traces(self.graph)
         end_time = time.time()
-        print(f"Found {len(self.vtx_traces)} traces for {len(figures)} figures in {(end_time - init_time) * 1000} milliseconds")
+        logging.info(f"Found {len(self.vtx_traces)} traces for {len(figures)} figures in {(end_time - init_time) * 1000} milliseconds")
 
         amount_figures = 0
         for vtx_trace in self.vtx_traces:

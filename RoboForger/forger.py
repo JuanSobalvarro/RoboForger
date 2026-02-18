@@ -2,12 +2,81 @@
 This module creates a Draw class that is used to generate the Rapid Code given a CAD file.
 """
 import os
-from typing import Tuple
+from typing import Tuple, Sequence
+from RoboForger.drawing.figures.figure import Figure
 from RoboForger.fig_types import Point3D, RawLine, RawArc, RawCircle, RawSpline
 from RoboForger.drawing.figures import PolyLine, Arc, Circle, BSpline
 from RoboForger.preprocessing.cad_parser import CADParser
 from RoboForger.preprocessing.converter import Converter
 from RoboForger.drawing.draw import Draw
+from RoboForger.utils import get_resource_path
+
+
+class ForgerParameters:
+    """
+    Remember to always keep this class picklable since we need to send it to the processing function in a separate process.
+    """
+    __slots__ = (
+        "origin",
+        "zero",
+        "pre_scale",
+        "float_precision",
+        "lifting",
+        "tool_name",
+        "global_velocity",
+        "polyline_velocity",
+        "arc_velocity",
+        "circle_velocity",
+        "spline_velocity",
+        "workspace_limits",
+        "use_intelligent_traces",
+        "use_offset_programming",
+    )
+
+    def __init__(self):
+        self.origin: Point3D = (450.0, 0.0, 450.0)
+        self.zero: Point3D = (0.0, 0.0, 0.0)
+        self.pre_scale: float = 1.0
+        self.float_precision: int = 4
+        self.lifting: float = 50.0
+        self.tool_name: str = "tool0"
+
+        self.global_velocity = 1000
+        self.polyline_velocity = 1000
+        self.arc_velocity = 1000
+        self.circle_velocity = 1000
+        self.spline_velocity = 1000
+
+        self.workspace_limits = ((-600, -800, -200), (800, 800, 1200))
+        self.use_intelligent_traces = True
+        self.use_offset_programming = True
+
+    def to_dict(self) -> dict:
+        return {
+            "origin": self.origin,
+            "zero": self.zero,
+            "pre_scale": self.pre_scale,
+            "float_precision": self.float_precision,
+            "lifting": self.lifting,
+            "tool_name": self.tool_name,
+            "global_velocity": self.global_velocity,
+            "polyline_velocity": self.polyline_velocity,
+            "arc_velocity": self.arc_velocity,
+            "circle_velocity": self.circle_velocity,
+            "spline_velocity": self.spline_velocity,
+            "workspace_limits": self.workspace_limits,
+            "use_intelligent_traces": self.use_intelligent_traces,
+            "use_offset_programming": self.use_offset_programming,
+        }
+
+    def apply(self, data: dict):
+        for key, value in data.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+    def __str__(self):
+        return f"ForgerParameters(origin={self.origin}, zero={self.zero}, pre_scale={self.pre_scale}, float_precision={self.float_precision}, lifting={self.lifting}, tool_name='{self.tool_name}', global_velocity={self.global_velocity}, polyline_velocity={self.polyline_velocity}, arc_velocity={self.arc_velocity}, circle_velocity={self.circle_velocity}, spline_velocity={self.spline_velocity}, workspace_limits={self.workspace_limits}, use_intelligent_traces={self.use_intelligent_traces}, use_offset_programming={self.use_offset_programming})"
+
 
 
 class Forger:
@@ -18,43 +87,12 @@ class Forger:
     - Drawing detection: Logic for drawing, order of figures and maybe intelligent tracing
     - Code Generation: Translate traces and points into RAPID code
     """
-    def __init__(self,
-        resource_dir: str = "",
-        origin: Point3D = (450.0, 0, 450.0),
-        zero: Point3D = (0.0, 0.0, 0.0),
-        pre_scale: float = 1.0,
-        float_precision: int = 4,
-        lifting: float = 50.0,
-        tool_name: str = "tool0",
-        global_velocity: int = 1000,
-        polyline_velocity: int = 1000,
-        arc_velocity: int = 1000,
-        circle_velocity: int = 1000,
-        spline_velocity: int = 1000,
-        workspace_limits: Tuple[Point3D, Point3D] = ((-100, -700, -100), (800, 700, 800)),
-        use_intelligent_traces: bool = True,
-        use_offset_programming: bool = True
+    def __init__(
+            self,
+            parameters: ForgerParameters,
         ):
 
-        self._resource_dir = resource_dir
-
-        if not os.path.exists(self._resource_dir):
-            raise FileNotFoundError(f"Resource directory not found at {self._resource_dir}")
-
-        self._origin = origin
-        self._zero = zero
-        self._pre_scale = pre_scale
-        self._float_precision = float_precision
-        self._lifting = lifting
-        self._tool_name = tool_name
-        self._global_velocity = global_velocity
-        self._polyline_velocity = polyline_velocity
-        self._arc_velocity = arc_velocity
-        self._circle_velocity = circle_velocity
-        self._spline_velocity = spline_velocity
-        self._workspace_limits = workspace_limits
-        self._use_intelligent_traces = use_intelligent_traces
-        self._use_offset_programming = use_offset_programming
+        self._params = parameters
 
         self._raw_lines: list[RawLine] = []
         self._raw_arcs: list[RawArc] = []
@@ -66,132 +104,58 @@ class Forger:
         self._circles: list[Circle] = []
         self._splines: list[BSpline] = []
 
-        self._rapid_code: str = ""
-
-
-    def get_origin(self) -> Point3D:
-        return self._origin
-
-    def get_zero(self) -> Point3D:
-        return self._zero
-
-    def get_scale(self) -> float:
-        return self._pre_scale
-
-    def get_float_precision(self) -> int:
-        return self._float_precision
-
-    def get_lifting(self) -> float:
-        return self._lifting
-
-    def get_tool_name(self) -> str:
-        return self._tool_name
-
-    def get_global_velocity(self) -> float:
-        return self._global_velocity
-
-    def get_workspace_limits(self) -> Tuple[Point3D, Point3D]:
-        return self._workspace_limits
-
-    def get_use_intelligent_traces(self) -> bool:
-        return self._use_intelligent_traces
-
-    def get_use_offset_programming(self) -> bool:
-        return self._use_offset_programming
-
-    def set_origin(self, origin: Point3D) -> None:
-        self._origin = origin
-
-    def set_zero(self, zero: Point3D) -> None:
-        self._zero = zero
-
-    def set_scale(self, scale: float) -> None:
-        self._pre_scale = scale
-
-    def set_float_precision(self, float_precision: int) -> None:
-        self._float_precision = float_precision
-
-    def set_lifting(self, lifting: float) -> None:
-        self._lifting = lifting
-
-    def set_tool_name(self, tool_name: str) -> None:
-        self._tool_name = tool_name
-
-    def set_global_velocity(self, global_velocity: float) -> None:
-        self._global_velocity = global_velocity
-
-    def set_workspace_limits(self, workspace_limits: Tuple[Point3D, Point3D]) -> None:
-        self._workspace_limits = workspace_limits
-
-    def set_use_intelligent_traces(self, use_intelligent_traces: bool) -> None:
-        self._use_intelligent_traces = use_intelligent_traces
-
-    def set_use_offset_programming(self, use_offset_programming: bool) -> None:
-        self._use_offset_programming = use_offset_programming
-
-    def reset_default(self):
-        self._origin = (450.0, 0, 450.0)
-        self._zero = (0.0, 0.0, 0.0)
-        self._pre_scale = 1.0
-        self._float_precision = 4
-        self._lifting = 50.0
-        self._tool_name = "tool0"
-        self._global_velocity = 1000.0
-        self._workspace_limits = ((-810, -810, 0), (810, 810, 800))
-        self._use_intelligent_traces = True
-        self._use_offset_programming = True
-
-    def get_raw_lines(self) -> list[RawLine]:
-        return self._raw_lines
-
-    def get_raw_arcs(self) -> list[RawArc]:
-        return self._raw_arcs
-
-    def get_raw_circles(self) -> list[RawCircle]:
-        return self._raw_circles
-
-    def get_raw_splines(self) -> list[RawSpline]:
-        return self._raw_splines
-
-    def get_polylines(self) -> list[PolyLine]:
-        return self._polylines
-
-    def get_arcs(self) -> list[Arc]:
-        return self._arcs
-
-    def get_circles(self) -> list[Circle]:
-        return self._circles
-
-    def get_splines(self) -> list[BSpline]:
-        return self._splines
+        self._parsed: bool = False # flag to know if figures have been parsed
+        self._converted: bool = False # flag to know if figures have been converted
+        self._rapid_code: str = "" # generated RAPID code after processing
 
     def parse_figures(self, cad_file: str):
-        parser = CADParser(filepath=cad_file, binary_dwg2dxf_path=os.path.join(self._resource_dir, 'bin', 'libredwg', 'dwg2dxf.exe'))
+        if not os.path.exists(cad_file):
+            raise FileNotFoundError(f"CAD file not found at {cad_file}")
+        
+        if self._parsed:
+            self._parsed = False  # reset parsed flag if new parsing is done
+
+        try:
+            parser = CADParser(filepath=cad_file, binary_dwg2dxf_path=get_resource_path("bin/libredwg/dwg2dxf.exe"))
+        except Exception as e:
+            raise RuntimeError(f"Failed to initialize CAD parser: {e}")
+        
         figures = parser.get_figures_parsed()
         self._raw_lines = figures.get("lines", [])
         self._raw_arcs = figures.get("arcs", [])
         self._raw_circles = figures.get("circles", [])
         self._raw_splines = figures.get("splines", [])
 
+        self._parsed = True
+
+        if self._converted:
+            self._converted = False  # reset converted flag if new parsing is done
+
     def convert_figures(self):
-        converter = Converter(float_precision=self._float_precision, pre_scale=self._pre_scale, lifting=self._lifting, origin=self._origin)
-        figures = converter.convert_figures(lines=self._raw_lines,
-                                            arcs=self._raw_arcs,
-                                            circles=self._raw_circles,
-                                            splines=self._raw_splines)
-        self._polylines = figures.get("lines", [])
-        self._arcs = figures.get("arcs", [])
-        self._circles = figures.get("circles", [])
-        self._splines = figures.get("splines", [])
+        converter = Converter(float_precision=self._params.float_precision, pre_scale=self._params.pre_scale, lifting=self._params.lifting, origin=self._params.origin)
+        figures: dict[str, list[PolyLine | Arc | Circle | BSpline]] = converter.convert_figures(lines=self._raw_lines,
+                                                                                                arcs=self._raw_arcs,
+                                                                                                circles=self._raw_circles,
+                                                                                                splines=self._raw_splines)
+        self._polylines = figures.get("lines", []) # type: ignore
+        self._arcs = figures.get("arcs", []) # type: ignore
+        self._circles = figures.get("circles", [])  # type: ignore
+        self._splines = figures.get("splines", []) # type: ignore
 
         for line in self._polylines:
-            line.set_velocity(self._polyline_velocity)
+            # print(f"Polyline with velocity: {self._params.polyline_velocity}")
+            line.set_velocity(self._params.polyline_velocity)
 
         for arc in self._arcs:
-            arc.set_velocity(self._arc_velocity)
+            arc.set_velocity(self._params.arc_velocity)
 
         for circle in self._circles:
-            circle.set_velocity(self._circle_velocity)
+            circle.set_velocity(self._params.circle_velocity)
+
+        # for spline in self._splines:
+        #     spline.set_velocity(self._params.spline_velocity)
+
+        self._converted = True
 
     def get_raw_figures(self) -> dict:
         return {
@@ -210,19 +174,19 @@ class Forger:
         }
 
     def generate_rapid_code(self):
-        draw = Draw(tool_name=self._tool_name,
-                    velocity=self._global_velocity,
-                    workspace_limits=self._workspace_limits,
-                    origin=self._origin,
-                    zero=self._zero,
-                    use_detector=self._use_intelligent_traces)
+        draw = Draw(tool_name=self._params.tool_name,
+                    velocity=self._params.global_velocity,
+                    workspace_limits=self._params.workspace_limits,
+                    origin=self._params.origin,
+                    zero=self._params.zero,
+                    use_detector=self._params.use_intelligent_traces)
 
-        draw.add_figures(self._polylines)
-        draw.add_figures(self._arcs)
-        draw.add_figures(self._circles)
-        draw.add_figures(self._splines)
+        draw.add_figures(self._polylines) # type: ignore
+        draw.add_figures(self._arcs) # type: ignore
+        draw.add_figures(self._circles) # type: ignore
+        draw.add_figures(self._splines) # type: ignore
 
-        self._rapid_code = draw.generate_rapid_code(use_offset=self._use_offset_programming)
+        self._rapid_code = draw.generate_rapid_code(use_offset=self._params.use_offset_programming)
 
     def get_rapid_code(self) -> str:
         return self._rapid_code
@@ -234,22 +198,3 @@ class Forger:
         with open(save_path, 'w') as file:
             file.write(self._rapid_code)
         print(f"RAPID code exported to {save_path}")
-
-    def parameters_dict(self) -> dict:
-        return {
-            "resource_dir": self._resource_dir,
-            "origin": self._origin,
-            "zero": self._zero,
-            "scale": self._pre_scale,
-            "float_precision": self._float_precision,
-            "lifting": self._lifting,
-            "tool_name": self._tool_name,
-            "lines_velocity": self._polyline_velocity,
-            "arcs_velocity": self._arc_velocity,
-            "circles_velocity": self._circle_velocity,
-            "splines_velocity": self._spline_velocity,
-            "inferior_limit": self._workspace_limits[0],
-            "superior_limit": self._workspace_limits[1],
-            "use_detector": self._use_intelligent_traces,
-            "use_offset": self._use_offset_programming
-        }

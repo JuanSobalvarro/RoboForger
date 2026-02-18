@@ -115,7 +115,7 @@ class Draw:
             self.instructions.extend(fig.move_instructions_offset(origin_robtarget_name="origin",
                                                                     origin=self.origin,
                                                                     tool_name=self.tool_name,
-                                                                    global_velocity=self.velocity))
+                                                                    global_velocity=fig.velocity if fig.velocity else self.velocity))
 
         # Move to origin
         self.instructions.append(f"\n        ! Move to origin point after finishing the drawing\n")
