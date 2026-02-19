@@ -102,7 +102,9 @@ def dwg_to_dxf(dwg_filepath: str, tool_path: str) -> str:
         raise FileNotFoundError(f"DWG file not found: {dwg_filepath}")
 
     try:
-        with tempfile.TemporaryDirectory(dir=os.getcwd()) as tmpdir:
+        # remember to keep the temp directory default to write on Temp, so we don't have to worry about cleaning up files after conversion, and we can be sure that the directory is writable and has enough space for the generated DXF file. 
+        # The temporary directory will be automatically deleted after the block is exited, even if an error occurs.
+        with tempfile.TemporaryDirectory() as tmpdir:
 
             base_name = os.path.splitext(os.path.basename(dwg_filepath))[0]
             output_path = os.path.join(tmpdir, base_name + ".dxf")
