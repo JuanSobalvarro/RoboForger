@@ -16,6 +16,8 @@ Item {
         environment: SceneEnvironment {
             clearColor: "#010101"
             backgroundMode: SceneEnvironment.Color
+            antialiasingMode: SceneEnvironment.MSAA
+            antialiasingQuality: SceneEnvironment.VeryHigh
         }
 
         PerspectiveCamera {
